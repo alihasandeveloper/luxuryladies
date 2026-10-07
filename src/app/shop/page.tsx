@@ -4,7 +4,7 @@ import ShopArchive from "@/components/ShopArchive";
 import { allProducts } from "@/data/products";
 
 export const metadata: Metadata = {
-  title: "Shop All Products | Cloudy BD / NextCart",
+  title: "Shop All Products | luxuryladies",
   description: "Browse our complete collection of luxury heels, bags, clutches, and sets with price and category filters.",
 };
 

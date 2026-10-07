@@ -526,7 +526,7 @@ export default function ShopArchive({
               </>
             )}
           </nav>
-          <h1 className="text-xl md:text-2xl font-bold text-[#1f191c]">
+          <h1 className="text-xl md:text-2xl">
             {searchQuery.trim() ? (
               <span>
                 Search results for{" "}
