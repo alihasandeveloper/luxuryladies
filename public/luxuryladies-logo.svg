@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60" fill="none">
+  <defs>
+    <linearGradient id="pinkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff1493" />
+      <stop offset="100%" stop-color="#ff0080" />
+    </linearGradient>
+    <linearGradient id="darkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e181c" />
+      <stop offset="100%" stop-color="#0f0b0d" />
+    </linearGradient>
+    <filter id="subtleGlow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="#ff0080" flood-opacity="0.25" />
+    </filter>
+  </defs>
+
+  <!-- ── Left Logo Mark: Elegant Silhouette Woman merging with High Heel ── -->
+  <g transform="translate(4, 3)">
+    <!-- Heel Stiletto Spike & Sole Base -->
+    <path 
+      d="M 12 49 L 14 26 C 14 26, 17 38, 28 42 C 34 44.5, 42 43.5, 47 43.5 C 47.5 44, 45 46.5, 36 47.5 C 24 49, 16 50, 12 50 Z" 
+      fill="url(#pinkGrad)" 
+      filter="url(#subtleGlow)"
+    />
+    <!-- Thin Stiletto Heel Pin -->
+    <path 
+      d="M 13.5 30 L 12.5 49.5 C 12.5 50.5, 14 50.5, 14 49.5 L 15 30 Z" 
+      fill="#ff0080" 
+    />
+
+    <!-- Elegant Woman Bodice & Silhouette Flowing into Arch -->
+    <!-- Woman Hair & Updo -->
+    <circle cx="23.5" cy="9" r="4.2" fill="#111827" />
+    <path 
+      d="M 21 6.5 C 22 4.5, 26 4.5, 27 7 C 28.5 7.5, 29 10, 26.5 12 C 24 13.5, 21.5 10.5, 21 6.5 Z" 
+      fill="#ff0080" 
+    />
+
+    <!-- Woman Face & Graceful Neck Profile -->
+    <path 
+      d="M 25 11.5 C 26.5 13, 27 15, 25.5 17.5 C 24.5 19, 23 20, 23.5 22.5" 
+      stroke="#111827" 
+      stroke-width="1.2" 
+      stroke-linecap="round" 
+    />
+
+    <!-- Gown & Torso merging into shoe counter -->
+    <path 
+      d="M 22.5 18 C 26 21, 28 25, 27 30 C 26 34, 21 38, 17 30 C 15 26, 17 21, 20.5 18 Z" 
+      fill="#111827" 
+    />
+
+    <!-- Swirling Evening Dress S-Curve sweeping to shoe toe -->
+    <path 
+      d="M 24 22 C 27 25, 30 31, 27 36 C 24 40.5, 18 36, 15 31 C 13.8 28.5, 14.5 25, 17.5 24 C 20.5 23, 22.5 27, 26 29 C 30 31, 38 35, 45 42 C 46.5 43.5, 44 44.5, 40 44 C 32 43, 23 37.5, 19 32" 
+      fill="url(#pinkGrad)" 
+    />
+
+    <!-- Sparkle Accents on Shoe Crest -->
+    <path 
+      d="M 43 40.5 Q 44.5 40.5 45 39 Q 45.5 40.5 47 40.5 Q 45.5 40.5 45 42 Q 44.5 40.5 43 40.5 Z" 
+      fill="#ff0080" 
+    />
+  </g>
+
+  <!-- ── Brand Typography: luxury (Dark) + ladies (Vivid Pink) ── -->
+  <g transform="translate(56, 0)">
+    <!-- Main Brand Name -->
+    <text 
+      x="0" 
+      y="34" 
+      font-family="'Playfair Display', 'Bodoni MT', 'Didot', 'Georgia', serif" 
+      font-size="23" 
+      font-weight="700" 
+      letter-spacing="-0.02em"
+    >
+      <tspan fill="#111827">luxury</tspan>
+      <tspan fill="#ff0080" font-weight="700" dx="1">ladies</tspan>
+    </text>
+
+    <!-- Refined Sub-Brand Slogan / Tagline -->
+    <text 
+      x="2" 
+      y="47.5" 
+      font-family="'Montserrat', 'Inter', -apple-system, sans-serif" 
+      font-size="6.8" 
+      font-weight="600" 
+      letter-spacing="0.32em" 
+      fill="#8C7B82"
+    >
+      HAUTE COUTURE
+    </text>
+
+    <!-- Small decorative luxury diamond dot -->
+    <circle cx="118" cy="45.5" r="1.3" fill="#ff0080" />
+  </g>
+</svg>
