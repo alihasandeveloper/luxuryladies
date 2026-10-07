@@ -28,14 +28,24 @@ export default function Header() {
   const router = useRouter();
   const [cartCount] = useState(3);
   const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
-  // Lock body scroll when drawer is open
+  // Lock body scroll when drawer or mobile search is open
   useEffect(() => {
-    document.body.style.overflow = drawerOpen ? "hidden" : "";
+    document.body.style.overflow = drawerOpen || mobileSearchOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
-  }, [drawerOpen]);
+  }, [drawerOpen, mobileSearchOpen]);
+
+  // Focus input when mobile search opens
+  useEffect(() => {
+    if (mobileSearchOpen) {
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 100);
+    }
+  }, [mobileSearchOpen]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,6 +53,21 @@ export default function Header() {
     router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
     setMobileSearchOpen(false);
   };
+
+  const handleSelectSuggestion = (productSlug: string) => {
+    router.push(`/product/${productSlug}`);
+    setMobileSearchOpen(false);
+  };
+
+  const matchingSuggestions = searchQuery.trim()
+    ? allProducts
+        .filter((p) =>
+          p.name.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
+          p.sku?.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
+          p.categories?.some((c) => c.name.toLowerCase().includes(searchQuery.trim().toLowerCase()))
+        )
+        .slice(0, 5)
+    : [];
 
   return (
     <>
@@ -68,7 +93,7 @@ export default function Header() {
                 width={200}
                 height={60}
                 priority
-                className="w-[180px] md:w-[200px] h-[54px] md:h-[60px] object-contain"
+                className="w-auto h-[38px] xs:h-[44px] md:h-[54px] max-w-[150px] sm:max-w-[180px] md:max-w-[200px] object-contain"
               />
             </a>
 
@@ -141,37 +166,7 @@ export default function Header() {
             </div>
           </div>
 
-          {/* Mobile Search Bar Dropdown */}
-          {mobileSearchOpen && (
-            <div className="mobile-only px-4 pb-3 pt-1 border-t border-[#F7E7EC] bg-white">
-              <form onSubmit={handleSearchSubmit} className="flex items-center gap-2 border border-[#E5D7DD] rounded-full px-3 py-2 bg-[#FAF7F8] focus-within:border-[#ff0080] focus-within:bg-white transition-all">
-                <Search size={16} className="text-gray-400 shrink-0" />
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-transparent text-xs text-[#222] placeholder:text-[#999] outline-none"
-                  autoFocus
-                />
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery("")}
-                    className="p-1 text-gray-400 hover:text-gray-600"
-                  >
-                    <X size={13} />
-                  </button>
-                )}
-                <button
-                  type="submit"
-                  className="px-2.5 py-1 bg-[#ff0080] text-white rounded-full text-xs font-semibold shrink-0"
-                >
-                  Go
-                </button>
-              </form>
-            </div>
-          )}
+          {/* Inline dropdown replaced by top sliding drawer below */}
         </div>
 
         {/* ── Category Bar (desktop only) ──────────────── */}
@@ -189,6 +184,111 @@ export default function Header() {
           </div>
         </nav>
       </header>
+
+      {/* ── Top Slide-down Mobile Search Wrapper ── */}
+      {/* Search Backdrop Overlay */}
+      <div
+        className={`fixed inset-0 bg-black/50 backdrop-blur-xs z-[120] transition-opacity duration-300 md:hidden ${
+          mobileSearchOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setMobileSearchOpen(false)}
+        aria-hidden="true"
+      />
+
+      {/* Slide-Down Search Panel from Top */}
+      <div
+        className={`fixed top-0 left-0 right-0 bg-white z-[130] shadow-xl border-b border-[#F2E6EC] transition-transform duration-300 ease-out md:hidden ${
+          mobileSearchOpen ? "translate-y-0" : "-translate-y-full"
+        }`}
+      >
+        <div className="px-5 pt-3.5 pb-5 flex flex-col gap-2.5">
+          {/* Top row with subtle close button on right */}
+          <div className="flex items-center justify-end">
+            <button
+              type="button"
+              onClick={() => setMobileSearchOpen(false)}
+              className="text-[#666] hover:text-[#111] transition-colors cursor-pointer p-1"
+              aria-label="Close search"
+            >
+              <X size={18} strokeWidth={1.75} />
+            </button>
+          </div>
+
+          {/* Subtitle / Question */}
+          <p className="text-xs font-medium text-[#5A4A52] tracking-wide -mt-1">
+            What are you looking for?
+          </p>
+
+          {/* Search Input Form (Pink bordered rounded-full pill) */}
+          <form onSubmit={handleSearchSubmit} className="relative flex items-center">
+            <div className="w-full flex items-center border-2 border-[#ff0080] rounded-full px-3.5 py-2.5 bg-white transition-all shadow-xs">
+              <Search size={18} className="text-[#ff0080] shrink-0 mr-2.5" strokeWidth={2} />
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Search for products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-transparent text-sm text-[#222] placeholder:text-[#888] outline-none"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="p-1 text-gray-400 hover:text-gray-700 cursor-pointer shrink-0"
+                  aria-label="Clear text"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
+
+        {/* Live Matching Product Suggestions */}
+        {matchingSuggestions.length > 0 && (
+          <div className="px-4 pb-4 pt-1 border-t border-[#F7E7EC] flex flex-col gap-2 max-h-[50vh] overflow-y-auto">
+            <span className="text-[11px] font-semibold text-[#8C7B82] uppercase tracking-wider">
+              Matching Products ({matchingSuggestions.length})
+            </span>
+            <div className="divide-y divide-[#F7E7EC]">
+              {matchingSuggestions.map((item) => (
+                <div
+                  key={item.id}
+                  onClick={() => handleSelectSuggestion(item.slug)}
+                  className="flex items-center gap-3 py-2 cursor-pointer hover:bg-[#FFF5F8] -mx-2 px-2 rounded-md transition-colors"
+                >
+                  <div className="relative w-11 h-11 rounded-md overflow-hidden bg-[#f5f5f5] shrink-0 border border-[#F2E6EC]">
+                    <Image
+                      src={item.images?.[0]?.src || "/file.svg"}
+                      alt={item.name}
+                      fill
+                      sizes="44px"
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-[#222] truncate">
+                      {item.name}
+                    </p>
+                    <p className="text-[11px] font-semibold text-[#ff0080]">
+                      Tk {parseFloat(item.price).toLocaleString()}
+                      {item.sku && (
+                        <span className="ml-1.5 text-[10px] text-[#8C7B82] font-normal">
+                          SKU: {item.sku}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                  <ChevronRight size={14} className="text-[#bbb] shrink-0" />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* ── Mobile Drawer ────────────────────────────── */}
       {/* Overlay */}

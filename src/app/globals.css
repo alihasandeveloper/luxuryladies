@@ -50,6 +50,8 @@
 html {
   font-size: 16px;
   scroll-behavior: smooth;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 /* Hide scrollbar utility */
@@ -69,10 +71,13 @@ body {
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 .site-main {
   width: 100%;
+  overflow-x: hidden;
 }
 
 /* ─── Typography ─────────────────────────────────────────── */
@@ -714,7 +719,17 @@ a {
   }
 
   .header-top-inner {
-    gap: var(--space-sm);
+    gap: 0.35rem;
+    justify-content: space-between;
+  }
+
+  .header-logo {
+    min-width: 0;
+    flex-shrink: 1;
+  }
+
+  .header-actions {
+    gap: 2px;
   }
 
   .footer-main {
