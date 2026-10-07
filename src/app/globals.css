@@ -7,6 +7,27 @@
   box-sizing: border-box;
 }
 
+/* ─── Global Interactive Element Fixes (Mobile/iOS) ──────── */
+button,
+a,
+[role="button"],
+input[type="submit"],
+input[type="button"],
+select,
+label[for] {
+  /* Eliminate 300ms tap delay on iOS Safari */
+  touch-action: manipulation;
+  /* Remove iOS default blue tap highlight */
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  /* Prevent text-selection on buttons (interferes with taps) */
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: pointer;
+}
+
 /* ─── Design Tokens ──────────────────────────────────────── */
 :root {
   /* Brand Colors */
@@ -50,8 +71,8 @@
 html {
   font-size: 16px;
   scroll-behavior: smooth;
-  overflow-x: hidden;
-  max-width: 100vw;
+  /* NOTE: Do NOT set overflow-x: hidden on html or body — it breaks
+     iOS Safari touch events and position:fixed elements completely. */
 }
 
 /* Hide scrollbar utility */
@@ -71,13 +92,24 @@ body {
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
-  max-width: 100vw;
+  /* Prevent horizontal scroll without breaking iOS touch/fixed */
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Body scroll lock used by drawers/modals — safe iOS approach */
+body.scroll-locked {
+  overflow: hidden;
+  /* iOS Safari needs this extra fix to prevent scroll-through */
+  position: fixed;
+  width: 100%;
+  /* preserve scroll position via JS (see Header) */
 }
 
 .site-main {
   width: 100%;
-  overflow-x: hidden;
+  /* overflow-x: clip is safe (unlike hidden, doesn't affect touch) */
+  overflow-x: clip;
 }
 
 /* ─── Typography ─────────────────────────────────────────── */
@@ -240,6 +272,9 @@ a {
   align-items: center;
   justify-content: center;
   transition: color var(--transition), background-color var(--transition);
+  /* Prevent 300ms tap delay on iOS */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .action-btn:hover {
@@ -332,6 +367,9 @@ a {
   flex-shrink: 0;
   transition: all var(--transition);
   color: var(--color-dark);
+  /* Prevent 300ms tap delay on iOS */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .hamburger-btn:hover {

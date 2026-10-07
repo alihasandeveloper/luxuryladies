@@ -96,15 +96,27 @@ export default function ShopArchive({
   const [sortBy, setSortBy] = useState<string>("newest");
   const [mobileFilterOpen, setMobileFilterOpen] = useState<boolean>(false);
 
-  // Lock body scroll when mobile filter is open
+  // Lock body scroll when mobile filter is open (iOS-safe)
   React.useEffect(() => {
     if (mobileFilterOpen) {
-      document.body.style.overflow = "hidden";
+      const scrollY = window.scrollY;
+      document.body.style.top = `-${scrollY}px`;
+      document.body.classList.add("scroll-locked");
     } else {
-      document.body.style.overflow = "";
+      const scrollY = document.body.style.top;
+      document.body.classList.remove("scroll-locked");
+      document.body.style.top = "";
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || "0") * -1);
+      }
     }
     return () => {
-      document.body.style.overflow = "";
+      const scrollY = document.body.style.top;
+      document.body.classList.remove("scroll-locked");
+      document.body.style.top = "";
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || "0") * -1);
+      }
     };
   }, [mobileFilterOpen]);
 

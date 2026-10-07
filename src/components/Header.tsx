@@ -32,10 +32,31 @@ export default function Header() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
-  // Lock body scroll when drawer or mobile search is open
+  // Lock body scroll when drawer or mobile search is open (iOS-safe)
   useEffect(() => {
-    document.body.style.overflow = drawerOpen || mobileSearchOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    const shouldLock = drawerOpen || mobileSearchOpen;
+    if (shouldLock) {
+      // Save current scroll position
+      const scrollY = window.scrollY;
+      document.body.style.top = `-${scrollY}px`;
+      document.body.classList.add("scroll-locked");
+    } else {
+      // Restore scroll position
+      const scrollY = document.body.style.top;
+      document.body.classList.remove("scroll-locked");
+      document.body.style.top = "";
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || "0") * -1);
+      }
+    }
+    return () => {
+      const scrollY = document.body.style.top;
+      document.body.classList.remove("scroll-locked");
+      document.body.style.top = "";
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || "0") * -1);
+      }
+    };
   }, [drawerOpen, mobileSearchOpen]);
 
   // Focus input when mobile search opens
