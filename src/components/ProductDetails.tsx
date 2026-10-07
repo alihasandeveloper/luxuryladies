@@ -568,9 +568,14 @@ export default function ProductDetails({
             </h2>
             <Link
               href="/shop"
-              className="text-xs font-semibold text-[#ff0080] hover:underline"
+              className="text-xs md:text-sm font-medium text-[#555] hover:!text-[#ff0080] inline-flex items-center gap-0.5 transition-colors group cursor-pointer"
             >
-              See More
+              <span className="hover:!text-[#ff0080]">See More</span>
+              <ChevronRight
+                size={15}
+                strokeWidth={2}
+                className="transition-transform group-hover:translate-x-0.5"
+              />
             </Link>
           </div>
 
@@ -588,9 +593,14 @@ export default function ProductDetails({
           <div className="text-center mt-8">
             <Link
               href="/shop"
-              className="inline-flex items-center justify-center px-8 py-2.5 bg-[#ff0080] hover:bg-[#d4006a] !text-white text-xs font-bold rounded-md shadow-xs transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 px-8 py-2.5 bg-white text-[#222] border-2 border-[#E5D7DD] hover:border-[#ff0080] hover:!bg-[#ff0080] hover:!text-white text-xs font-bold rounded-md shadow-xs transition-all duration-200 group cursor-pointer"
             >
-              See More
+              <span className="group-hover:!text-white">See More</span>
+              <ChevronRight
+                size={15}
+                strokeWidth={2}
+                className="transition-transform group-hover:translate-x-0.5"
+              />
             </Link>
           </div>
         </div>

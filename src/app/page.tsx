@@ -169,9 +169,14 @@ export default function Home() {
             </h2>
             <Link
               href="/category/golden-picks"
-              className="text-xs md:text-sm font-medium text-[var(--color-primary)] hover:underline inline-flex items-center gap-0.5"
+              className="text-xs md:text-sm font-medium text-[#555] hover:!text-[#ff0080] inline-flex items-center gap-0.5 transition-colors group cursor-pointer"
             >
-              See More <ChevronNext size={15} strokeWidth={2} />
+              <span className="hover:!text-[#ff0080]">See More</span>
+              <ChevronNext
+                size={15}
+                strokeWidth={2}
+                className="transition-transform group-hover:translate-x-0.5"
+              />
             </Link>
           </div>
 
