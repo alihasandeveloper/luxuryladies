@@ -52,6 +52,15 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 body {
   color: var(--color-text);
   font-family: var(--font-montserrat), "Montserrat", sans-serif;

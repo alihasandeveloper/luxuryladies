@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -10,6 +10,7 @@ import {
   RotateCcw,
   ShieldCheck,
   Check,
+  ChevronLeft,
   ChevronRight,
   Minus,
   Plus,
@@ -18,6 +19,7 @@ import {
   Layers,
   ShoppingBag,
   Info,
+  ZoomIn,
 } from "lucide-react";
 import { WooCommerceProduct } from "@/types/woocommerce";
 import ProductCard from "@/components/ProductCard";
@@ -38,6 +40,51 @@ export default function ProductDetails({
       : [{ id: 1, src: "/file.svg", name: product.name, alt: product.name }];
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [showThumbNav, setShowThumbNav] = useState(false);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
+  const thumbnailsRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const x = Math.max(0, Math.min(100, ((e.clientX - left) / width) * 100));
+    const y = Math.max(0, Math.min(100, ((e.clientY - top) / height) * 100));
+    setZoomPosition({ x, y });
+  };
+
+  const handleSelectImage = (idx: number) => {
+    setActiveImageIndex(idx);
+    const container = thumbnailsRef.current;
+    if (container) {
+      const thumb = container.children[idx] as HTMLElement;
+      if (thumb) {
+        thumb.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center",
+        });
+      }
+    }
+  };
+
+  const handlePrevImage = () => {
+    const newIdx =
+      activeImageIndex === 0 ? galleryImages.length - 1 : activeImageIndex - 1;
+    handleSelectImage(newIdx);
+  };
+
+  const handleNextImage = () => {
+    const newIdx =
+      activeImageIndex === galleryImages.length - 1 ? 0 : activeImageIndex + 1;
+    handleSelectImage(newIdx);
+  };
+
+  const scrollThumbnails = (direction: "left" | "right") => {
+    if (thumbnailsRef.current) {
+      const scrollAmount = direction === "left" ? -240 : 240;
+      thumbnailsRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }
+  };
 
   // Sizes available (fallback to default standard sizes if not defined in attributes)
   const sizeOptions =
@@ -123,41 +170,115 @@ export default function ProductDetails({
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
             {/* Left: Gallery Column (7 cols on lg) */}
             <div className="lg:col-span-6 flex flex-col gap-4">
-              {/* Main Featured Image with Badge & Zoom look */}
-              <div className="relative aspect-square w-full overflow-hidden bg-[#f8f8f8] border border-[#F2E6EC]">
+              {/* Main Featured Image with Magnifier Lens / Zoom Effect */}
+              <div
+                className="relative aspect-square w-full overflow-hidden bg-[#f8f8f8] border border-[#F2E6EC] cursor-zoom-in group/zoom"
+                onMouseEnter={() => setIsZoomed(true)}
+                onMouseLeave={() => setIsZoomed(false)}
+                onMouseMove={handleMouseMove}
+              >
                 <Image
                   src={galleryImages[activeImageIndex]?.src || galleryImages[0].src}
                   alt={galleryImages[activeImageIndex]?.alt || product.name || "Product"}
                   fill
                   priority
                   sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover object-center transition-all duration-300"
+                  className={`object-cover object-center transition-transform duration-150 ${
+                    isZoomed ? "opacity-0" : "opacity-100"
+                  }`}
                 />
 
+                {/* Magnified zoom layer */}
+                {isZoomed && (
+                  <div
+                    className="absolute inset-0 pointer-events-none transition-opacity duration-200"
+                    style={{
+                      backgroundImage: `url(${galleryImages[activeImageIndex]?.src || galleryImages[0].src})`,
+                      backgroundPosition: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                      backgroundSize: "220%",
+                      backgroundRepeat: "no-repeat",
+                    }}
+                  />
+                )}
+
+                {/* Magnifier Glass Icon Badge */}
+                {!isZoomed && (
+                  <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/85 backdrop-blur-xs border border-[#EDE0E5] shadow-xs flex items-center justify-center text-[#555] pointer-events-none transition-opacity group-hover/zoom:text-[#ff0080]">
+                    <ZoomIn size={16} />
+                  </div>
+                )}
               </div>
 
-              {/* Thumbnails Row */}
-              <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
-                {galleryImages.map((img, idx) => (
+              {/* Thumbnails Row (Only render if there are multiple images) */}
+              {galleryImages.length > 1 && (
+                <div
+                  onClick={() => setShowThumbNav(true)}
+                  className="relative flex items-center group/thumbs select-none"
+                >
+                  {/* Left scroll button (shown on wrapper click or hover) */}
                   <button
-                    key={img.id || idx}
                     type="button"
-                    onClick={() => setActiveImageIndex(idx)}
-                    className={`relative w-20 h-20 md:w-22 md:h-22 overflow-hidden border-2 transition-all cursor-pointer shrink-0 bg-[#fbfbfb] ${activeImageIndex === idx
-                      ? "border-[#ff0080] ring-2 ring-[#ff0080]/20 shadow-xs"
-                      : "border-[#EDE0E5] hover:border-[#ff0080]/50 opacity-80 hover:opacity-100"
-                      }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      scrollThumbnails("left");
+                    }}
+                    aria-label="Scroll thumbnails left"
+                    className={`absolute -left-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white shadow-md border border-[#EDE0E5] text-[#444] hover:text-[#ff0080] flex items-center justify-center z-10 transition-all cursor-pointer ${
+                      showThumbNav
+                        ? "opacity-100 scale-100 pointer-events-auto"
+                        : "opacity-0 group-hover/thumbs:opacity-100 pointer-events-none group-hover/thumbs:pointer-events-auto"
+                    }`}
                   >
-                    <Image
-                      src={img.src}
-                      alt={img.alt || `Thumbnail ${idx + 1}`}
-                      fill
-                      sizes="90px"
-                      className="object-cover"
-                    />
+                    <ChevronLeft size={16} />
                   </button>
-                ))}
-              </div>
+
+                  <div
+                    ref={thumbnailsRef}
+                    className="flex items-center gap-2.5 overflow-x-auto py-1.5 px-0.5 scroll-smooth w-full no-scrollbar select-none"
+                  >
+                    {galleryImages.map((img, idx) => (
+                      <button
+                        key={img.id || idx}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSelectImage(idx);
+                        }}
+                        className={`relative w-18 h-18 md:w-20 md:h-20 overflow-hidden border-2 transition-all cursor-pointer shrink-0 bg-[#fbfbfb] ${
+                          activeImageIndex === idx
+                            ? "border-[#ff0080] shadow-xs"
+                            : "border-[#EDE0E5] hover:border-[#ff0080]/50 opacity-75 hover:opacity-100"
+                        }`}
+                      >
+                        <Image
+                          src={img.src}
+                          alt={img.alt || `Thumbnail ${idx + 1}`}
+                          fill
+                          sizes="90px"
+                          className="object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Right scroll button (shown on wrapper click or hover) */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      scrollThumbnails("right");
+                    }}
+                    aria-label="Scroll thumbnails right"
+                    className={`absolute -right-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white shadow-md border border-[#EDE0E5] text-[#444] hover:text-[#ff0080] flex items-center justify-center z-10 transition-all cursor-pointer ${
+                      showThumbNav
+                        ? "opacity-100 scale-100 pointer-events-auto"
+                        : "opacity-0 group-hover/thumbs:opacity-100 pointer-events-none group-hover/thumbs:pointer-events-auto"
+                    }`}
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Right: Info & Purchase Column (6 cols on lg) */}
@@ -223,10 +344,18 @@ export default function ProductDetails({
               </div>
 
               {/* Inclusive of taxes note */}
-              <div className="flex items-center gap-1.5 text-xs text-[#8C7B82] mb-5">
+              <div className="flex items-center gap-1.5 text-xs text-[#8C7B82] mb-3">
                 <Info size={14} className="text-[#8C7B82]" />
                 <span>Inclusive of all taxes</span>
               </div>
+
+              {/* Short Description */}
+              {product.short_description && (
+                <div
+                  className="text-sm md:text-[15px] text-[#555] leading-relaxed mb-5 pb-3 border-b border-[#F7E7EC]"
+                  dangerouslySetInnerHTML={{ __html: product.short_description }}
+                />
+              )}
 
               {/* Size Selector */}
               <div className="mb-5">
@@ -412,18 +541,18 @@ export default function ProductDetails({
                 Product Description
               </h2>
             </div>
-            <div className="min-h-[140px] text-xs text-[#555] leading-relaxed">
-              <p className="font-semibold text-[#222] mb-2">
+            <div className="min-h-[140px] text-sm md:text-[15px] text-[#444] leading-relaxed">
+              <p className="font-semibold text-base text-[#222] mb-3">
                 {product.name} {product.sku ? `(${product.sku})` : ""}
               </p>
               {product.description ? (
                 <div
-                  className="mb-2 prose prose-sm max-w-none text-xs text-[#555]"
+                  className="mb-2 prose prose-sm max-w-none text-sm md:text-[15px] text-[#444] leading-relaxed [&>p]:mb-3 [&>ul]:space-y-1.5 [&>ul]:pl-5 [&>ul]:list-disc"
                   dangerouslySetInnerHTML={{ __html: product.description }}
                 />
               ) : product.short_description ? (
                 <div
-                  className="mb-2 prose prose-sm max-w-none text-xs text-[#555]"
+                  className="mb-2 prose prose-sm max-w-none text-sm md:text-[15px] text-[#444] leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: product.short_description }}
                 />
               ) : null}

@@ -16,26 +16,62 @@ export const hotDealsProducts: WooCommerceProduct[] = [
       {
         id: 1001,
         src: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80",
-        name: "Z0059 Animal Print Flat Sandals - View 1",
-        alt: "Z0059 Animal Print Flat Sandals",
+        name: "Z0059 View 1",
+        alt: "Z0059 Animal Print Flat Sandals - View 1",
       },
       {
-        id: 10012,
+        id: 1002,
         src: "https://images.unsplash.com/photo-1535043934128-cf0b28d52f95?auto=format&fit=crop&w=800&q=80",
-        name: "Z0059 Animal Print Flat Sandals - View 2",
+        name: "Z0059 View 2",
         alt: "Z0059 View 2",
       },
       {
-        id: 10013,
+        id: 1003,
         src: "https://images.unsplash.com/photo-1515347619252-60a4bf4fff4f?auto=format&fit=crop&w=800&q=80",
-        name: "Z0059 Animal Print Flat Sandals - View 3",
+        name: "Z0059 View 3",
         alt: "Z0059 View 3",
       },
       {
-        id: 10014,
+        id: 1004,
         src: "https://images.unsplash.com/photo-1560769629-975ec94e6a86?auto=format&fit=crop&w=800&q=80",
-        name: "Z0059 Animal Print Flat Sandals - View 4",
+        name: "Z0059 View 4",
         alt: "Z0059 View 4",
+      },
+      {
+        id: 1005,
+        src: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=800&q=80",
+        name: "Z0059 View 5",
+        alt: "Z0059 View 5",
+      },
+      {
+        id: 1006,
+        src: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?auto=format&fit=crop&w=800&q=80",
+        name: "Z0059 View 6",
+        alt: "Z0059 View 6",
+      },
+      {
+        id: 1007,
+        src: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80",
+        name: "Z0059 View 7",
+        alt: "Z0059 View 7",
+      },
+      {
+        id: 1008,
+        src: "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=800&q=80",
+        name: "Z0059 View 8",
+        alt: "Z0059 View 8",
+      },
+      {
+        id: 1009,
+        src: "https://images.unsplash.com/photo-1511556532299-8f662fc26c06?auto=format&fit=crop&w=800&q=80",
+        name: "Z0059 View 9",
+        alt: "Z0059 View 9",
+      },
+      {
+        id: 1010,
+        src: "https://images.unsplash.com/photo-1575537302964-96cd47c06b1b?auto=format&fit=crop&w=800&q=80",
+        name: "Z0059 View 10",
+        alt: "Z0059 View 10",
       },
     ],
     attributes: [
@@ -441,6 +477,32 @@ export const goldenPicksProducts: WooCommerceProduct[] = [
   },
 ];
 
+// Helper function to ensure all products have description & short_description
+const enrichProduct = (item: WooCommerceProduct): WooCommerceProduct => {
+  const catName = item.categories?.[0]?.name || "Luxury Footwear & Accessories";
+  return {
+    ...item,
+    short_description:
+      item.short_description ||
+      `Premium quality ${item.name} from luxuryladies. Crafted for everyday elegance, comfort, and premium style.`,
+    description:
+      item.description ||
+      `<p class="mb-3">
+Introducing <strong>${item.name}</strong> (${item.sku}), an exclusive addition to our <em>${catName}</em> collection at <strong>luxuryladies</strong>. Handcrafted with meticulous attention to detail, this piece combines contemporary elegance with unmatched everyday comfort.
+</p>
+<p class="mb-3">
+Featuring durable craftsmanship, breathable premium materials, and a lightweight cushioned sole designed for extended wear. Perfect for parties, festive occasions, and classy casual outings.
+</p>
+<ul class="list-disc pl-5 space-y-1 mt-2 text-[#555]">
+  <li>Brand: luxuryladies</li>
+  <li>Collection: ${catName}</li>
+  <li>Material: Premium High-Grade Synthetic Leather / Fabric</li>
+  <li>Insole & Sole: Ergonomic cushioned padding with non-slip flexible grip</li>
+  <li>Care Instructions: Wipe gently with a soft damp cloth. Store away from direct sunlight.</li>
+</ul>`,
+  };
+};
+
 export const allProducts: WooCommerceProduct[] = [
   ...hotDealsProducts,
   ...goldenPicksProducts,
@@ -527,5 +589,5 @@ export const allProducts: WooCommerceProduct[] = [
       },
     ],
   },
-];
+].map(enrichProduct);
 

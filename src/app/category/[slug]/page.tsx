@@ -16,8 +16,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     .join(" ");
 
   return {
-    title: `${readableName} | Cloudy BD / NextCart`,
-    description: `Shop the latest ${readableName} collection at Cloudy BD.`,
+    title: `${readableName} | luxuryladies`,
+    description: `Shop the latest ${readableName} collection at luxuryladies.`,
   };
 }
 
