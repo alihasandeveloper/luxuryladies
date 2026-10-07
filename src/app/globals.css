@@ -719,16 +719,15 @@ a {
   }
 
   .header-top-inner {
-    gap: 0.35rem;
+    display: flex;
+    align-items: center;
     justify-content: space-between;
-  }
-
-  .header-logo {
-    min-width: 0;
-    flex-shrink: 1;
+    gap: 0.5rem;
   }
 
   .header-actions {
+    display: flex;
+    align-items: center;
     gap: 2px;
   }
 

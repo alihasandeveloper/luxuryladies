@@ -76,26 +76,40 @@ export default function Header() {
         <div className="header-top">
           <div className="container header-top-inner">
 
-            {/* Hamburger / Menu (mobile only) */}
-            <button
-              className="hamburger-btn"
-              aria-label="Open menu"
-              onClick={() => setDrawerOpen(true)}
-            >
-              <Menu size={22} strokeWidth={1.85} className="text-[#1f161b] hover:text-[#ff0080] transition-colors" />
-            </button>
+            {/* Left section on mobile: Hamburger Menu + Mobile Search Icon */}
+            <div className="flex items-center gap-1 md:contents">
+              {/* Hamburger / Menu (mobile only) */}
+              <button
+                className="hamburger-btn"
+                aria-label="Open menu"
+                onClick={() => setDrawerOpen(true)}
+              >
+                <Menu size={22} strokeWidth={1.85} className="text-[#1f161b] hover:text-[#ff0080] transition-colors" />
+              </button>
 
-            {/* Logo (200x60px) */}
-            <a href="/" className="header-logo inline-flex items-center" aria-label="luxuryladies Home">
-              <Image
-                src="/luxuryladies-logo.png"
-                alt="luxuryladies"
-                width={200}
-                height={60}
-                priority
-                className="w-auto h-[38px] xs:h-[44px] md:h-[54px] max-w-[150px] sm:max-w-[180px] md:max-w-[200px] object-contain"
-              />
-            </a>
+              {/* Search icon (mobile only - placed beside menu) */}
+              <button
+                className="action-btn mobile-search-btn mobile-only"
+                aria-label="Toggle search"
+                onClick={() => setMobileSearchOpen((prev) => !prev)}
+              >
+                <Search size={19} strokeWidth={1.75} />
+              </button>
+            </div>
+
+            {/* Logo (Centered on mobile, normal position on desktop) */}
+            <div className="flex-1 flex justify-center md:flex-initial md:justify-start">
+              <a href="/" className="header-logo inline-flex items-center justify-center" aria-label="luxuryladies Home">
+                <Image
+                  src="/luxuryladies-logo.png"
+                  alt="luxuryladies"
+                  width={200}
+                  height={60}
+                  priority
+                  className="w-auto h-[36px] xs:h-[40px] md:h-[54px] max-w-[140px] sm:max-w-[170px] md:max-w-[200px] object-contain"
+                />
+              </a>
+            </div>
 
             {/* Main Nav (desktop only) */}
             <nav className="header-nav desktop-only" aria-label="Main navigation">
@@ -130,16 +144,7 @@ export default function Header() {
               )}
             </form>
 
-            {/* Search icon (mobile only) */}
-            <button
-              className="action-btn mobile-search-btn mobile-only"
-              aria-label="Toggle search"
-              onClick={() => setMobileSearchOpen((prev) => !prev)}
-            >
-              <Search size={19} strokeWidth={1.75} />
-            </button>
-
-            {/* Icon Actions */}
+            {/* Icon Actions (Right side: Cart, User on mobile; Wishlist, Compare, Cart, User on desktop) */}
             <div className="header-actions">
               {/* Wishlist (desktop only) */}
               <button className="action-btn desktop-only" aria-label="Wishlist">
