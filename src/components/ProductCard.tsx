@@ -21,11 +21,12 @@ export default function ProductCard({
       ? Math.round(((regular - current) / regular) * 100)
       : 0;
 
+  const isOutOfStock = product.stock_status === "outofstock";
   const badgeMeta = product.meta_data?.find((m) => m.key === "_badge")?.value;
   const image = product.images?.[0]?.src || "/file.svg";
 
   return (
-    <div className="group relative bg-white overflow-hidden md:shadow-lg hover:shadow-xl hover:shadow-gray-200/50 transition-all duration-300 flex flex-col">
+    <div className={`group relative bg-white overflow-hidden md:shadow-lg hover:shadow-xl hover:shadow-gray-200/50 transition-all duration-300 flex flex-col ${isOutOfStock ? "opacity-90" : ""}`}>
       {/* Product Image Frame */}
       <div className="relative aspect-square w-full overflow-hidden bg-[#f7f7f7]">
         <Link href={`/product/${product.slug}`} className="block w-full h-full overflow-hidden">
@@ -34,16 +35,21 @@ export default function ProductCard({
             alt={product.images?.[0]?.alt || product.name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+            className={`object-cover transition-transform duration-700 ease-out group-hover:scale-110 ${isOutOfStock ? "grayscale-[30%]" : ""}`}
           />
         </Link>
 
-        {/* Limited Offer Badge (Green badge on top-left) */}
-        {badgeMeta && (
+        {/* Out of Stock Badge */}
+        {isOutOfStock ? (
+          <span className="absolute top-2 left-2 z-10 bg-[#1e1e1e]/90 backdrop-blur-xs text-white text-[10px] font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-sm shadow-xs">
+            Out of Stock
+          </span>
+        ) : badgeMeta ? (
+          /* Limited Offer Badge (Green badge on top-left) */
           <span className="absolute top-2 left-2 z-10 bg-[#28a745] text-white text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full shadow-xs">
             {badgeMeta}
           </span>
-        )}
+        ) : null}
 
         {/* Wishlist Button (top-right round icon) */}
         {showWishlist && (
@@ -91,11 +97,17 @@ export default function ProductCard({
             )}
           </div>
 
-          {/* Add to Cart Round Pink Button with Hover Scale Effect */}
+          {/* Add to Cart Round Button (Disabled styling if out of stock) */}
           <button
             type="button"
-            className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center transition-all duration-200 transform hover:scale-110 active:scale-95 shadow-sm cursor-pointer flex-shrink-0"
-            aria-label={`Add ${product.name} to cart`}
+            disabled={isOutOfStock}
+            className={`w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm flex-shrink-0 ${
+              isOutOfStock
+                ? "bg-[#e2d8dc] text-[#8C7B82] cursor-not-allowed opacity-70"
+                : "bg-[var(--color-primary)] text-white hover:scale-110 active:scale-95 cursor-pointer"
+            }`}
+            aria-label={isOutOfStock ? `${product.name} is out of stock` : `Add ${product.name} to cart`}
+            title={isOutOfStock ? "Out of Stock" : "Add to Cart"}
           >
             <ShoppingCart size={15} strokeWidth={2.2} />
           </button>

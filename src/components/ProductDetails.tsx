@@ -135,8 +135,8 @@ export default function ProductDetails({
   };
 
   return (
-    <div className="w-full bg-[#FAFAFA] min-h-screen py-6 md:py-10">
-      <div className="container max-w-6xl mx-auto px-4">
+    <div className="w-full min-h-screen py-6 md:py-10">
+      <div className="container max-w-[1328px] mx-auto">
         {/* ── Breadcrumb Navigation ── */}
         <nav className="flex items-center gap-2 text-xs text-[#8C7B82] mb-6 flex-wrap">
           <Link href="/" className="hover:text-[#ff0080] transition-colors">
@@ -183,9 +183,8 @@ export default function ProductDetails({
                   fill
                   priority
                   sizes="(max-width: 1024px) 100vw, 50vw"
-                  className={`object-cover object-center transition-transform duration-150 ${
-                    isZoomed ? "opacity-0" : "opacity-100"
-                  }`}
+                  className={`object-cover object-center transition-transform duration-150 ${isZoomed ? "opacity-0" : "opacity-100"
+                    }`}
                 />
 
                 {/* Magnified zoom layer */}
@@ -223,11 +222,10 @@ export default function ProductDetails({
                       scrollThumbnails("left");
                     }}
                     aria-label="Scroll thumbnails left"
-                    className={`absolute -left-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white shadow-md border border-[#EDE0E5] text-[#444] hover:text-[#ff0080] flex items-center justify-center z-10 transition-all cursor-pointer ${
-                      showThumbNav
+                    className={`absolute -left-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white shadow-md border border-[#EDE0E5] text-[#444] hover:text-[#ff0080] flex items-center justify-center z-10 transition-all cursor-pointer ${showThumbNav
                         ? "opacity-100 scale-100 pointer-events-auto"
                         : "opacity-0 group-hover/thumbs:opacity-100 pointer-events-none group-hover/thumbs:pointer-events-auto"
-                    }`}
+                      }`}
                   >
                     <ChevronLeft size={16} />
                   </button>
@@ -244,11 +242,10 @@ export default function ProductDetails({
                           e.stopPropagation();
                           handleSelectImage(idx);
                         }}
-                        className={`relative w-18 h-18 md:w-20 md:h-20 overflow-hidden border-2 transition-all cursor-pointer shrink-0 bg-[#fbfbfb] ${
-                          activeImageIndex === idx
+                        className={`relative w-18 h-18 md:w-20 md:h-20 overflow-hidden border-2 transition-all cursor-pointer shrink-0 bg-[#fbfbfb] ${activeImageIndex === idx
                             ? "border-[#ff0080] shadow-xs"
                             : "border-[#EDE0E5] hover:border-[#ff0080]/50 opacity-75 hover:opacity-100"
-                        }`}
+                          }`}
                       >
                         <Image
                           src={img.src}
@@ -269,11 +266,10 @@ export default function ProductDetails({
                       scrollThumbnails("right");
                     }}
                     aria-label="Scroll thumbnails right"
-                    className={`absolute -right-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white shadow-md border border-[#EDE0E5] text-[#444] hover:text-[#ff0080] flex items-center justify-center z-10 transition-all cursor-pointer ${
-                      showThumbNav
+                    className={`absolute -right-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white shadow-md border border-[#EDE0E5] text-[#444] hover:text-[#ff0080] flex items-center justify-center z-10 transition-all cursor-pointer ${showThumbNav
                         ? "opacity-100 scale-100 pointer-events-auto"
                         : "opacity-0 group-hover/thumbs:opacity-100 pointer-events-none group-hover/thumbs:pointer-events-auto"
-                    }`}
+                      }`}
                   >
                     <ChevronRight size={16} />
                   </button>
@@ -418,9 +414,9 @@ export default function ProductDetails({
               {/* Action Buttons */}
               <div className="space-y-3 mb-6">
                 {/* Cash on Delivery Feature Pill Banner */}
-                <div className="w-full py-2.5 px-4 bg-[#149A8C] text-white rounded-md text-xs font-semibold text-center tracking-wide shadow-xs flex items-center justify-center gap-2">
+                <div className="w-full py-2.5 px-4 bg-[#FFF0F5] text-[#ff0080] border border-[#FFD6E3] rounded-md text-xs font-semibold text-center tracking-wide shadow-2xs flex items-center justify-center gap-2">
                   <Truck size={16} />
-                  <span>Cash On Delivery</span>
+                  <span>Cash On Delivery Available Nationwide</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -467,9 +463,9 @@ export default function ProductDetails({
                 </div>
 
                 <div className="pt-2">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#EDF5FF] text-[#206bc4] text-xs font-medium border border-[#D5E6FB]">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#FFF5F8] text-[#ff0080] text-xs font-medium border border-[#F2E6EC]">
                     <Truck size={14} />
-                    <span>Shipping</span>
+                    <span>Free Shipping on Pre-orders</span>
                   </div>
                 </div>
               </div>
@@ -593,14 +589,9 @@ export default function ProductDetails({
           <div className="text-center mt-8">
             <Link
               href="/shop"
-              className="inline-flex items-center justify-center gap-1.5 px-8 py-2.5 bg-white text-[#222] border-2 border-[#E5D7DD] hover:border-[#ff0080] hover:!bg-[#ff0080] hover:!text-white text-xs font-bold rounded-md shadow-xs transition-all duration-200 group cursor-pointer"
+              className="inline-flex items-center justify-center px-8 py-2.5 bg-[#ff0080] hover:bg-[#d4006a] !text-white text-xs font-bold rounded-md shadow-xs transition-colors"
             >
-              <span className="group-hover:!text-white">See More</span>
-              <ChevronRight
-                size={15}
-                strokeWidth={2}
-                className="transition-transform group-hover:translate-x-0.5"
-              />
+              See More
             </Link>
           </div>
         </div>

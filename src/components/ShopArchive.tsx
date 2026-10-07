@@ -53,23 +53,26 @@ export default function ShopArchive({
     }
   }, [initialSearchQuery]);
 
-  // Compute absolute min & max price from products
+  // Compute absolute min & max price dynamically from actual products
   const { absoluteMinPrice, absoluteMaxPrice } = useMemo(() => {
-    let min = 0;
-    let max = 15000;
     if (initialProducts.length > 0) {
       const prices = initialProducts.map((p) => parseFloat(p.price) || 0);
-      min = Math.floor(Math.min(...prices));
-      max = Math.ceil(Math.max(...prices));
-      // Give a comfortable buffer to max
-      max = Math.max(max, 11530);
+      const min = Math.floor(Math.min(...prices));
+      const max = Math.ceil(Math.max(...prices));
+      return { absoluteMinPrice: min, absoluteMaxPrice: max };
     }
-    return { absoluteMinPrice: 0, absoluteMaxPrice: max };
+    return { absoluteMinPrice: 0, absoluteMaxPrice: 5000 };
   }, [initialProducts]);
 
-  // Filters state
-  const [minPrice, setMinPrice] = useState<number>(0);
-  const [maxPrice, setMaxPrice] = useState<number>(11530);
+  // Filters state (initialized to the exact lowest and highest product price)
+  const [minPrice, setMinPrice] = useState<number>(absoluteMinPrice);
+  const [maxPrice, setMaxPrice] = useState<number>(absoluteMaxPrice);
+
+  // Sync state if initialProducts changes
+  React.useEffect(() => {
+    setMinPrice(absoluteMinPrice);
+    setMaxPrice(absoluteMaxPrice);
+  }, [absoluteMinPrice, absoluteMaxPrice]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>(() =>
     categorySlug ? [categorySlug] : []
   );
@@ -120,7 +123,7 @@ export default function ShopArchive({
   // Clear all filters
   const handleClearAll = () => {
     setSearchQuery("");
-    setMinPrice(0);
+    setMinPrice(absoluteMinPrice);
     setMaxPrice(absoluteMaxPrice);
     setSelectedCategories([]);
     setInStock(false);
@@ -137,7 +140,7 @@ export default function ShopArchive({
   const isFilterActive = useMemo(() => {
     return (
       searchQuery.trim().length > 0 ||
-      minPrice > 0 ||
+      minPrice > absoluteMinPrice ||
       maxPrice < absoluteMaxPrice ||
       selectedCategories.length > 0 ||
       inStock ||
@@ -149,6 +152,7 @@ export default function ShopArchive({
     searchQuery,
     minPrice,
     maxPrice,
+    absoluteMinPrice,
     absoluteMaxPrice,
     selectedCategories,
     inStock,
@@ -258,7 +262,7 @@ export default function ShopArchive({
 
   const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Math.min(Number(e.target.value), maxPrice - priceGap);
-    setMinPrice(Math.max(0, value));
+    setMinPrice(Math.max(absoluteMinPrice, value));
   };
 
   const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -335,9 +339,9 @@ export default function ShopArchive({
             id="min-price-slider"
             aria-label="Minimum price"
             type="range"
-            min={0}
+            min={absoluteMinPrice}
             max={absoluteMaxPrice}
-            step={50}
+            step={10}
             value={minPrice}
             onChange={handleMinChange}
             className="multi-range-input z-20"
@@ -346,9 +350,9 @@ export default function ShopArchive({
             id="max-price-slider"
             aria-label="Maximum price"
             type="range"
-            min={0}
+            min={absoluteMinPrice}
             max={absoluteMaxPrice}
-            step={50}
+            step={10}
             value={maxPrice}
             onChange={handleMaxChange}
             className="multi-range-input z-30"
