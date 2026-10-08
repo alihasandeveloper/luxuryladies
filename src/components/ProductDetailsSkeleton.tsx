@@ -1,6 +1,29 @@
-import React from "react";
+"use client";
 
-export default function ProductDetailsSkeleton() {
+import React from "react";
+import { useParams } from "next/navigation";
+import { allProducts } from "@/data/products";
+
+interface ProductDetailsSkeletonProps {
+  hasMultipleImages?: boolean;
+}
+
+export default function ProductDetailsSkeleton({
+  hasMultipleImages,
+}: ProductDetailsSkeletonProps) {
+  const params = useParams();
+  const slug = params?.slug as string | undefined;
+
+  let showThumbnails = hasMultipleImages;
+  if (showThumbnails === undefined) {
+    if (slug) {
+      const product = allProducts.find((p) => p.slug === slug);
+      showThumbnails = Boolean(product?.images && product.images.length > 1);
+    } else {
+      showThumbnails = false;
+    }
+  }
+
   return (
     <div className="w-full py-6 md:py-10 bg-white animate-pulse">
       <div className="container max-w-[1328px] mx-auto">
@@ -21,15 +44,17 @@ export default function ProductDetailsSkeleton() {
           <div className="lg:col-span-6 flex flex-col gap-4">
             {/* Main Featured Image Skeleton */}
             <div className="aspect-square w-full bg-gray-200 overflow-hidden" />
-            {/* Thumbnails Row Skeleton */}
-            <div className="flex items-center gap-2.5">
-              {[1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className="w-18 h-18 md:w-20 md:h-20 bg-gray-100 overflow-hidden shrink-0"
-                />
-              ))}
-            </div>
+            {/* Thumbnails Row Skeleton (Only rendered if product has multiple images) */}
+            {showThumbnails && (
+              <div className="flex items-center gap-2.5">
+                {[1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    className="w-18 h-18 md:w-20 md:h-20 bg-gray-100 overflow-hidden shrink-0"
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Details / Purchase Skeleton (Right 6 cols) */}
