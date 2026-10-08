@@ -114,7 +114,7 @@ export default function Header() {
                 aria-label="Open menu"
                 onClick={() => setDrawerOpen(true)}
               >
-                <Menu size={22} strokeWidth={1.85} className="text-[#1f161b] hover:text-[#ff0080] transition-colors" />
+                <Menu size={22} strokeWidth={1.85} className="text-[lab(35.6337%_-1.58697_-10.8425)] hover:text-[#ff0080] transition-colors" />
               </button>
 
               {/* Search icon (mobile only - placed beside menu) */}
@@ -383,11 +383,11 @@ export default function Header() {
                   className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                     active
                       ? "text-[#ff0080] bg-[#FFF5F8]"
-                      : "text-[#1A1A1A] hover:text-[#ff0080] hover:bg-[#FFF5F8]"
+                      : "text-[lab(35.6337%_-1.58697_-10.8425)] hover:text-[#ff0080] hover:bg-[#FFF5F8]"
                   }`}
                 >
                   <span>{link.label}</span>
-                  <ChevronRight size={15} className={active ? "text-[#ff0080]" : "text-[#B39DA7]"} />
+                  <ChevronRight size={15} className={active ? "text-[#ff0080]" : "text-[lab(35.6337%_-1.58697_-10.8425)]"} />
                 </Link>
               );
             })}
@@ -413,11 +413,11 @@ export default function Header() {
                     className={`flex items-center justify-between px-3 py-2 rounded-lg text-[13px] transition-colors ${
                       active
                         ? "text-[#ff0080] bg-[#FFF5F8]"
-                        : "text-[#4A3E44] hover:text-[#ff0080] hover:bg-[#FFF5F8]"
+                        : "text-[lab(35.6337%_-1.58697_-10.8425)] hover:text-[#ff0080] hover:bg-[#FFF5F8]"
                     }`}
                   >
                     <span className="font-normal">{cat.label}</span>
-                    <ChevronRight size={13} className={active ? "text-[#ff0080]" : "text-[#D4C4CB]"} />
+                    <ChevronRight size={13} className={active ? "text-[#ff0080]" : "text-[lab(35.6337%_-1.58697_-10.8425)]"} />
                   </Link>
                 );
               })}
@@ -439,7 +439,7 @@ export default function Header() {
                 className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-lg border text-xs font-medium gap-1.5 transition-colors ${
                   pathname === "/wishlist"
                     ? "border-[#ff0080] text-[#ff0080] bg-[#FFF5F8]"
-                    : "border-[#F2E6EC] hover:border-[#ff0080] hover:text-[#ff0080] text-[#444]"
+                    : "border-[#F2E6EC] hover:border-[#ff0080] hover:text-[#ff0080] text-[lab(35.6337%_-1.58697_-10.8425)]"
                 }`}
               >
                 <Heart size={16} strokeWidth={1.75} />
@@ -451,7 +451,7 @@ export default function Header() {
                 className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-lg border text-xs font-medium gap-1.5 transition-colors ${
                   pathname === "/shop"
                     ? "border-[#ff0080] text-[#ff0080] bg-[#FFF5F8]"
-                    : "border-[#F2E6EC] hover:border-[#ff0080] hover:text-[#ff0080] text-[#444]"
+                    : "border-[#F2E6EC] hover:border-[#ff0080] hover:text-[#ff0080] text-[lab(35.6337%_-1.58697_-10.8425)]"
                 }`}
               >
                 <ArrowLeftRight size={16} strokeWidth={1.75} />
@@ -463,7 +463,7 @@ export default function Header() {
                 className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-lg border text-xs font-medium gap-1.5 transition-colors ${
                   pathname === "/account"
                     ? "border-[#ff0080] text-[#ff0080] bg-[#FFF5F8]"
-                    : "border-[#F2E6EC] hover:border-[#ff0080] hover:text-[#ff0080] text-[#444]"
+                    : "border-[#F2E6EC] hover:border-[#ff0080] hover:text-[#ff0080] text-[lab(35.6337%_-1.58697_-10.8425)]"
                 }`}
               >
                 <User size={16} strokeWidth={1.75} />

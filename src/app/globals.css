@@ -40,7 +40,8 @@ button {
   --color-accent: #FFB3C7;
   --color-bg: #FFF5F8;
   --color-text: #251A1F;
-  --color-text-muted: #8C7B82;
+  --color-text-muted: lab(35.6337% -1.58697 -10.8425);
+  --color-description: lab(35.6337% -1.58697 -10.8425);
   --color-border: #EDE0E5;
   --color-surface: #ffffff;
 
@@ -70,7 +71,6 @@ button {
 /* ─── Base ───────────────────────────────────────────────── */
 html {
   font-size: 16px;
-  scroll-behavior: smooth;
   /* NOTE: Do NOT set overflow-x: hidden on html or body — it breaks
      iOS Safari touch events and position:fixed elements completely. */
 }
@@ -372,7 +372,7 @@ a {
   border-radius: var(--radius-md);
   flex-shrink: 0;
   transition: all var(--transition);
-  color: var(--color-dark);
+  color: var(--color-text-muted);
   /* Prevent 300ms tap delay on iOS */
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;

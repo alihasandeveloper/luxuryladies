@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -44,6 +44,11 @@ export default function ProductDetails({
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
   const thumbnailsRef = useRef<HTMLDivElement>(null);
+
+  // Ensure product details page always scrolls to top on initial load or product change
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [product?.id]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
@@ -348,7 +353,7 @@ export default function ProductDetails({
               {/* Short Description */}
               {product.short_description && (
                 <div
-                  className="text-sm md:text-[15px] text-[#555] leading-relaxed mb-5 pb-3 border-b border-[#F7E7EC]"
+                  className="text-sm md:text-[15px] text-[lab(35.6337%_-1.58697_-10.8425)] leading-relaxed mb-5 pb-3 border-b border-[#F7E7EC]"
                   dangerouslySetInnerHTML={{ __html: product.short_description }}
                 />
               )}
@@ -537,18 +542,18 @@ export default function ProductDetails({
                 Product Description
               </h2>
             </div>
-            <div className="min-h-[140px] text-sm md:text-[15px] text-[#444] leading-relaxed">
+            <div className="min-h-[140px] text-sm md:text-[15px] text-[lab(35.6337%_-1.58697_-10.8425)] leading-relaxed">
               <p className="font-semibold text-base text-[#222] mb-3">
                 {product.name} {product.sku ? `(${product.sku})` : ""}
               </p>
               {product.description ? (
                 <div
-                  className="mb-2 prose prose-sm max-w-none text-sm md:text-[15px] text-[#444] leading-relaxed [&>p]:mb-3 [&>ul]:space-y-1.5 [&>ul]:pl-5 [&>ul]:list-disc"
+                  className="mb-2 prose prose-sm max-w-none text-sm md:text-[15px] text-[lab(35.6337%_-1.58697_-10.8425)] leading-relaxed [&>p]:mb-3 [&>ul]:space-y-1.5 [&>ul]:pl-5 [&>ul]:list-disc"
                   dangerouslySetInnerHTML={{ __html: product.description }}
                 />
               ) : product.short_description ? (
                 <div
-                  className="mb-2 prose prose-sm max-w-none text-sm md:text-[15px] text-[#444] leading-relaxed"
+                  className="mb-2 prose prose-sm max-w-none text-sm md:text-[15px] text-[lab(35.6337%_-1.58697_-10.8425)] leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: product.short_description }}
                 />
               ) : null}

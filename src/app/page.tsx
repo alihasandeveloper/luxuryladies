@@ -87,7 +87,7 @@ export default function Home() {
       <div className="container py-10 md:py-14">
         {/* ── Section Header ── */}
         <div className="text-center mb-6">
-          <span className="text-[11px] md:text-xs font-semibold tracking-[0.25em] text-[#8C7B82] uppercase block mb-2">
+          <span className="text-[11px] md:text-xs font-semibold tracking-[0.25em] text-[lab(35.6337%_-1.58697_-10.8425)] uppercase block mb-2">
             CURATED COLLECTIONS
           </span>
           <h2 className="text-2xl md:text-3xl font-medium tracking-tight text-[#251A1F]">
