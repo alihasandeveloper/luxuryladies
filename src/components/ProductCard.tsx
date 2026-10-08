@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, ShoppingCart } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Heart, ShoppingCart, Check } from "lucide-react";
 import { WooCommerceProduct } from "@/types/woocommerce";
+import { useCart } from "@/context/CartContext";
 
 interface ProductCardProps {
   product: WooCommerceProduct;
@@ -26,6 +28,40 @@ export default function ProductCard({
   const badgeMeta = product.meta_data?.find((m) => m.key === "_badge")?.value;
   const initialImage = product.images?.[0]?.src || "/woocommerce-placeholder.webp";
   const [imgSrc, setImgSrc] = useState(initialImage);
+  const [justAdded, setJustAdded] = useState(false);
+
+  const { addToCart } = useCart();
+  const router = useRouter();
+
+  const isVariable =
+    product.type === "variable" ||
+    (product.variations && product.variations.length > 0);
+
+  const handleCartClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (isOutOfStock) return;
+
+    if (isVariable) {
+      router.push(`/product/${product.slug}`);
+      return;
+    }
+
+    addToCart({
+      id: `${product.id}-0-{}`,
+      productId: product.id,
+      name: product.name,
+      slug: product.slug,
+      price: current > 0 ? current : regular,
+      regularPrice: regular > current ? regular : undefined,
+      image: imgSrc,
+      stockStatus: "instock",
+    });
+
+    setJustAdded(true);
+    setTimeout(() => setJustAdded(false), 1500);
+  };
 
   useEffect(() => {
     setImgSrc(product.images?.[0]?.src || "/woocommerce-placeholder.webp");
@@ -104,19 +140,40 @@ export default function ProductCard({
             )}
           </div>
 
-          {/* Add to Cart Round Button (Disabled styling if out of stock) */}
+          {/* Add to Cart Round Button */}
           <button
             type="button"
             disabled={isOutOfStock}
+            onClick={handleCartClick}
             className={`w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm flex-shrink-0 ${
               isOutOfStock
                 ? "bg-[#e2d8dc] text-[#8C7B82] cursor-not-allowed opacity-70"
+                : justAdded
+                ? "bg-emerald-600 text-white scale-105"
                 : "bg-[var(--color-primary)] text-white hover:scale-110 active:scale-95 cursor-pointer"
             }`}
-            aria-label={isOutOfStock ? `${product.name} is out of stock` : `Add ${product.name} to cart`}
-            title={isOutOfStock ? "Out of Stock" : "Add to Cart"}
+            aria-label={
+              isOutOfStock
+                ? `${product.name} is out of stock`
+                : isVariable
+                ? `Select options for ${product.name}`
+                : `Add ${product.name} to cart`
+            }
+            title={
+              isOutOfStock
+                ? "Out of Stock"
+                : isVariable
+                ? "Select Options"
+                : justAdded
+                ? "Added to Cart!"
+                : "Add to Cart"
+            }
           >
-            <ShoppingCart size={15} strokeWidth={2.2} />
+            {justAdded ? (
+              <Check size={16} strokeWidth={2.5} className="animate-in zoom-in-75" />
+            ) : (
+              <ShoppingCart size={15} strokeWidth={2.2} />
+            )}
           </button>
         </div>
       </div>

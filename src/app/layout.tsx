@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { CartProvider } from "@/context/CartContext";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -24,11 +25,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={montserrat.variable}>
       <body suppressHydrationWarning>
-        <Header />
-        <main className="site-main">
-          {children}
-        </main>
-        <Footer />
+        <CartProvider>
+          <Header />
+          <main className="site-main">
+            {children}
+          </main>
+          <Footer />
+        </CartProvider>
       </body>
     </html>
   );

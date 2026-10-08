@@ -13,6 +13,8 @@ const navLinks = [
   { label: "About Us", href: "/about" },
 ];
 
+import { useCart } from "@/context/CartContext";
+
 interface HeaderCategory {
   label: string;
   slug: string;
@@ -21,7 +23,7 @@ interface HeaderCategory {
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
-  const [cartCount] = useState(3);
+  const { cartCount } = useCart();
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -219,12 +221,16 @@ export default function Header() {
               </button>
 
               {/* Cart */}
-              <button className="action-btn cart-btn" aria-label={`Cart (${cartCount} items)`}>
+              <Link
+                href="/cart"
+                className="action-btn cart-btn"
+                aria-label={`Cart (${cartCount} items)`}
+              >
                 <ShoppingBag size={19} strokeWidth={1.75} />
                 {cartCount > 0 && (
                   <span className="cart-badge" aria-hidden="true">{cartCount}</span>
                 )}
-              </button>
+              </Link>
 
               {/* Account */}
               <button className="action-btn" aria-label="Account">

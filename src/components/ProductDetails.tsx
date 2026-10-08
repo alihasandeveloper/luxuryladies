@@ -3,6 +3,8 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCart } from "@/context/CartContext";
 import {
   Heart,
   Share2,
@@ -88,6 +90,9 @@ export default function ProductDetails({
   product,
   relatedProducts,
 }: ProductDetailsProps) {
+  const router = useRouter();
+  const { addToCart } = useCart();
+
   // Gallery active image
   const galleryImages =
     product.images && product.images.length > 0
@@ -418,17 +423,61 @@ export default function ProductDetails({
 
   const handleAddToCart = () => {
     if (isCurrentOutOfStock) return;
+    const cartItemId = `${product.id}-${matchingVariation?.id || 0}-${JSON.stringify(selectedAttributes)}`;
+    addToCart(
+      {
+        id: cartItemId,
+        productId: product.id,
+        variationId: matchingVariation?.id,
+        name: product.name,
+        slug: product.slug,
+        sku: matchingVariation?.sku || product.sku || undefined,
+        price: currentPrice,
+        regularPrice: regularPrice > currentPrice ? regularPrice : undefined,
+        image:
+          matchingVariation?.image?.src ||
+          product.images?.[0]?.src ||
+          "/woocommerce-placeholder.webp",
+        selectedAttributes: { ...selectedAttributes },
+        stockStatus: "instock",
+      },
+      quantity
+    );
+
     const details = Object.entries(selectedAttributes)
       .map(([k, v]) => `${k}: ${v}`)
       .join(", ");
-    setAddedToCartToast(details ? `Added to Cart (${details})!` : "Added to Cart!");
-    setTimeout(() => setAddedToCartToast(null), 2500);
+    setAddedToCartToast(
+      details
+        ? `Added to Cart (${details})`
+        : `Added to Cart`
+    );
+    setTimeout(() => setAddedToCartToast(null), 3500);
   };
 
   const handleBuyNow = () => {
     if (isCurrentOutOfStock) return;
-    setAddedToCartToast("Redirecting to checkout...");
-    setTimeout(() => setAddedToCartToast(null), 2500);
+    const cartItemId = `${product.id}-${matchingVariation?.id || 0}-${JSON.stringify(selectedAttributes)}`;
+    addToCart(
+      {
+        id: cartItemId,
+        productId: product.id,
+        variationId: matchingVariation?.id,
+        name: product.name,
+        slug: product.slug,
+        sku: matchingVariation?.sku || product.sku || undefined,
+        price: currentPrice,
+        regularPrice: regularPrice > currentPrice ? regularPrice : undefined,
+        image:
+          matchingVariation?.image?.src ||
+          product.images?.[0]?.src ||
+          "/woocommerce-placeholder.webp",
+        selectedAttributes: { ...selectedAttributes },
+        stockStatus: "instock",
+      },
+      quantity
+    );
+    router.push("/cart");
   };
 
   const handleQuantityChange = (delta: number) => {
@@ -793,8 +842,17 @@ export default function ProductDetails({
                 </div>
 
                 {addedToCartToast && (
-                  <div className="p-2.5 bg-[#E8F8EE] border border-[#C6EBD3] text-[#1E824C] rounded-md text-xs font-medium text-center animate-in fade-in">
-                    {addedToCartToast}
+                  <div className="p-3 bg-[#E8F8EE] border border-[#C6EBD3] text-[#1E824C] rounded-md text-xs font-medium flex items-center justify-between gap-3 animate-in fade-in shadow-2xs">
+                    <span className="flex items-center gap-1.5 font-semibold">
+                      <Check size={14} className="shrink-0" />
+                      {addedToCartToast}
+                    </span>
+                    <Link
+                      href="/cart"
+                      className="font-bold underline text-[#ff0080] hover:text-[#d4006a] transition-colors shrink-0 flex items-center gap-1"
+                    >
+                      View Cart →
+                    </Link>
                   </div>
                 )}
               </div>
