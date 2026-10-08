@@ -1,4 +1,10 @@
-import { WooCommerceCategory, WooCommerceProduct, WooCommerceImage } from "@/types/woocommerce";
+import {
+  WooCommerceCategory,
+  WooCommerceProduct,
+  WooCommerceImage,
+  WooCommerceVariation,
+  WooCommerceAttribute,
+} from "@/types/woocommerce";
 
 const WP_URL = process.env.WP_BACKEND_URL || "https://headless.local";
 const WP_CK = process.env.WP_CK || "";
@@ -95,7 +101,22 @@ function normalizeProduct(raw: any): WooCommerceProduct {
     stock_status: (raw.stock_status as any) || "instock",
     categories,
     images,
-    attributes: raw.attributes || [],
+    attributes: (raw.attributes || []).map((attr: any) => ({
+      id: attr.id,
+      name: decodeHtml(attr.name || ""),
+      slug: attr.slug || "",
+      position: attr.position ?? 0,
+      visible: Boolean(attr.visible),
+      variation: Boolean(attr.variation),
+      options: (attr.options || []).map((opt: any) => decodeHtml(String(opt).trim())),
+    })),
+    default_attributes: (raw.default_attributes || []).map((def: any) => ({
+      id: def.id,
+      name: decodeHtml(def.name || ""),
+      option: decodeHtml(String(def.option || "").trim()),
+    })),
+    variations: raw.variations || [],
+    variations_data: raw.variations_data || [],
     meta_data: raw.meta_data || [],
   };
 }
@@ -157,6 +178,82 @@ export async function getProducts(params?: {
 }
 
 /**
+ * Fetch variations for a variable product from WooCommerce REST API
+ */
+export async function getProductVariations(productId: number): Promise<WooCommerceVariation[]> {
+  try {
+    const authHeader = getAuthHeader();
+    if (!authHeader) return [];
+
+    const res = await fetch(
+      `${getBaseUrl()}/wp-json/wc/v3/products/${productId}/variations?per_page=100`,
+      {
+        headers: {
+          Authorization: authHeader,
+          "Content-Type": "application/json",
+        },
+        cache: "no-store",
+      }
+    );
+
+    if (!res.ok) {
+      console.error(`WooCommerce API error fetching variations for product ${productId}: ${res.status}`);
+      return [];
+    }
+
+    const rawVars = await res.json();
+    if (!Array.isArray(rawVars)) return [];
+
+    return rawVars.map((v: any) => {
+      const isOutOfStock =
+        v.stock_status === "outofstock" ||
+        v.in_stock === false ||
+        (v.manage_stock &&
+          v.stock_quantity !== null &&
+          v.stock_quantity !== undefined &&
+          Number(v.stock_quantity) <= 0);
+
+      const rawReg = v.regular_price || v.price || "0";
+      const rawSale = v.sale_price || "";
+      const rawPrice = v.price || rawSale || rawReg;
+
+      return {
+        id: v.id,
+        sku: v.sku || "",
+        price: String(rawPrice),
+        regular_price: String(rawReg),
+        sale_price: String(rawSale),
+        on_sale: Boolean(
+          v.on_sale || (rawReg && rawSale && Number(rawReg) > Number(rawSale))
+        ),
+        purchasable: isOutOfStock ? false : (v.purchasable ?? true),
+        stock_status: isOutOfStock
+          ? "outofstock"
+          : ((v.stock_status as any) || "instock"),
+        attributes: (v.attributes || []).map((a: any) => ({
+          id: a.id ?? 0,
+          name: decodeHtml(a.name || ""),
+          option: decodeHtml(String(a.option || "").trim()),
+          slug: a.slug ? decodeHtml(String(a.slug).trim()) : undefined,
+        })),
+        image:
+          v.image && v.image.src
+            ? {
+                id: v.image.id || 0,
+                src: v.image.src,
+                name: v.image.name || "Variation Image",
+                alt: v.image.alt || "Variation Image",
+              }
+            : null,
+      };
+    });
+  } catch (err) {
+    console.error(`Failed to fetch variations for product ${productId}:`, err);
+    return [];
+  }
+}
+
+/**
  * Fetch single product by slug from WooCommerce REST API
  */
 export async function getProductBySlug(slug: string): Promise<WooCommerceProduct | null> {
@@ -173,7 +270,7 @@ export async function getProductBySlug(slug: string): Promise<WooCommerceProduct
           Authorization: authHeader,
           "Content-Type": "application/json",
         },
-        next: { revalidate: 30 },
+        cache: "no-store",
       }
     );
 
@@ -183,7 +280,15 @@ export async function getProductBySlug(slug: string): Promise<WooCommerceProduct
 
     const raw = await res.json();
     if (Array.isArray(raw) && raw.length > 0) {
-      return normalizeProduct(raw[0]);
+      const product = normalizeProduct(raw[0]);
+      if (
+        (product.type === "variable" ||
+          (product.variations && product.variations.length > 0)) &&
+        product.id
+      ) {
+        product.variations_data = await getProductVariations(product.id);
+      }
+      return product;
     }
 
     return null;

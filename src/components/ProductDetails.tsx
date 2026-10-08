@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -27,6 +27,61 @@ import ProductCard from "@/components/ProductCard";
 interface ProductDetailsProps {
   product: WooCommerceProduct;
   relatedProducts: WooCommerceProduct[];
+}
+
+function matchAttributeKey(key1: string, key2: string, slug?: string): boolean {
+  if (!key1 || !key2) return false;
+  const normalize = (str: string) =>
+    str
+      .toLowerCase()
+      .trim()
+      .replace(/^attribute_/, "")
+      .replace(/^pa_/, "")
+      .replace(/[-_]/g, "");
+  const k1 = normalize(key1);
+  const k2 = normalize(key2);
+  const s = slug ? normalize(slug) : "";
+  return k1 === k2 || (s !== "" && (k1 === s || k2 === s));
+}
+
+function normalizeOptionString(str: string): string {
+  if (!str) return "";
+  try {
+    str = decodeURIComponent(str);
+  } catch {}
+  return str
+    .toLowerCase()
+    .trim()
+    .replace(/[-_\s]+/g, "-")
+    .replace(/[^\w-]/g, "");
+}
+
+function findMatchingOption(options: string[], targetOption: string): string | null {
+  if (!targetOption || !options || options.length === 0) return null;
+  const targetClean = targetOption.toLowerCase().trim();
+  const targetNorm = normalizeOptionString(targetOption);
+
+  // 1. Direct case-insensitive match
+  const directMatch = options.find((opt) => opt && opt.toLowerCase().trim() === targetClean);
+  if (directMatch) return directMatch;
+
+  // 2. Normalized match (handles spaces, dashes, underscores, case)
+  const normMatch = options.find((opt) => opt && normalizeOptionString(opt) === targetNorm);
+  if (normMatch) return normMatch;
+
+  // 3. Fallback partial/slug match
+  const fallback = options.find((opt) => {
+    if (!opt) return false;
+    const o = normalizeOptionString(opt);
+    return (
+      o.length > 0 &&
+      targetNorm.length > 0 &&
+      (o === targetNorm || o.includes(targetNorm) || targetNorm.includes(o))
+    );
+  });
+  if (fallback) return fallback;
+
+  return null;
 }
 
 export default function ProductDetails({
@@ -91,31 +146,267 @@ export default function ProductDetails({
     }
   };
 
-  // Sizes available (fallback to default standard sizes if not defined in attributes)
-  const sizeOptions =
-    product.attributes?.find((a) => a.name.toLowerCase() === "size")?.options || [
-      "35",
-      "36",
-      "37",
-      "38",
-      "39",
-      "40",
-      "41",
-      "42",
-    ];
+  // Determine if product is variable and extract genuine variation attributes
+  const variationAttributes = useMemo(() => {
+    if (!product.attributes || product.attributes.length === 0) return [];
 
-  const [selectedSize, setSelectedSize] = useState<string>("36");
+    // If variations_data exists, find attributes that actually participate in variations
+    if (product.variations_data && product.variations_data.length > 0) {
+      const attrsInVariations = product.attributes.filter((attr) => {
+        if (attr.variation) return true;
+        return product.variations_data!.some((v) =>
+          v.attributes?.some(
+            (va) =>
+              (va.id && attr.id && va.id === attr.id) ||
+              matchAttributeKey(va.name, attr.name, attr.slug)
+          )
+        );
+      });
+      if (attrsInVariations.length > 0) {
+        return attrsInVariations;
+      }
+    }
+
+    return (product.attributes || []).filter((a) => a.variation);
+  }, [product.attributes, product.variations_data]);
+
+  const isVariableProduct =
+    Boolean(
+      product.type === "variable" ||
+      (product.variations && product.variations.length > 0) ||
+      (product.variations_data && product.variations_data.length > 0)
+    ) && variationAttributes.length > 0;
+
+  // Helper to extract default selections
+  const computeInitialSelections = (): Record<string, string> => {
+    const initial: Record<string, string> = {};
+    if (variationAttributes.length === 0) return initial;
+
+    // 1. Try from default_attributes if specified in WooCommerce
+    if (product.default_attributes && product.default_attributes.length > 0) {
+      variationAttributes.forEach((attr) => {
+        const def = product.default_attributes?.find(
+          (d) =>
+            (d.id && attr.id && d.id === attr.id) ||
+            matchAttributeKey(d.name, attr.name, attr.slug)
+        );
+        if (def && def.option) {
+          const matched = findMatchingOption(attr.options, def.option);
+          if (matched) {
+            initial[attr.name] = matched;
+          }
+        }
+      });
+    }
+
+    // 2. If no default_attributes or incomplete, pick from preferred in-stock variation
+    if (
+      Object.keys(initial).length < variationAttributes.length &&
+      product.variations_data &&
+      product.variations_data.length > 0
+    ) {
+      const preferredVar =
+        product.variations_data.find(
+          (v) => v.stock_status !== "outofstock" && v.purchasable !== false
+        ) || product.variations_data[0];
+
+      if (preferredVar?.attributes) {
+        variationAttributes.forEach((attr) => {
+          if (initial[attr.name]) return;
+          const vAttr = preferredVar.attributes.find(
+            (va) =>
+              (va.id && attr.id && va.id === attr.id) ||
+              matchAttributeKey(va.name, attr.name, attr.slug)
+          );
+          if (vAttr && vAttr.option) {
+            const matched = findMatchingOption(attr.options, vAttr.option);
+            if (matched) {
+              initial[attr.name] = matched;
+            }
+          }
+        });
+      }
+    }
+
+    // 3. Fallback to first option of each attribute
+    variationAttributes.forEach((attr) => {
+      if (!initial[attr.name] && attr.options && attr.options.length > 0) {
+        initial[attr.name] = attr.options[0];
+      }
+    });
+
+    return initial;
+  };
+
+  // Initialize selected attributes
+  const [selectedAttributes, setSelectedAttributes] = useState<Record<string, string>>(() => {
+    return computeInitialSelections();
+  });
+
+  // Keep selectedAttributes in sync if product changes
+  useEffect(() => {
+    if (isVariableProduct) {
+      setSelectedAttributes(computeInitialSelections());
+    } else {
+      setSelectedAttributes({});
+    }
+  }, [product.id, isVariableProduct]);
+
+  // Find currently matching variation from variations_data
+  const matchingVariation = useMemo(() => {
+    if (!isVariableProduct || !product.variations_data || product.variations_data.length === 0) {
+      return null;
+    }
+
+    return (
+      product.variations_data.find((v) => {
+        if (!v.attributes || v.attributes.length === 0) {
+          return true;
+        }
+
+        return v.attributes.every((vAttr) => {
+          // Empty option in WooCommerce variation means "Any"
+          if (!vAttr.option || vAttr.option.trim() === "") {
+            return true;
+          }
+
+          const matchedProductAttr = variationAttributes.find(
+            (pa) =>
+              (vAttr.id && pa.id && vAttr.id === pa.id) ||
+              matchAttributeKey(vAttr.name, pa.name, pa.slug)
+          );
+
+          const key = matchedProductAttr ? matchedProductAttr.name : vAttr.name;
+          const selectedVal = selectedAttributes[key] || selectedAttributes[vAttr.name];
+
+          if (!selectedVal) {
+            return false;
+          }
+
+          const optionsToCompare = [vAttr.option];
+          if (vAttr.slug && vAttr.slug !== vAttr.option) {
+            optionsToCompare.push(vAttr.slug);
+          }
+
+          return Boolean(findMatchingOption(optionsToCompare, selectedVal));
+        });
+      }) || null
+    );
+  }, [isVariableProduct, product.variations_data, variationAttributes, selectedAttributes]);
+
+  // When variation has its own image, automatically switch active image in gallery
+  useEffect(() => {
+    if (matchingVariation?.image?.src) {
+      const foundIdx = galleryImages.findIndex(
+        (img) => img.src === matchingVariation.image?.src
+      );
+      if (foundIdx !== -1) {
+        setActiveImageIndex(foundIdx);
+      }
+    }
+  }, [matchingVariation, galleryImages]);
+
+  // Calculate pricing based on matching variation or product
+  const rawVarRegular = matchingVariation?.regular_price || matchingVariation?.price;
+  const parsedVarRegular = rawVarRegular ? parseFloat(rawVarRegular) : 0;
+  const regularPrice =
+    parsedVarRegular > 0
+      ? parsedVarRegular
+      : parseFloat(product.regular_price || product.price || "0");
+
+  const rawVarCurrent = matchingVariation?.sale_price || matchingVariation?.price;
+  const parsedVarCurrent = rawVarCurrent ? parseFloat(rawVarCurrent) : 0;
+  const currentPrice =
+    parsedVarCurrent > 0
+      ? parsedVarCurrent
+      : parseFloat(product.sale_price || product.price || "0");
+
+  const isOnSale = matchingVariation
+    ? Boolean(matchingVariation.on_sale || regularPrice > currentPrice)
+    : Boolean(product.on_sale && regularPrice > currentPrice);
+
+  const discountPercent =
+    isOnSale && regularPrice > currentPrice
+      ? Math.round(((regularPrice - currentPrice) / regularPrice) * 100)
+      : 0;
+
+  // Accurate stock status for current selection
+  const isCurrentOutOfStock = isVariableProduct
+    ? !matchingVariation ||
+      matchingVariation.stock_status === "outofstock" ||
+      matchingVariation.purchasable === false
+    : product.stock_status === "outofstock" || product.purchasable === false;
+
+  // Helper to check if a specific attribute option exists and has available stock
+  const getOptionStatus = (
+    attrName: string,
+    optionVal: string
+  ): { exists: boolean; inStock: boolean } => {
+    if (!product.variations_data || product.variations_data.length === 0) {
+      return { exists: true, inStock: true };
+    }
+
+    const targetAttr = variationAttributes.find((a) => a.name === attrName);
+
+    const matchingVars = product.variations_data.filter((v) => {
+      if (!v.attributes || v.attributes.length === 0) return true;
+
+      // 1. Check target attribute
+      const thisVAttr = v.attributes.find(
+        (a) =>
+          (targetAttr && a.id && targetAttr.id && a.id === targetAttr.id) ||
+          matchAttributeKey(a.name, attrName, targetAttr?.slug)
+      );
+      if (thisVAttr && thisVAttr.option && thisVAttr.option.trim() !== "") {
+        const optionsToCompare = [thisVAttr.option];
+        if (thisVAttr.slug && thisVAttr.slug !== thisVAttr.option) {
+          optionsToCompare.push(thisVAttr.slug);
+        }
+        if (!findMatchingOption(optionsToCompare, optionVal)) {
+          return false;
+        }
+      }
+
+      // 2. Check other selected attributes
+      for (const otherAttr of variationAttributes) {
+        if (otherAttr.name === attrName) continue;
+        const otherSelectedVal = selectedAttributes[otherAttr.name];
+        if (!otherSelectedVal) continue;
+
+        const otherVAttr = v.attributes.find(
+          (a) =>
+            (otherAttr.id && a.id && otherAttr.id === a.id) ||
+            matchAttributeKey(a.name, otherAttr.name, otherAttr.slug)
+        );
+        if (otherVAttr && otherVAttr.option && otherVAttr.option.trim() !== "") {
+          const otherOptions = [otherVAttr.option];
+          if (otherVAttr.slug && otherVAttr.slug !== otherVAttr.option) {
+            otherOptions.push(otherVAttr.slug);
+          }
+          if (!findMatchingOption(otherOptions, otherSelectedVal)) {
+            return false;
+          }
+        }
+      }
+
+      return true;
+    });
+
+    if (matchingVars.length === 0) {
+      return { exists: false, inStock: false };
+    }
+
+    const inStock = matchingVars.some(
+      (v) => v.stock_status !== "outofstock" && v.purchasable !== false
+    );
+
+    return { exists: true, inStock };
+  };
+
   const [quantity, setQuantity] = useState<number>(1);
   const [isWishlisted, setIsWishlisted] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
   const [addedToCartToast, setAddedToCartToast] = useState<string | null>(null);
-
-  const regularPrice = parseFloat(product.regular_price || product.price);
-  const currentPrice = parseFloat(product.sale_price || product.price);
-  const discountPercent =
-    product.on_sale && regularPrice > currentPrice
-      ? Math.round(((regularPrice - currentPrice) / regularPrice) * 100)
-      : 30;
 
   const handleShare = () => {
     if (typeof window !== "undefined") {
@@ -126,11 +417,16 @@ export default function ProductDetails({
   };
 
   const handleAddToCart = () => {
-    setAddedToCartToast("Added to Cart!");
+    if (isCurrentOutOfStock) return;
+    const details = Object.entries(selectedAttributes)
+      .map(([k, v]) => `${k}: ${v}`)
+      .join(", ");
+    setAddedToCartToast(details ? `Added to Cart (${details})!` : "Added to Cart!");
     setTimeout(() => setAddedToCartToast(null), 2500);
   };
 
   const handleBuyNow = () => {
+    if (isCurrentOutOfStock) return;
     setAddedToCartToast("Redirecting to checkout...");
     setTimeout(() => setAddedToCartToast(null), 2500);
   };
@@ -348,12 +644,6 @@ export default function ProductDetails({
                 )}
               </div>
 
-              {/* Inclusive of taxes note */}
-              {/* <div className="flex items-center gap-1.5 text-xs text-[#8C7B82] mb-3">
-                <Info size={14} className="text-[#8C7B82]" />
-                <span>Inclusive of all taxes</span>
-              </div> */}
-
               {/* Short Description */}
               {product.short_description && (
                 <div
@@ -362,34 +652,82 @@ export default function ProductDetails({
                 />
               )}
 
-              {/* Size Selector */}
-              <div className="mb-5">
-                <span className="block text-xs font-semibold text-[#222] mb-2.5">
-                  Select Size
-                </span>
+              {/* Dynamic Attribute Selectors */}
+              {isVariableProduct && (
+                <div className="space-y-4 mb-5">
+                  {variationAttributes.map((attr) => {
+                    const currentVal = selectedAttributes[attr.name];
 
-                <div className="flex flex-wrap gap-2">
-                  {sizeOptions.map((sz, i) => {
-                    const isSelected = selectedSize === sz;
-                    const isOutOfStock = i === 0; // matching first crossed option in screenshot
                     return (
-                      <button
-                        key={sz}
-                        type="button"
-                        disabled={isOutOfStock}
-                        onClick={() => setSelectedSize(sz)}
-                        className={`min-w-[42px] h-9 px-2.5 rounded-md text-xs font-semibold flex items-center justify-center border transition-all cursor-pointer relative ${isSelected
-                          ? "bg-[#ff0080] text-white border-[#ff0080] shadow-xs"
-                          : isOutOfStock
-                            ? "border-[#E8DFE3] text-[#B8ABB2] bg-[#FAF8F9] line-through cursor-not-allowed opacity-60"
-                            : "border-[#E0D3D9] text-[#333] bg-white hover:border-[#ff0080]"
-                          }`}
-                      >
-                        {sz}
-                      </button>
+                      <div key={attr.id || attr.name}>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-semibold text-[#222]">
+                            Select {attr.name}:{" "}
+                            <span className="font-bold text-[#ff0080]">
+                              {currentVal || "Choose an option"}
+                            </span>
+                          </span>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2">
+                          {attr.options.map((option) => {
+                            const isSelected = Boolean(
+                              currentVal &&
+                                (currentVal.toLowerCase().trim() === option.toLowerCase().trim() ||
+                                  normalizeOptionString(currentVal) === normalizeOptionString(option))
+                            );
+                            const { exists, inStock } = getOptionStatus(attr.name, option);
+
+                            return (
+                              <button
+                                key={option}
+                                type="button"
+                                disabled={!exists}
+                                onClick={() => {
+                                  setSelectedAttributes((prev) => ({
+                                    ...prev,
+                                    [attr.name]: option,
+                                  }));
+                                }}
+                                className={`min-w-[44px] h-9 px-3 rounded-md text-xs font-semibold flex items-center justify-center border transition-all cursor-pointer relative ${
+                                  isSelected
+                                    ? inStock
+                                      ? "bg-[#ff0080] text-white border-[#ff0080] shadow-xs ring-2 ring-[#ff0080]/30"
+                                      : "bg-[#E53935] text-white border-[#E53935] shadow-xs ring-2 ring-[#E53935]/30"
+                                    : !exists
+                                      ? "border-[#E8DFE3] text-[#B8ABB2] bg-[#FAF8F9] line-through cursor-not-allowed opacity-40 pointer-events-none"
+                                      : !inStock
+                                        ? "border-[#F2D6D6] text-[#C53030] bg-[#FFF5F5] line-through hover:border-[#E53935]"
+                                        : "border-[#E0D3D9] text-[#333] bg-white hover:border-[#ff0080] hover:text-[#ff0080]"
+                                }`}
+                                title={
+                                  !exists
+                                    ? `${option} (Not available)`
+                                    : !inStock
+                                      ? `${option} (Out of stock)`
+                                      : option
+                                }
+                              >
+                                {option}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
                     );
                   })}
                 </div>
+              )}
+
+              {/* Stock status text */}
+              <div className="mb-5 flex items-center">
+                <span
+                  className={`text-xs font-medium flex items-center gap-1.5 ${isCurrentOutOfStock ? "text-[#E53935]" : "text-[#718096]"
+                    }`}
+                >
+                  <span className="text-base leading-none select-none">•</span>
+                  <span>{isCurrentOutOfStock ? "Out of stock" : "Stock available"}</span>
+                </span>
               </div>
 
               {/* Quantity Selector */}
@@ -431,18 +769,26 @@ export default function ProductDetails({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <button
                     type="button"
+                    disabled={isCurrentOutOfStock}
                     onClick={handleBuyNow}
-                    className="w-full py-3 !bg-[#ff0080] hover:!bg-[#d4006a] !text-white rounded-md text-xs font-bold tracking-wide shadow-xs transition-colors cursor-pointer"
+                    className={`w-full py-3 rounded-md text-xs font-bold tracking-wide shadow-xs transition-colors ${isCurrentOutOfStock
+                        ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                        : "!bg-[#ff0080] hover:!bg-[#d4006a] !text-white cursor-pointer"
+                      }`}
                   >
-                    Buy Now
+                    {isCurrentOutOfStock ? "Out of Stock" : "Buy Now"}
                   </button>
 
                   <button
                     type="button"
+                    disabled={isCurrentOutOfStock}
                     onClick={handleAddToCart}
-                    className="w-full py-3 bg-white hover:bg-[#FFF0F5] text-[#ff0080] border-2 border-[#ff0080] rounded-md text-xs font-bold tracking-wide transition-colors cursor-pointer"
+                    className={`w-full py-3 rounded-md text-xs font-bold tracking-wide transition-colors ${isCurrentOutOfStock
+                        ? "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
+                        : "bg-white hover:bg-[#FFF0F5] text-[#ff0080] border-2 border-[#ff0080] cursor-pointer"
+                      }`}
                   >
-                    Add to Cart
+                    {isCurrentOutOfStock ? "Unavailable" : "Add to Cart"}
                   </button>
                 </div>
 
@@ -508,7 +854,7 @@ export default function ProductDetails({
             </div>
           </div>
 
-          {sizeOptions.length > 0 && (
+          {isVariableProduct && (
             <div className="bg-white p-4 rounded-xl border border-[#F2E6EC] flex items-center gap-3 shadow-2xs">
               <div className="w-10 h-10 rounded-lg bg-[#FFF0F5] text-[#ff0080] flex items-center justify-center shrink-0">
                 <Layers size={18} />
@@ -516,7 +862,7 @@ export default function ProductDetails({
               <div>
                 <p className="text-[11px] text-[#8C7B82]">Variants</p>
                 <p className="text-xs font-bold text-[#222]">
-                  {sizeOptions.length} options
+                  {product.variations_data?.length || "Available"}
                 </p>
               </div>
             </div>

@@ -4,10 +4,12 @@ import React from "react";
 
 interface ProductDetailsSkeletonProps {
   hasMultipleImages?: boolean;
+  hasVariations?: boolean;
 }
 
 export default function ProductDetailsSkeleton({
   hasMultipleImages = false,
+  hasVariations = true,
 }: ProductDetailsSkeletonProps) {
   const showThumbnails = hasMultipleImages;
 
@@ -75,15 +77,17 @@ export default function ProductDetailsSkeleton({
               <div className="h-3.5 w-3/4 bg-gray-100 rounded" />
             </div>
 
-            {/* Size Selector Skeleton */}
-            <div className="space-y-2.5">
-              <div className="h-3.5 w-20 bg-gray-300 rounded" />
-              <div className="flex flex-wrap gap-2">
-                {[35, 36, 37, 38, 39, 40].map((sz) => (
-                  <div key={sz} className="min-w-[42px] h-9 bg-gray-100 rounded-md border border-gray-200" />
-                ))}
+            {/* Attribute Selector Skeleton (Only rendered if product has variations) */}
+            {hasVariations && (
+              <div className="space-y-2.5">
+                <div className="h-3.5 w-24 bg-gray-300 rounded" />
+                <div className="flex flex-wrap gap-2">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="min-w-[44px] h-9 bg-gray-100 rounded-md border border-gray-200" />
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Quantity & Action Buttons Skeleton */}
             <div className="pt-2 space-y-3">
