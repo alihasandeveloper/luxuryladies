@@ -38,11 +38,11 @@ export default function AboutPage() {
             Welcome to <span className="text-[#ff0080]">luxuryladies</span>
           </h1>
 
-          <p className="text-base md:text-lg text-[lab(35.6337%_-1.58697_-10.8425)] leading-relaxed max-w-2xl mx-auto mb-4">
+          <p className="text-base md:text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto mb-4">
             Your premier online shopping destination in Bangladesh. We are dedicated to making your shopping experience effortless, enjoyable, and rewarding.
           </p>
 
-          <p className="text-sm md:text-base text-[lab(35.6337%_-1.58697_-10.8425)] leading-relaxed max-w-2xl mx-auto">
+          <p className="text-sm md:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto">
             At luxuryladies, we believe shopping should be simple and accessible to everyone. That&apos;s why we offer a wide variety of high-quality products, ranging from fashion and beauty to luxury heels, bags, home essentials, and beyond—all at competitive prices.
           </p>
 

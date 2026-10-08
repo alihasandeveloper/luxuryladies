@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
-import { Sparkles, SlidersHorizontal, X, ChevronDown, Check, Search } from "lucide-react";
+import { Sparkles, SlidersHorizontal, X, ChevronDown, Check } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import { WooCommerceProduct } from "@/types/woocommerce";
 
@@ -107,16 +107,12 @@ export default function ShopArchive({
       document.body.classList.remove("scroll-locked");
       document.body.style.top = "";
       if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || "0") * -1);
+        window.scrollTo({ top: parseInt(scrollY || "0") * -1, behavior: "instant" });
       }
     }
     return () => {
-      const scrollY = document.body.style.top;
       document.body.classList.remove("scroll-locked");
       document.body.style.top = "";
-      if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || "0") * -1);
-      }
     };
   }, [mobileFilterOpen]);
 
@@ -298,34 +294,6 @@ export default function ShopArchive({
         >
           Clear All
         </button>
-      </div>
-
-      {/* ── Search Input inside Filter ── */}
-      <div>
-        <label htmlFor="shop-search-input" className="block text-sm font-semibold text-[#222] mb-2">
-          Search Products
-        </label>
-        <div className="relative flex items-center">
-          <Search size={15} className="absolute left-3 text-gray-400 pointer-events-none" />
-          <input
-            id="shop-search-input"
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search title, SKU..."
-            className="w-full pl-9 pr-8 py-2 text-xs bg-[#FAF7F8] border border-[#EDE0E5] rounded-md text-[#222] placeholder:text-[#999] focus:outline-none focus:border-[#ff0080] focus:bg-white transition-colors"
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => setSearchQuery("")}
-              className="absolute right-2.5 p-0.5 text-gray-400 hover:text-gray-700 cursor-pointer"
-              aria-label="Clear search"
-            >
-              <X size={13} />
-            </button>
-          )}
-        </div>
       </div>
 
       {/* ── 1. Price Multi-Range Slider ── */}

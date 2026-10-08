@@ -143,28 +143,32 @@ export default function ProductDetails({
     <div className="w-full py-6 md:py-10">
       <div className="container max-w-[1328px] mx-auto">
         {/* ── Breadcrumb Navigation ── */}
-        <nav className="flex items-center gap-2 text-xs text-[#8C7B82] mb-6 flex-wrap">
-          <Link href="/" className="hover:text-[#ff0080] transition-colors">
+        <nav className="flex items-center gap-1.5 md:gap-2 text-xs text-[#8C7B82] mb-6 w-full lg:max-w-[calc(50%-1.5rem)] min-w-0">
+          <Link href="/" className="hover:text-[#ff0080] transition-colors shrink-0">
             Home
           </Link>
-          <span>/</span>
-          <Link href="/shop" className="hover:text-[#ff0080] transition-colors">
+          <span className="shrink-0">/</span>
+          <Link href="/shop" className="hover:text-[#ff0080] transition-colors shrink-0">
             Shop
           </Link>
           {product.categories?.[0] && (
             <>
-              <span>/</span>
+              <span className="shrink-0">/</span>
               <Link
                 href={`/category/${product.categories[0].slug}`}
-                className="hover:text-[#ff0080] transition-colors"
+                className="hover:text-[#ff0080] transition-colors shrink-0 max-w-[140px] truncate"
+                title={product.categories[0].name}
               >
                 {product.categories[0].name}
               </Link>
             </>
           )}
-          <span>/</span>
+          <span className="shrink-0">/</span>
           {product.name && (
-            <span className="text-[#251A1F] font-medium truncate max-w-[200px]">
+            <span
+              className="text-[#251A1F] font-medium truncate min-w-0 flex-1"
+              title={product.name}
+            >
               {product.name}
             </span>
           )}
@@ -353,7 +357,7 @@ export default function ProductDetails({
               {/* Short Description */}
               {product.short_description && (
                 <div
-                  className="text-sm md:text-[15px] text-[lab(35.6337%_-1.58697_-10.8425)] leading-relaxed mb-5 pb-3 border-b border-[#F7E7EC]"
+                  className="text-sm md:text-[15px] text-slate-600 leading-relaxed mb-5 pb-3 border-b border-[#F7E7EC]"
                   dangerouslySetInnerHTML={{ __html: product.short_description }}
                 />
               )}
@@ -542,18 +546,18 @@ export default function ProductDetails({
                 Product Description
               </h2>
             </div>
-            <div className="min-h-[140px] text-sm md:text-[15px] text-[lab(35.6337%_-1.58697_-10.8425)] leading-relaxed">
+            <div className="min-h-[140px] text-sm md:text-[15px] text-slate-600 leading-relaxed">
               <p className="font-semibold text-base text-[#222] mb-3">
                 {product.name} {product.sku ? `(${product.sku})` : ""}
               </p>
               {product.description ? (
                 <div
-                  className="mb-2 prose prose-sm max-w-none text-sm md:text-[15px] text-[lab(35.6337%_-1.58697_-10.8425)] leading-relaxed [&>p]:mb-3 [&>ul]:space-y-1.5 [&>ul]:pl-5 [&>ul]:list-disc"
+                  className="mb-2 prose prose-sm max-w-none text-sm md:text-[15px] text-slate-600 leading-relaxed [&>p]:mb-3 [&>ul]:space-y-1.5 [&>ul]:pl-5 [&>ul]:list-disc"
                   dangerouslySetInnerHTML={{ __html: product.description }}
                 />
               ) : product.short_description ? (
                 <div
-                  className="mb-2 prose prose-sm max-w-none text-sm md:text-[15px] text-[lab(35.6337%_-1.58697_-10.8425)] leading-relaxed"
+                  className="mb-2 prose prose-sm max-w-none text-sm md:text-[15px] text-slate-600 leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: product.short_description }}
                 />
               ) : null}

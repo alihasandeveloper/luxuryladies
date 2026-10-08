@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { Metadata } from "next";
 import ShopArchive from "@/components/ShopArchive";
+import ShopSkeleton from "@/components/ShopSkeleton";
 import { allProducts } from "@/data/products";
 
 export const metadata: Metadata = {
@@ -27,13 +28,7 @@ async function ShopContent({ searchParams }: ShopPageProps) {
 
 export default function ShopPage({ searchParams }: ShopPageProps) {
   return (
-    <Suspense
-      fallback={
-        <div className="w-full bg-[#FAFAFA] min-h-[40vh] flex items-center justify-center py-20">
-          <div className="w-8 h-8 border-3 border-[#ff0080] border-t-transparent rounded-full animate-spin" />
-        </div>
-      }
-    >
+    <Suspense fallback={<ShopSkeleton />}>
       <ShopContent searchParams={searchParams} />
     </Suspense>
   );

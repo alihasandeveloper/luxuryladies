@@ -40,8 +40,8 @@ button {
   --color-accent: #FFB3C7;
   --color-bg: #FFF5F8;
   --color-text: #251A1F;
-  --color-text-muted: lab(35.6337% -1.58697 -10.8425);
-  --color-description: lab(35.6337% -1.58697 -10.8425);
+  --color-text-muted: #475569;
+  --color-description: #475569;
   --color-border: #EDE0E5;
   --color-surface: #ffffff;
 
@@ -79,6 +79,7 @@ html {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -855,7 +856,8 @@ a {
   box-shadow: none;
   cursor: pointer;
   pointer-events: auto;
-  margin-top: calc(12px - 8px); /* Center in 24px slider height */
+  margin-top: calc(12px - 8px);
+  /* Center in 24px slider height */
   transition: transform 0.15s ease;
 }
 
