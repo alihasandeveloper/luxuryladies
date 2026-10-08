@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, ChevronRight as ChevronNext } from "lucide-react";
+import { ChevronRight as ChevronNext } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import { hotDealsProducts, goldenPicksProducts } from "@/data/products";
 
@@ -74,7 +74,7 @@ export default function Home() {
       {/* ── Full Width Hero Section: Responsive on mobile, 708px on desktop ── */}
       <section className="w-full relative h-[240px] sm:h-[380px] md:h-[520px] lg:h-[708px] overflow-hidden bg-[#FFF5F8]">
         <Image
-          src="/anniversary-banner.png"
+          src="/anniversary-banner.jpeg"
           alt="Anniversary Luxury Collection - NextCart"
           fill
           priority
@@ -130,27 +130,10 @@ export default function Home() {
 
         {/* ── Hot Deals Section ── */}
         <section className="mt-14 md:mt-20">
-          <div className="flex items-center justify-between mb-4 md:mb-5">
+          <div className="mb-4 md:mb-5">
             <h2 className="text-xl md:text-2xl font-medium tracking-tight text-[#251A1F]">
               Hot deals
             </h2>
-            {/* Slider Prev / Next Controls */}
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                className="w-7 h-7 rounded border border-[#EDE0E5] hover:border-[var(--color-primary)] text-[#8C7B82] hover:text-[var(--color-primary)] flex items-center justify-center transition-colors cursor-pointer"
-                aria-label="Previous items"
-              >
-                <ChevronLeft size={16} strokeWidth={1.75} />
-              </button>
-              <button
-                type="button"
-                className="w-7 h-7 rounded border border-[#EDE0E5] hover:border-[var(--color-primary)] text-[#8C7B82] hover:text-[var(--color-primary)] flex items-center justify-center transition-colors cursor-pointer"
-                aria-label="Next items"
-              >
-                <ChevronRight size={16} strokeWidth={1.75} />
-              </button>
-            </div>
           </div>
 
           {/* Hot Deals Product Grid */}

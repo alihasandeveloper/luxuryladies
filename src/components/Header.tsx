@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 import { Search, Heart, ArrowLeftRight, ShoppingBag, User, X, LogIn, ChevronRight, Menu, Sparkles } from "lucide-react";
 import { allProducts } from "@/data/products";
 
@@ -26,11 +27,19 @@ const categories = [
 
 export default function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const [cartCount] = useState(3);
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+
+  const isLinkActive = (href: string) => {
+    if (href === "/") {
+      return pathname === "/";
+    }
+    return pathname === href || pathname.startsWith(href + "/");
+  };
 
   // Lock body scroll when drawer or mobile search is open (iOS-safe)
   useEffect(() => {
@@ -120,7 +129,7 @@ export default function Header() {
 
             {/* Logo (Centered on mobile, normal position on desktop) */}
             <div className="flex-1 flex justify-center md:flex-initial md:justify-start">
-              <a href="/" className="header-logo inline-flex items-center justify-center" aria-label="luxuryladies Home">
+              <Link href="/" className="header-logo inline-flex items-center justify-center" aria-label="luxuryladies Home">
                 <Image
                   src="/luxuryladies-logo.png"
                   alt="luxuryladies"
@@ -129,17 +138,25 @@ export default function Header() {
                   priority
                   className="w-auto h-[36px] xs:h-[40px] md:h-[54px] max-w-[140px] sm:max-w-[170px] md:max-w-[200px] object-contain"
                 />
-              </a>
+              </Link>
             </div>
 
             {/* Main Nav (desktop only) */}
             <nav className="header-nav desktop-only" aria-label="Main navigation">
               <ul>
-                {navLinks.map((link) => (
-                  <li key={link.href}>
-                    <a href={link.href}>{link.label}</a>
-                  </li>
-                ))}
+                {navLinks.map((link) => {
+                  const isActive = isLinkActive(link.href);
+                  return (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        className={isActive ? "active" : ""}
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </nav>
 
@@ -199,13 +216,20 @@ export default function Header() {
         <nav className="header-categories desktop-only" aria-label="Category navigation">
           <div className="container">
             <ul>
-              {categories.map((cat) => (
-                <li key={cat.label}>
-                  <a href={`/category/${cat.label.toLowerCase().replace(/\s+/g, "-")}`}>
-                    {cat.label}
-                  </a>
-                </li>
-              ))}
+              {categories.map((cat) => {
+                const catHref = `/category/${cat.label.toLowerCase().replace(/\s+/g, "-")}`;
+                const isActive = pathname === catHref;
+                return (
+                  <li key={cat.label}>
+                    <Link
+                      href={catHref}
+                      className={isActive ? "active" : ""}
+                    >
+                      {cat.label}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </nav>
@@ -328,7 +352,7 @@ export default function Header() {
       <aside className={`drawer${drawerOpen ? " open" : ""}`} aria-label="Mobile menu">
         {/* Clean Minimal Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#F5EAEF] bg-white">
-          <a href="/" onClick={() => setDrawerOpen(false)} className="inline-flex items-center">
+          <Link href="/" onClick={() => setDrawerOpen(false)} className="inline-flex items-center">
             <Image
               src="/luxuryladies-logo.png"
               alt="luxuryladies"
@@ -336,7 +360,7 @@ export default function Header() {
               height={42}
               className="h-8 w-auto object-contain"
             />
-          </a>
+          </Link>
           <button
             className="w-8 h-8 rounded-full flex items-center justify-center text-[#444] hover:text-[#ff0080] hover:bg-[#FAF2F5] transition-colors"
             onClick={() => setDrawerOpen(false)}
@@ -349,17 +373,24 @@ export default function Header() {
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-5 bg-white">
           {/* Main Navigation Links */}
           <nav className="flex flex-col space-y-1">
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={() => setDrawerOpen(false)}
-                className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-[#1A1A1A] hover:text-[#ff0080] hover:bg-[#FFF5F8] transition-colors"
-              >
-                <span>{link.label}</span>
-                <ChevronRight size={15} className="text-[#B39DA7]" />
-              </a>
-            ))}
+            {navLinks.map((link) => {
+              const active = isLinkActive(link.href);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setDrawerOpen(false)}
+                  className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                    active
+                      ? "text-[#ff0080] bg-[#FFF5F8]"
+                      : "text-[#1A1A1A] hover:text-[#ff0080] hover:bg-[#FFF5F8]"
+                  }`}
+                >
+                  <span>{link.label}</span>
+                  <ChevronRight size={15} className={active ? "text-[#ff0080]" : "text-[#B39DA7]"} />
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Clean Divider */}
@@ -371,17 +402,25 @@ export default function Header() {
               Categories
             </p>
             <nav className="flex flex-col space-y-0.5">
-              {categories.map((cat) => (
-                <a
-                  key={cat.label}
-                  href={`/category/${cat.label.toLowerCase().replace(/\s+/g, "-")}`}
-                  onClick={() => setDrawerOpen(false)}
-                  className="flex items-center justify-between px-3 py-2 rounded-lg text-[13px] text-[#4A3E44] hover:text-[#ff0080] hover:bg-[#FFF5F8] transition-colors"
-                >
-                  <span className="font-normal">{cat.label}</span>
-                  <ChevronRight size={13} className="text-[#D4C4CB]" />
-                </a>
-              ))}
+              {categories.map((cat) => {
+                const catHref = `/category/${cat.label.toLowerCase().replace(/\s+/g, "-")}`;
+                const active = pathname === catHref;
+                return (
+                  <Link
+                    key={cat.label}
+                    href={catHref}
+                    onClick={() => setDrawerOpen(false)}
+                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-[13px] transition-colors ${
+                      active
+                        ? "text-[#ff0080] bg-[#FFF5F8]"
+                        : "text-[#4A3E44] hover:text-[#ff0080] hover:bg-[#FFF5F8]"
+                    }`}
+                  >
+                    <span className="font-normal">{cat.label}</span>
+                    <ChevronRight size={13} className={active ? "text-[#ff0080]" : "text-[#D4C4CB]"} />
+                  </Link>
+                );
+              })}
             </nav>
           </div>
 
@@ -394,30 +433,42 @@ export default function Header() {
               Account & Saved
             </p>
             <div className="grid grid-cols-3 gap-2 px-1">
-              <a
+              <Link
                 href="/wishlist"
                 onClick={() => setDrawerOpen(false)}
-                className="flex flex-col items-center justify-center py-2.5 px-2 rounded-lg border border-[#F2E6EC] hover:border-[#ff0080] hover:text-[#ff0080] text-[#444] text-xs font-medium gap-1.5 transition-colors"
+                className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-lg border text-xs font-medium gap-1.5 transition-colors ${
+                  pathname === "/wishlist"
+                    ? "border-[#ff0080] text-[#ff0080] bg-[#FFF5F8]"
+                    : "border-[#F2E6EC] hover:border-[#ff0080] hover:text-[#ff0080] text-[#444]"
+                }`}
               >
                 <Heart size={16} strokeWidth={1.75} />
                 <span>Wishlist</span>
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/shop"
                 onClick={() => setDrawerOpen(false)}
-                className="flex flex-col items-center justify-center py-2.5 px-2 rounded-lg border border-[#F2E6EC] hover:border-[#ff0080] hover:text-[#ff0080] text-[#444] text-xs font-medium gap-1.5 transition-colors"
+                className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-lg border text-xs font-medium gap-1.5 transition-colors ${
+                  pathname === "/shop"
+                    ? "border-[#ff0080] text-[#ff0080] bg-[#FFF5F8]"
+                    : "border-[#F2E6EC] hover:border-[#ff0080] hover:text-[#ff0080] text-[#444]"
+                }`}
               >
                 <ArrowLeftRight size={16} strokeWidth={1.75} />
                 <span>Compare</span>
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/account"
                 onClick={() => setDrawerOpen(false)}
-                className="flex flex-col items-center justify-center py-2.5 px-2 rounded-lg border border-[#F2E6EC] hover:border-[#ff0080] hover:text-[#ff0080] text-[#444] text-xs font-medium gap-1.5 transition-colors"
+                className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-lg border text-xs font-medium gap-1.5 transition-colors ${
+                  pathname === "/account"
+                    ? "border-[#ff0080] text-[#ff0080] bg-[#FFF5F8]"
+                    : "border-[#F2E6EC] hover:border-[#ff0080] hover:text-[#ff0080] text-[#444]"
+                }`}
               >
                 <User size={16} strokeWidth={1.75} />
                 <span>Account</span>
-              </a>
+              </Link>
             </div>
           </div>
         </div>

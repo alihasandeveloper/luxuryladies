@@ -25,7 +25,7 @@ export default async function CategoryPage({ params }: PageProps) {
   const { slug } = await params;
 
   return (
-    <div className="w-full bg-[#FAFAFA] min-h-screen">
+    <div className="w-full bg-[#FAFAFA]">
       <ShopArchive initialProducts={allProducts} categorySlug={slug} />
     </div>
   );

@@ -95,6 +95,9 @@ body {
   /* Prevent horizontal scroll without breaking iOS touch/fixed */
   width: 100%;
   max-width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Body scroll lock used by drawers/modals — safe iOS approach */
@@ -108,6 +111,7 @@ body.scroll-locked {
 
 .site-main {
   width: 100%;
+  flex: 1 0 auto;
   /* overflow-x: clip is safe (unlike hidden, doesn't affect touch) */
   overflow-x: clip;
 }
@@ -198,7 +202,8 @@ a {
   letter-spacing: 0.01em;
 }
 
-.header-nav a:hover {
+.header-nav a:hover,
+.header-nav a.active {
   color: var(--color-primary);
   background-color: var(--color-bg);
 }
@@ -335,7 +340,8 @@ a {
   transition: color var(--transition), border-color var(--transition);
 }
 
-.header-categories a:hover {
+.header-categories a:hover,
+.header-categories a.active {
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
 }

@@ -135,7 +135,7 @@ export default function ProductDetails({
   };
 
   return (
-    <div className="w-full min-h-screen py-6 md:py-10">
+    <div className="w-full py-6 md:py-10">
       <div className="container max-w-[1328px] mx-auto">
         {/* ── Breadcrumb Navigation ── */}
         <nav className="flex items-center gap-2 text-xs text-[#8C7B82] mb-6 flex-wrap">

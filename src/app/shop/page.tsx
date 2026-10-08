@@ -19,7 +19,7 @@ async function ShopContent({ searchParams }: ShopPageProps) {
   const query = resolvedParams?.q || "";
 
   return (
-    <div className="w-full bg-[#FAFAFA] min-h-screen">
+    <div className="w-full bg-[#FAFAFA]">
       <ShopArchive initialProducts={allProducts} initialSearchQuery={query} />
     </div>
   );
@@ -29,7 +29,7 @@ export default function ShopPage({ searchParams }: ShopPageProps) {
   return (
     <Suspense
       fallback={
-        <div className="w-full bg-[#FAFAFA] min-h-screen flex items-center justify-center py-20">
+        <div className="w-full bg-[#FAFAFA] min-h-[40vh] flex items-center justify-center py-20">
           <div className="w-8 h-8 border-3 border-[#ff0080] border-t-transparent rounded-full animate-spin" />
         </div>
       }
