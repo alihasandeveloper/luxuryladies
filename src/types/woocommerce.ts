@@ -9,6 +9,13 @@ export interface WooCommerceCategory {
   id: number;
   name: string;
   slug: string;
+  image?: {
+    id?: number;
+    src: string;
+    name?: string;
+    alt?: string;
+  } | null;
+  count?: number;
 }
 
 export interface WooCommerceProduct {

@@ -4,7 +4,7 @@ import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { Sparkles, SlidersHorizontal, X, ChevronDown, Check } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
-import { WooCommerceProduct } from "@/types/woocommerce";
+import { WooCommerceProduct, WooCommerceCategory } from "@/types/woocommerce";
 
 export interface FilterState {
   minPrice: number;
@@ -24,25 +24,26 @@ interface ShopArchiveProps {
   initialProducts: WooCommerceProduct[];
   categorySlug?: string;
   initialSearchQuery?: string;
+  categories?: WooCommerceCategory[];
 }
-
-const CATEGORY_OPTIONS = [
-  { slug: "golden-picks", name: "Golden Picks" },
-  { slug: "luxury-edit-heels", name: "Luxury Edit Heels" },
-  { slug: "luxury-bags", name: "Luxury Bags" },
-  { slug: "party-clutch", name: "Party Clutch" },
-  { slug: "z-style-heels", name: "Z-Style Heels" },
-  { slug: "2-pcs-pj-sets", name: "2 Pcs PJ Sets" },
-  { slug: "flats-sandals", name: "Flats & Sandals" },
-  { slug: "3-pcs-pj-sets", name: "3 Pcs PJ Sets" },
-  { slug: "clearance-sale", name: "Clearance Sale" },
-];
 
 export default function ShopArchive({
   initialProducts,
   categorySlug,
   initialSearchQuery = "",
+  categories,
 }: ShopArchiveProps) {
+  const activeCategories = useMemo(() => {
+    if (categories && categories.length > 0) return categories;
+    const map = new Map<string, WooCommerceCategory>();
+    initialProducts.forEach((p) => {
+      p.categories?.forEach((c) => {
+        if (!map.has(c.slug)) map.set(c.slug, c);
+      });
+    });
+    return Array.from(map.values());
+  }, [categories, initialProducts]);
+
   // Search query state
   const [searchQuery, setSearchQuery] = useState<string>(initialSearchQuery);
 
@@ -260,13 +261,13 @@ export default function ShopArchive({
 
   // Categories sorted by product count descending
   const categoriesWithCount = useMemo(() => {
-    return CATEGORY_OPTIONS.map((cat) => {
+    return activeCategories.map((cat) => {
       const count = initialProducts.filter((p) =>
         p.categories?.some((c) => c.slug === cat.slug)
       ).length;
       return { ...cat, count };
     }).sort((a, b) => b.count - a.count);
-  }, [initialProducts]);
+  }, [initialProducts, activeCategories]);
 
   const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Math.min(Number(e.target.value), maxPrice - priceGap);
@@ -517,7 +518,7 @@ export default function ShopArchive({
                 <span className="text-[#ff0080]">&ldquo;{searchQuery.trim()}&rdquo;</span>
               </span>
             ) : categorySlug ? (
-              CATEGORY_OPTIONS.find((c) => c.slug === categorySlug)?.name || "Shop Archive"
+              activeCategories.find((c) => c.slug === categorySlug)?.name || "Shop Archive"
             ) : (
               "All Products"
             )}

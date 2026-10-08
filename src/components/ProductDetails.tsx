@@ -37,7 +37,7 @@ export default function ProductDetails({
   const galleryImages =
     product.images && product.images.length > 0
       ? product.images
-      : [{ id: 1, src: "/file.svg", name: product.name, alt: product.name }];
+      : [{ id: 1, src: "/woocommerce-placeholder.webp", name: product.name, alt: product.name }];
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [showThumbNav, setShowThumbNav] = useState(false);
@@ -232,8 +232,8 @@ export default function ProductDetails({
                     }}
                     aria-label="Scroll thumbnails left"
                     className={`absolute -left-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white shadow-md border border-[#EDE0E5] text-[#444] hover:text-[#ff0080] flex items-center justify-center z-10 transition-all cursor-pointer ${showThumbNav
-                        ? "opacity-100 scale-100 pointer-events-auto"
-                        : "opacity-0 group-hover/thumbs:opacity-100 pointer-events-none group-hover/thumbs:pointer-events-auto"
+                      ? "opacity-100 scale-100 pointer-events-auto"
+                      : "opacity-0 group-hover/thumbs:opacity-100 pointer-events-none group-hover/thumbs:pointer-events-auto"
                       }`}
                   >
                     <ChevronLeft size={16} />
@@ -252,8 +252,8 @@ export default function ProductDetails({
                           handleSelectImage(idx);
                         }}
                         className={`relative w-18 h-18 md:w-20 md:h-20 overflow-hidden border-2 transition-all cursor-pointer shrink-0 bg-[#fbfbfb] ${activeImageIndex === idx
-                            ? "border-[#ff0080] shadow-xs"
-                            : "border-[#EDE0E5] hover:border-[#ff0080]/50 opacity-75 hover:opacity-100"
+                          ? "border-[#ff0080] shadow-xs"
+                          : "border-[#EDE0E5] hover:border-[#ff0080]/50 opacity-75 hover:opacity-100"
                           }`}
                       >
                         <Image
@@ -276,8 +276,8 @@ export default function ProductDetails({
                     }}
                     aria-label="Scroll thumbnails right"
                     className={`absolute -right-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white shadow-md border border-[#EDE0E5] text-[#444] hover:text-[#ff0080] flex items-center justify-center z-10 transition-all cursor-pointer ${showThumbNav
-                        ? "opacity-100 scale-100 pointer-events-auto"
-                        : "opacity-0 group-hover/thumbs:opacity-100 pointer-events-none group-hover/thumbs:pointer-events-auto"
+                      ? "opacity-100 scale-100 pointer-events-auto"
+                      : "opacity-0 group-hover/thumbs:opacity-100 pointer-events-none group-hover/thumbs:pointer-events-auto"
                       }`}
                   >
                     <ChevronRight size={16} />
@@ -349,10 +349,10 @@ export default function ProductDetails({
               </div>
 
               {/* Inclusive of taxes note */}
-              <div className="flex items-center gap-1.5 text-xs text-[#8C7B82] mb-3">
+              {/* <div className="flex items-center gap-1.5 text-xs text-[#8C7B82] mb-3">
                 <Info size={14} className="text-[#8C7B82]" />
                 <span>Inclusive of all taxes</span>
-              </div>
+              </div> */}
 
               {/* Short Description */}
               {product.short_description && (

@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ProductDetails from "@/components/ProductDetails";
-import { allProducts } from "@/data/products";
+import { getProductBySlug, getProducts } from "@/lib/woocommerce";
 
 interface ProductPageProps {
   params: Promise<{
@@ -11,7 +11,7 @@ interface ProductPageProps {
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const product = allProducts.find((p) => p.slug === slug);
+  const product = await getProductBySlug(slug);
 
   if (!product) {
     return {
@@ -30,7 +30,10 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
 export default async function SingleProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
-  const product = allProducts.find((p) => p.slug === slug);
+  const [product, all] = await Promise.all([
+    getProductBySlug(slug),
+    getProducts({ per_page: 50 }),
+  ]);
 
   if (!product) {
     notFound();
@@ -38,7 +41,7 @@ export default async function SingleProductPage({ params }: ProductPageProps) {
 
   // Get related products (same category or others)
   const productCatSlug = product.categories?.[0]?.slug;
-  const relatedProducts = allProducts.filter((p) => p.id !== product.id);
+  const relatedProducts = all.filter((p) => p.id !== product.id);
 
   // If products share same category, put them first
   if (productCatSlug) {

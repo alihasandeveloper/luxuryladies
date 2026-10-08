@@ -1,28 +1,15 @@
 "use client";
 
 import React from "react";
-import { useParams } from "next/navigation";
-import { allProducts } from "@/data/products";
 
 interface ProductDetailsSkeletonProps {
   hasMultipleImages?: boolean;
 }
 
 export default function ProductDetailsSkeleton({
-  hasMultipleImages,
+  hasMultipleImages = false,
 }: ProductDetailsSkeletonProps) {
-  const params = useParams();
-  const slug = params?.slug as string | undefined;
-
-  let showThumbnails = hasMultipleImages;
-  if (showThumbnails === undefined) {
-    if (slug) {
-      const product = allProducts.find((p) => p.slug === slug);
-      showThumbnails = Boolean(product?.images && product.images.length > 1);
-    } else {
-      showThumbnails = false;
-    }
-  }
+  const showThumbnails = hasMultipleImages;
 
   return (
     <div className="w-full py-6 md:py-10 bg-white animate-pulse">

@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { Search, Heart, ArrowLeftRight, ShoppingBag, User, X, LogIn, ChevronRight, Menu, Sparkles } from "lucide-react";
-import { allProducts } from "@/data/products";
+import { WooCommerceProduct } from "@/types/woocommerce";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -13,17 +13,10 @@ const navLinks = [
   { label: "About Us", href: "/about" },
 ];
 
-const categories = [
-  { label: "Golden Picks", emoji: "✨" },
-  { label: "Luxury Edit Heels", emoji: "👠" },
-  { label: "Luxury Bags", emoji: "👜" },
-  { label: "Party Clutch", emoji: "🎀" },
-  { label: "Z-Style Heels", emoji: "💎" },
-  { label: "2 Pcs PJ Sets", emoji: "🌙" },
-  { label: "Flats & Sandals", emoji: "🩴" },
-  { label: "3 Pcs PJ Sets", emoji: "☁️" },
-  { label: "Clearance Sale!!!", emoji: "🔥" },
-];
+interface HeaderCategory {
+  label: string;
+  slug: string;
+}
 
 export default function Header() {
   const router = useRouter();
@@ -77,6 +70,37 @@ export default function Header() {
     }
   }, [mobileSearchOpen]);
 
+  const [liveProducts, setLiveProducts] = useState<WooCommerceProduct[]>([]);
+  const [liveCategories, setLiveCategories] = useState<HeaderCategory[]>([]);
+
+  useEffect(() => {
+    fetch("/api/products")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setLiveProducts(data);
+        }
+      })
+      .catch(() => {});
+
+    fetch("/api/products?type=categories")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setLiveCategories(
+            data
+              .filter((c: any) => c.slug !== "uncategorized")
+              .slice(0, 8)
+              .map((c: any) => ({
+                label: c.name,
+                slug: c.slug,
+              }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
@@ -90,11 +114,11 @@ export default function Header() {
   };
 
   const matchingSuggestions = searchQuery.trim()
-    ? allProducts
+    ? liveProducts
         .filter((p) =>
           p.name.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
           p.sku?.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
-          p.categories?.some((c) => c.name.toLowerCase().includes(searchQuery.trim().toLowerCase()))
+          p.categories?.some((c: any) => c.name.toLowerCase().includes(searchQuery.trim().toLowerCase()))
         )
         .slice(0, 5)
     : [];
@@ -216,11 +240,11 @@ export default function Header() {
         <nav className="header-categories desktop-only" aria-label="Category navigation">
           <div className="container">
             <ul>
-              {categories.map((cat) => {
-                const catHref = `/category/${cat.label.toLowerCase().replace(/\s+/g, "-")}`;
+              {liveCategories.map((cat) => {
+                const catHref = `/category/${cat.slug}`;
                 const isActive = pathname === catHref;
                 return (
-                  <li key={cat.label}>
+                  <li key={cat.slug}>
                     <Link
                       href={catHref}
                       className={isActive ? "active" : ""}
@@ -312,7 +336,7 @@ export default function Header() {
                 >
                   <div className="relative w-11 h-11 rounded-md overflow-hidden bg-[#f5f5f5] shrink-0 border border-[#F2E6EC]">
                     <Image
-                      src={item.images?.[0]?.src || "/file.svg"}
+                      src={item.images?.[0]?.src || "/woocommerce-placeholder.webp"}
                       alt={item.name}
                       fill
                       sizes="44px"
@@ -402,12 +426,12 @@ export default function Header() {
               Categories
             </p>
             <nav className="flex flex-col space-y-0.5">
-              {categories.map((cat) => {
-                const catHref = `/category/${cat.label.toLowerCase().replace(/\s+/g, "-")}`;
+              {liveCategories.map((cat) => {
+                const catHref = `/category/${cat.slug}`;
                 const active = pathname === catHref;
                 return (
                   <Link
-                    key={cat.label}
+                    key={cat.slug}
                     href={catHref}
                     onClick={() => setDrawerOpen(false)}
                     className={`flex items-center justify-between px-3 py-2 rounded-lg text-[13px] transition-colors ${

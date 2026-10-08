@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Heart, ShoppingCart } from "lucide-react";
@@ -23,19 +24,22 @@ export default function ProductCard({
 
   const isOutOfStock = product.stock_status === "outofstock";
   const badgeMeta = product.meta_data?.find((m) => m.key === "_badge")?.value;
-  const image = product.images?.[0]?.src || "/file.svg";
+  const [imgSrc, setImgSrc] = useState(
+    product.images?.[0]?.src || "/woocommerce-placeholder.webp"
+  );
 
   return (
     <div className={`group relative bg-white overflow-hidden md:shadow-lg hover:shadow-xl hover:shadow-gray-200/50 transition-all duration-300 flex flex-col ${isOutOfStock ? "opacity-90" : ""}`}>
       {/* Product Image Frame */}
       <div className="relative aspect-square w-full overflow-hidden bg-[#f7f7f7]">
-        <Link href={`/product/${product.slug}`} className="block w-full h-full overflow-hidden">
+        <Link href={`/product/${product.slug}`} className="relative block w-full h-full overflow-hidden">
           <Image
-            src={image}
+            src={imgSrc}
             alt={product.images?.[0]?.alt || product.name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
             className={`object-cover transition-transform duration-700 ease-out group-hover:scale-110 ${isOutOfStock ? "grayscale-[30%]" : ""}`}
+            onError={() => setImgSrc("/woocommerce-placeholder.webp")}
           />
         </Link>
 
