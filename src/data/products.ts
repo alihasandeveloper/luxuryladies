@@ -478,7 +478,7 @@ export const goldenPicksProducts: WooCommerceProduct[] = [
 ];
 
 // Helper function to ensure all products have description & short_description
-const enrichProduct = (item: WooCommerceProduct): WooCommerceProduct => {
+const enrichProduct = (item: any): WooCommerceProduct => {
   const catName = item.categories?.[0]?.name || "Luxury Footwear & Accessories";
   return {
     ...item,
