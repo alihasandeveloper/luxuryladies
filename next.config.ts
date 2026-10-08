@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
-// Disable SSL certificate verification in development for local WordPress (e.g. self-signed certs on headless.local)
-if (process.env.NODE_ENV !== "production") {
+// Disable SSL certificate verification for local WordPress (e.g. self-signed certs on headless.local)
+if (process.env.NODE_ENV !== "production" || (process.env.WP_BACKEND_URL && process.env.WP_BACKEND_URL.includes(".local"))) {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 }
 

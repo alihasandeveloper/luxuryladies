@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Heart, ShoppingCart } from "lucide-react";
@@ -24,9 +24,12 @@ export default function ProductCard({
 
   const isOutOfStock = product.stock_status === "outofstock";
   const badgeMeta = product.meta_data?.find((m) => m.key === "_badge")?.value;
-  const [imgSrc, setImgSrc] = useState(
-    product.images?.[0]?.src || "/woocommerce-placeholder.webp"
-  );
+  const initialImage = product.images?.[0]?.src || "/woocommerce-placeholder.webp";
+  const [imgSrc, setImgSrc] = useState(initialImage);
+
+  useEffect(() => {
+    setImgSrc(product.images?.[0]?.src || "/woocommerce-placeholder.webp");
+  }, [product.images]);
 
   return (
     <div className={`group relative bg-white overflow-hidden md:shadow-lg hover:shadow-xl hover:shadow-gray-200/50 transition-all duration-300 flex flex-col ${isOutOfStock ? "opacity-90" : ""}`}>

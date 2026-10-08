@@ -1,13 +1,13 @@
 import { WooCommerceCategory, WooCommerceProduct, WooCommerceImage } from "@/types/woocommerce";
 
-// Allow self-signed certificates in development for local WordPress installations (e.g. headless.local)
-if (process.env.NODE_ENV !== "production") {
-  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-}
-
 const WP_URL = process.env.WP_BACKEND_URL || "https://headless.local";
 const WP_CK = process.env.WP_CK || "";
 const WP_CS = process.env.WP_CS || "";
+
+// Allow self-signed certificates for local WordPress installations (e.g. headless.local or localhost)
+if (process.env.NODE_ENV !== "production" || WP_URL.includes(".local") || WP_URL.includes("localhost")) {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+}
 
 function getAuthHeader(): string {
   if (!WP_CK || !WP_CS) return "";

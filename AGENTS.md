@@ -7,3 +7,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+# User Preferences & Execution Constraints
+- **NEVER run any `git` or `npm` commands** in terminal.
+- Do not run terminal/shell commands for building, starting servers, or debugging.
+- All actions must be strictly limited to reading and modifying project code files.
+- The user will perform terminal tasks, test, and provide debugging feedback.
