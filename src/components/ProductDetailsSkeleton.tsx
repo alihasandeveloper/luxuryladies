@@ -20,13 +20,13 @@ export default function ProductDetailsSkeleton() {
           {/* Gallery Skeleton (Left 6 cols) */}
           <div className="lg:col-span-6 flex flex-col gap-4">
             {/* Main Featured Image Skeleton */}
-            <div className="aspect-square w-full bg-gray-200 border border-gray-200 rounded-md" />
+            <div className="aspect-square w-full bg-gray-200 overflow-hidden" />
             {/* Thumbnails Row Skeleton */}
             <div className="flex items-center gap-2.5">
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="w-18 h-18 md:w-20 md:h-20 bg-gray-100 border border-gray-200 rounded shrink-0"
+                  className="w-18 h-18 md:w-20 md:h-20 bg-gray-100 overflow-hidden shrink-0"
                 />
               ))}
             </div>
