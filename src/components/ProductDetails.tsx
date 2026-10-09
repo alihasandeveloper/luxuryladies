@@ -183,12 +183,12 @@ export default function ProductDetails({
       (product.variations_data && product.variations_data.length > 0)
     ) && variationAttributes.length > 0;
 
-  // Helper to extract default selections
+  // Helper to extract default selections ONLY if explicitly set in WooCommerce backend
   const computeInitialSelections = (): Record<string, string> => {
     const initial: Record<string, string> = {};
     if (variationAttributes.length === 0) return initial;
 
-    // 1. Try from default_attributes if specified in WooCommerce
+    // Only set defaults if explicitly specified in product.default_attributes
     if (product.default_attributes && product.default_attributes.length > 0) {
       variationAttributes.forEach((attr) => {
         const def = product.default_attributes?.find(
@@ -196,7 +196,7 @@ export default function ProductDetails({
             (d.id && attr.id && d.id === attr.id) ||
             matchAttributeKey(d.name, attr.name, attr.slug)
         );
-        if (def && def.option) {
+        if (def && def.option && def.option.trim() !== "") {
           const matched = findMatchingOption(attr.options, def.option);
           if (matched) {
             initial[attr.name] = matched;
@@ -204,42 +204,6 @@ export default function ProductDetails({
         }
       });
     }
-
-    // 2. If no default_attributes or incomplete, pick from preferred in-stock variation
-    if (
-      Object.keys(initial).length < variationAttributes.length &&
-      product.variations_data &&
-      product.variations_data.length > 0
-    ) {
-      const preferredVar =
-        product.variations_data.find(
-          (v) => v.stock_status !== "outofstock" && v.purchasable !== false
-        ) || product.variations_data[0];
-
-      if (preferredVar?.attributes) {
-        variationAttributes.forEach((attr) => {
-          if (initial[attr.name]) return;
-          const vAttr = preferredVar.attributes.find(
-            (va) =>
-              (va.id && attr.id && va.id === attr.id) ||
-              matchAttributeKey(va.name, attr.name, attr.slug)
-          );
-          if (vAttr && vAttr.option) {
-            const matched = findMatchingOption(attr.options, vAttr.option);
-            if (matched) {
-              initial[attr.name] = matched;
-            }
-          }
-        });
-      }
-    }
-
-    // 3. Fallback to first option of each attribute
-    variationAttributes.forEach((attr) => {
-      if (!initial[attr.name] && attr.options && attr.options.length > 0) {
-        initial[attr.name] = attr.options[0];
-      }
-    });
 
     return initial;
   };
@@ -257,6 +221,13 @@ export default function ProductDetails({
       setSelectedAttributes({});
     }
   }, [product.id, isVariableProduct]);
+
+  // Check if all variation attributes are currently selected
+  const isAllAttributesSelected = useMemo(() => {
+    if (!isVariableProduct) return true;
+    if (variationAttributes.length === 0) return true;
+    return variationAttributes.every((attr) => Boolean(selectedAttributes[attr.name]));
+  }, [isVariableProduct, variationAttributes, selectedAttributes]);
 
   // Find currently matching variation from variations_data
   const matchingVariation = useMemo(() => {
@@ -300,7 +271,7 @@ export default function ProductDetails({
     );
   }, [isVariableProduct, product.variations_data, variationAttributes, selectedAttributes]);
 
-  // When variation has its own image, automatically switch active image in gallery
+  // When variation has its own image, automatically switch active image in gallery; revert to primary when deselected
   useEffect(() => {
     if (matchingVariation?.image?.src) {
       const foundIdx = galleryImages.findIndex(
@@ -309,8 +280,37 @@ export default function ProductDetails({
       if (foundIdx !== -1) {
         setActiveImageIndex(foundIdx);
       }
+    } else if (!matchingVariation && activeImageIndex !== 0) {
+      setActiveImageIndex(0);
     }
   }, [matchingVariation, galleryImages]);
+
+  // Price range computation for variable products when not all attributes are selected
+  const priceRange = useMemo(() => {
+    if (!isVariableProduct || !product.variations_data || product.variations_data.length === 0) {
+      return null;
+    }
+    const prices = product.variations_data
+      .map((v) => parseFloat(v.sale_price || v.price || "0"))
+      .filter((p) => p > 0);
+    if (prices.length === 0) return null;
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    return { min, max, isRange: min !== max };
+  }, [isVariableProduct, product.variations_data]);
+
+  // Check if any variation has available stock
+  const hasAnyInStock = useMemo(() => {
+    if (!isVariableProduct) {
+      return product.stock_status !== "outofstock" && product.purchasable !== false;
+    }
+    if (!product.variations_data || product.variations_data.length === 0) {
+      return product.stock_status !== "outofstock" && product.purchasable !== false;
+    }
+    return product.variations_data.some(
+      (v) => v.stock_status !== "outofstock" && v.purchasable !== false
+    );
+  }, [isVariableProduct, product.variations_data, product.stock_status, product.purchasable]);
 
   // Calculate pricing based on matching variation or product
   const rawVarRegular = matchingVariation?.regular_price || matchingVariation?.price;
@@ -338,9 +338,11 @@ export default function ProductDetails({
 
   // Accurate stock status for current selection
   const isCurrentOutOfStock = isVariableProduct
-    ? !matchingVariation ||
-      matchingVariation.stock_status === "outofstock" ||
-      matchingVariation.purchasable === false
+    ? isAllAttributesSelected
+      ? !matchingVariation ||
+        matchingVariation.stock_status === "outofstock" ||
+        matchingVariation.purchasable === false
+      : !hasAnyInStock
     : product.stock_status === "outofstock" || product.purchasable === false;
 
   // Helper to check if a specific attribute option exists and has available stock
@@ -424,6 +426,16 @@ export default function ProductDetails({
   };
 
   const handleAddToCart = () => {
+    if (isVariableProduct && !isAllAttributesSelected) {
+      const missingAttr = variationAttributes.find((a) => !selectedAttributes[a.name]);
+      toast.error(
+        missingAttr
+          ? `Please select "${missingAttr.name}" before adding to cart!`
+          : "Please select all product options before adding to cart!"
+      );
+      return;
+    }
+
     if (isCurrentOutOfStock) return;
     const cartItemId = `${product.id}-${matchingVariation?.id || 0}-${JSON.stringify(selectedAttributes)}`;
     addToCart(
@@ -463,6 +475,16 @@ export default function ProductDetails({
   };
 
   const handleBuyNow = () => {
+    if (isVariableProduct && !isAllAttributesSelected) {
+      const missingAttr = variationAttributes.find((a) => !selectedAttributes[a.name]);
+      toast.error(
+        missingAttr
+          ? `Please select "${missingAttr.name}" before proceeding!`
+          : "Please select all product options before proceeding!"
+      );
+      return;
+    }
+
     if (isCurrentOutOfStock) return;
     const cartItemId = `${product.id}-${matchingVariation?.id || 0}-${JSON.stringify(selectedAttributes)}`;
     addToCart(
@@ -687,18 +709,26 @@ export default function ProductDetails({
 
               {/* Price Row */}
               <div className="flex items-baseline gap-3 mb-2">
-                <h3 className="text-2xl md:text-3xl font-bold">
-                  Tk {currentPrice.toLocaleString()}
-                </h3>
-                {regularPrice > currentPrice && (
-                  <span className="text-base text-[#8C7B82] line-through">
-                    Tk {regularPrice.toLocaleString()}
-                  </span>
-                )}
-                {discountPercent > 0 && (
-                  <span className="px-2 py-0.5 bg-[#E8F8EE] text-[#1E824C] border border-[#C6EBD3] rounded-md text-xs font-bold">
-                    {discountPercent}% OFF
-                  </span>
+                {isVariableProduct && !isAllAttributesSelected && priceRange?.isRange ? (
+                  <h3 className="text-2xl md:text-3xl font-bold">
+                    Tk {priceRange.min.toLocaleString()} – Tk {priceRange.max.toLocaleString()}
+                  </h3>
+                ) : (
+                  <>
+                    <h3 className="text-2xl md:text-3xl font-bold">
+                      Tk {currentPrice.toLocaleString()}
+                    </h3>
+                    {regularPrice > currentPrice && (
+                      <span className="text-base text-[#8C7B82] line-through">
+                        Tk {regularPrice.toLocaleString()}
+                      </span>
+                    )}
+                    {discountPercent > 0 && (
+                      <span className="px-2 py-0.5 bg-[#E8F8EE] text-[#1E824C] border border-[#C6EBD3] rounded-md text-xs font-bold">
+                        {discountPercent}% OFF
+                      </span>
+                    )}
+                  </>
                 )}
               </div>
 
@@ -725,6 +755,21 @@ export default function ProductDetails({
                               {currentVal || "Choose an option"}
                             </span>
                           </span>
+                          {currentVal && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedAttributes((prev) => {
+                                  const next = { ...prev };
+                                  delete next[attr.name];
+                                  return next;
+                                });
+                              }}
+                              className="text-[11px] font-medium text-[#8C7B82] hover:text-[#ff0080] transition-colors cursor-pointer underline"
+                            >
+                              Clear
+                            </button>
+                          )}
                         </div>
 
                         <div className="flex flex-wrap gap-2">
@@ -742,10 +787,17 @@ export default function ProductDetails({
                                 type="button"
                                 disabled={!exists}
                                 onClick={() => {
-                                  setSelectedAttributes((prev) => ({
-                                    ...prev,
-                                    [attr.name]: option,
-                                  }));
+                                  setSelectedAttributes((prev) => {
+                                    if (isSelected) {
+                                      const next = { ...prev };
+                                      delete next[attr.name];
+                                      return next;
+                                    }
+                                    return {
+                                      ...prev,
+                                      [attr.name]: option,
+                                    };
+                                  });
                                 }}
                                 className={`min-w-[44px] h-9 px-3 rounded-md text-xs font-semibold flex items-center justify-center border transition-all cursor-pointer relative ${
                                   isSelected
@@ -771,6 +823,14 @@ export default function ProductDetails({
                             );
                           })}
                         </div>
+
+                        {/* Helper message when this attribute is not yet selected */}
+                        {!currentVal && (
+                          <p className="text-[11px] text-[#ff0080] font-medium mt-2 flex items-center gap-1.5">
+                            <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#ff0080]" />
+                            <span>Please select a {attr.name}</span>
+                          </p>
+                        )}
                       </div>
                     );
                   })}
@@ -780,11 +840,14 @@ export default function ProductDetails({
               {/* Stock status text */}
               <div className="mb-5 flex items-center">
                 <span
-                  className={`text-xs font-medium flex items-center gap-1.5 ${isCurrentOutOfStock ? "text-[#E53935]" : "text-[#718096]"
-                    }`}
+                  className={`text-xs font-medium flex items-center gap-1.5 ${
+                    isCurrentOutOfStock ? "text-[#E53935]" : "text-[#1E824C]"
+                  }`}
                 >
                   <span className="text-base leading-none select-none">•</span>
-                  <span>{isCurrentOutOfStock ? "Out of stock" : "Stock available"}</span>
+                  <span>
+                    {isCurrentOutOfStock ? "Out of stock" : "Stock available"}
+                  </span>
                 </span>
               </div>
 
@@ -827,26 +890,28 @@ export default function ProductDetails({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <button
                     type="button"
-                    disabled={isCurrentOutOfStock}
+                    disabled={isCurrentOutOfStock || (isVariableProduct && !isAllAttributesSelected)}
                     onClick={handleBuyNow}
-                    className={`w-full py-3 rounded-md text-xs font-bold tracking-wide shadow-xs transition-colors ${isCurrentOutOfStock
-                        ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                        : "!bg-[#ff0080] hover:!bg-[#d4006a] !text-white cursor-pointer"
-                      }`}
+                    className={`w-full py-3 rounded-md text-xs font-bold tracking-wide shadow-xs transition-all duration-200 !bg-[#ff0080] !text-white ${
+                      isCurrentOutOfStock || (isVariableProduct && !isAllAttributesSelected)
+                        ? "opacity-50 cursor-not-allowed"
+                        : "hover:!bg-[#d4006a] cursor-pointer"
+                    }`}
                   >
                     {isCurrentOutOfStock ? "Out of Stock" : "Buy Now"}
                   </button>
 
                   <button
                     type="button"
-                    disabled={isCurrentOutOfStock}
+                    disabled={isCurrentOutOfStock || (isVariableProduct && !isAllAttributesSelected)}
                     onClick={handleAddToCart}
-                    className={`w-full py-3 rounded-md text-xs font-bold tracking-wide transition-all duration-200 ${isCurrentOutOfStock
-                        ? "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
-                        : justAdded
+                    className={`w-full py-3 rounded-md text-xs font-bold tracking-wide transition-all duration-200 ${
+                      justAdded
                         ? "bg-emerald-600 text-white border-2 border-emerald-600 shadow-xs"
+                        : isCurrentOutOfStock || (isVariableProduct && !isAllAttributesSelected)
+                        ? "bg-white text-[#ff0080] border-2 border-[#ff0080] opacity-50 cursor-not-allowed"
                         : "bg-white hover:bg-[#FFF0F5] text-[#ff0080] border-2 border-[#ff0080] cursor-pointer"
-                      }`}
+                    }`}
                   >
                     {isCurrentOutOfStock ? (
                       "Unavailable"
@@ -895,7 +960,7 @@ export default function ProductDetails({
 
         {/* ── Key Highlights Cards Grid ── */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 mb-8">
-          {product.sku && (
+          {(matchingVariation?.sku || product.sku) && (
             <div className="bg-white p-4 rounded-xl border border-[#F2E6EC] flex items-center gap-3 shadow-2xs">
               <div className="w-10 h-10 rounded-lg bg-[#FFF0F5] text-[#ff0080] flex items-center justify-center shrink-0">
                 <Layers size={18} />
@@ -903,7 +968,7 @@ export default function ProductDetails({
               <div>
                 <p className="text-[11px] text-[#8C7B82]">SKU</p>
                 <p className="text-xs font-bold text-[#222] truncate">
-                  {product.sku}
+                  {matchingVariation?.sku || product.sku}
                 </p>
               </div>
             </div>
