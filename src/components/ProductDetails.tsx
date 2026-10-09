@@ -539,6 +539,7 @@ export default function ProductDetails({
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   className={`object-cover object-center transition-transform duration-150 ${isZoomed ? "opacity-0" : "opacity-100"
                     }`}
+                  unoptimized={Boolean((galleryImages[activeImageIndex]?.src || galleryImages[0]?.src)?.startsWith("/"))}
                 />
 
                 {/* Magnified zoom layer */}
@@ -607,6 +608,7 @@ export default function ProductDetails({
                           fill
                           sizes="90px"
                           className="object-cover"
+                          unoptimized={Boolean(img.src?.startsWith("/"))}
                         />
                       </button>
                     ))}

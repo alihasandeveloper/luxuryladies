@@ -347,6 +347,7 @@ export default function Header() {
                       fill
                       sizes="44px"
                       className="object-cover"
+                      unoptimized={Boolean(!item.images?.[0]?.src || item.images[0].src.startsWith("/"))}
                     />
                   </div>
                   <div className="flex-1 min-w-0">

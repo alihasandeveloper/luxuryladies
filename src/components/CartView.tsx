@@ -96,6 +96,7 @@ export default function CartView() {
                             fill
                             sizes="100px"
                             className="object-cover group-hover/img:scale-105 transition-transform duration-300"
+                            unoptimized={Boolean(!item.image || item.image.startsWith("/"))}
                           />
                         </Link>
 

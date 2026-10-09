@@ -79,6 +79,7 @@ export default function ProductCard({
             sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
             className={`object-cover transition-transform duration-700 ease-out group-hover:scale-110 ${isOutOfStock ? "grayscale-[30%]" : ""}`}
             onError={() => setImgSrc("/woocommerce-placeholder.webp")}
+            unoptimized={typeof imgSrc === "string" && imgSrc.startsWith("/")}
           />
         </Link>
 
