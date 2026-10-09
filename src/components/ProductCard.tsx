@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Heart, ShoppingCart, Check } from "lucide-react";
 import { WooCommerceProduct } from "@/types/woocommerce";
 import { useCart } from "@/context/CartContext";
+import { toast } from "sonner";
 
 interface ProductCardProps {
   product: WooCommerceProduct;
@@ -61,6 +62,13 @@ export default function ProductCard({
 
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1500);
+
+    toast.success(`${product.name} added to cart!`, {
+      action: {
+        label: "View Cart",
+        onClick: () => router.push("/cart"),
+      },
+    });
   };
 
   useEffect(() => {

@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
+import { toast } from "sonner";
 import {
   Heart,
   Share2,
@@ -411,7 +412,8 @@ export default function ProductDetails({
   const [quantity, setQuantity] = useState<number>(1);
   const [isWishlisted, setIsWishlisted] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
-  const [addedToCartToast, setAddedToCartToast] = useState<string | null>(null);
+  const [justAdded, setJustAdded] = useState<boolean>(false);
+
 
   const handleShare = () => {
     if (typeof window !== "undefined") {
@@ -444,15 +446,20 @@ export default function ProductDetails({
       quantity
     );
 
+    setJustAdded(true);
+    setTimeout(() => setJustAdded(false), 2000);
+
     const details = Object.entries(selectedAttributes)
       .map(([k, v]) => `${k}: ${v}`)
       .join(", ");
-    setAddedToCartToast(
-      details
-        ? `Added to Cart (${details})`
-        : `Added to Cart`
-    );
-    setTimeout(() => setAddedToCartToast(null), 3500);
+
+    toast.success(`${product.name} added to cart!`, {
+      description: details || undefined,
+      action: {
+        label: "View Cart",
+        onClick: () => router.push("/cart"),
+      },
+    });
   };
 
   const handleBuyNow = () => {
@@ -834,29 +841,27 @@ export default function ProductDetails({
                     type="button"
                     disabled={isCurrentOutOfStock}
                     onClick={handleAddToCart}
-                    className={`w-full py-3 rounded-md text-xs font-bold tracking-wide transition-colors ${isCurrentOutOfStock
+                    className={`w-full py-3 rounded-md text-xs font-bold tracking-wide transition-all duration-200 ${isCurrentOutOfStock
                         ? "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
+                        : justAdded
+                        ? "bg-emerald-600 text-white border-2 border-emerald-600 shadow-xs"
                         : "bg-white hover:bg-[#FFF0F5] text-[#ff0080] border-2 border-[#ff0080] cursor-pointer"
                       }`}
                   >
-                    {isCurrentOutOfStock ? "Unavailable" : "Add to Cart"}
+                    {isCurrentOutOfStock ? (
+                      "Unavailable"
+                    ) : justAdded ? (
+                      <span className="flex items-center justify-center gap-1.5 animate-in zoom-in-95">
+                        <Check size={16} strokeWidth={2.5} />
+                        Added to Cart
+                      </span>
+                    ) : (
+                      "Add to Cart"
+                    )}
                   </button>
                 </div>
 
-                {addedToCartToast && (
-                  <div className="p-3 bg-[#E8F8EE] border border-[#C6EBD3] text-[#1E824C] rounded-md text-xs font-medium flex items-center justify-between gap-3 animate-in fade-in shadow-2xs">
-                    <span className="flex items-center gap-1.5 font-semibold">
-                      <Check size={14} className="shrink-0" />
-                      {addedToCartToast}
-                    </span>
-                    <Link
-                      href="/cart"
-                      className="font-bold underline text-[#ff0080] hover:text-[#d4006a] transition-colors shrink-0 flex items-center gap-1"
-                    >
-                      View Cart →
-                    </Link>
-                  </div>
-                )}
+
               </div>
 
               {/* Delivery Meta Information Details */}
