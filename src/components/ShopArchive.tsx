@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { Sparkles, SlidersHorizontal, X, ChevronDown, Check } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
@@ -32,16 +32,106 @@ export default function ShopArchive({
   initialSearchQuery = "",
   categories,
 }: ShopArchiveProps) {
+  // Infinite scroll product states
+  const [allProducts, setAllProducts] = useState<WooCommerceProduct[]>(initialProducts);
+  const [page, setPage] = useState<number>(1);
+  const [hasMore, setHasMore] = useState<boolean>(initialProducts.length >= 12);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+  const isFetchingRef = useRef<boolean>(false);
+  const observerTargetRef = useRef<HTMLDivElement | null>(null);
+
+  // Sync products when initialProducts change (e.g. route or category change)
+  useEffect(() => {
+    setAllProducts(initialProducts);
+    setPage(1);
+    setHasMore(initialProducts.length >= 12);
+    isFetchingRef.current = false;
+  }, [initialProducts]);
+
+  // Load next batch of 12 products
+  const loadMoreProducts = useCallback(async () => {
+    if (isFetchingRef.current || !hasMore) return;
+    isFetchingRef.current = true;
+    setIsLoadingMore(true);
+
+    try {
+      const nextPage = page + 1;
+      const params = new URLSearchParams({
+        page: String(nextPage),
+        per_page: "12",
+      });
+      if (categorySlug) {
+        params.set("category", categorySlug);
+      }
+      if (initialSearchQuery) {
+        params.set("search", initialSearchQuery);
+      }
+
+      const res = await fetch(`/api/products?${params.toString()}`);
+      if (!res.ok) {
+        setHasMore(false);
+        return;
+      }
+
+      const newProducts: WooCommerceProduct[] = await res.json();
+
+      if (!Array.isArray(newProducts) || newProducts.length === 0) {
+        setHasMore(false);
+      } else {
+        if (newProducts.length < 12) {
+          setHasMore(false);
+        }
+        setAllProducts((prev) => {
+          const existingIds = new Set(prev.map((p) => p.id));
+          const unique = newProducts.filter((p) => !existingIds.has(p.id));
+          return [...prev, ...unique];
+        });
+        setPage(nextPage);
+      }
+    } catch (err) {
+      console.error("Failed to load more products:", err);
+      setHasMore(false);
+    } finally {
+      setIsLoadingMore(false);
+      isFetchingRef.current = false;
+    }
+  }, [hasMore, page, categorySlug, initialSearchQuery]);
+
+  // IntersectionObserver to auto-fetch when scrolling near the bottom
+  useEffect(() => {
+    const sentinel = observerTargetRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasMore && !isFetchingRef.current) {
+          loadMoreProducts();
+        }
+      },
+      {
+        root: null,
+        rootMargin: "350px",
+        threshold: 0,
+      }
+    );
+
+    observer.observe(sentinel);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [loadMoreProducts, hasMore]);
+
   const activeCategories = useMemo(() => {
     if (categories && categories.length > 0) return categories;
     const map = new Map<string, WooCommerceCategory>();
-    initialProducts.forEach((p) => {
+    allProducts.forEach((p) => {
       p.categories?.forEach((c) => {
         if (!map.has(c.slug)) map.set(c.slug, c);
       });
     });
     return Array.from(map.values());
-  }, [categories, initialProducts]);
+  }, [categories, allProducts]);
 
   // Search query state
   const [searchQuery, setSearchQuery] = useState<string>(initialSearchQuery);
@@ -169,7 +259,7 @@ export default function ShopArchive({
   const filteredProducts = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
-    return initialProducts
+    return allProducts
       .filter((product) => {
         // Search query filter (matches name, SKU, categories, or description)
         if (query) {
@@ -231,7 +321,7 @@ export default function ShopArchive({
         }
       });
   }, [
-    initialProducts,
+    allProducts,
     searchQuery,
     minPrice,
     maxPrice,
@@ -257,12 +347,12 @@ export default function ShopArchive({
   // Categories sorted by product count descending
   const categoriesWithCount = useMemo(() => {
     return activeCategories.map((cat) => {
-      const count = initialProducts.filter((p) =>
+      const count = allProducts.filter((p) =>
         p.categories?.some((c) => c.slug === cat.slug)
       ).length;
       return { ...cat, count };
     }).sort((a, b) => b.count - a.count);
-  }, [initialProducts, activeCategories]);
+  }, [allProducts, activeCategories]);
 
   const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Math.min(Number(e.target.value), maxPrice - priceGap);
@@ -548,8 +638,8 @@ export default function ShopArchive({
           {/* Result Count and Active Tags */}
           <div className="flex items-center justify-between mb-4">
             <p className="text-xs text-[#8C7B82]">
-              Showing <span className="font-semibold text-[#251A1F]">{filteredProducts.length}</span> of{" "}
-              {initialProducts.length} products
+              Showing <span className="font-semibold text-[#251A1F]">{filteredProducts.length}</span>
+              {filteredProducts.length !== allProducts.length ? ` of ${allProducts.length}` : ""} products
             </p>
 
             {isFilterActive && (
@@ -565,11 +655,23 @@ export default function ShopArchive({
 
           {/* Products Grid */}
           {filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 md:gap-4">
-              {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} showWishlist />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 md:gap-4">
+                {filteredProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} showWishlist />
+                ))}
+              </div>
+
+              {/* Infinite Scroll Sentinel & Status Indicator */}
+              <div ref={observerTargetRef} className={`w-full flex flex-col items-center justify-center ${isLoadingMore ? "py-8" : "h-2"}`}>
+                {isLoadingMore && (
+                  <div className="flex items-center gap-2.5 text-xs font-semibold text-[#8C7B82]">
+                    <span className="w-4 h-4 border-2 border-[#ff0080]/30 border-t-[#ff0080] rounded-full animate-spin" />
+                    <span>Loading more products...</span>
+                  </div>
+                )}
+              </div>
+            </>
           ) : (
             <div className="bg-white p-12 text-center flex flex-col items-center justify-center">
               <div className="w-16 h-16 rounded-full bg-[#FFF5F8] flex items-center justify-center text-[#ff0080] mb-4">

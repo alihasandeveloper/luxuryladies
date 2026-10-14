@@ -20,7 +20,7 @@ async function ShopContent({ searchParams }: ShopPageProps) {
   const query = resolvedParams?.q || "";
 
   const [products, categories] = await Promise.all([
-    getProducts({ search: query }),
+    getProducts({ search: query, per_page: 12, page: 1 }),
     getCategories(),
   ]);
 

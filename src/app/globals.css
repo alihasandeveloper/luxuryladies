@@ -524,7 +524,6 @@ a {
 /* ─────────────────────────────────────────────────────────── */
 .site-footer {
   background: linear-gradient(180deg, #FFF5F8 0%, #FFF9FA 50%, #ffffff 100%);
-  border-top: 1px solid #F7E7EC;
 }
 
 .footer-gradient-line {
@@ -908,4 +907,57 @@ a {
 [data-sonner-toaster] [data-close-button]:hover {
   color: #ff0080 !important;
   border-color: #ff0080 !important;
+}
+
+/* ─── Print Styles (Single Page A4 Order Receipt) ────────── */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm 10mm;
+  }
+
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    height: auto !important;
+    width: 100% !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Completely hide all site chrome, headers, footers, navigation, toaster */
+  header,
+  footer,
+  nav,
+  .site-header,
+  .site-footer,
+  .footer-main,
+  .footer-gradient-line,
+  .theme-toaster,
+  .no-print,
+  #theme-toaster,
+  [data-sonner-toaster] {
+    display: none !important;
+  }
+
+  main.site-main {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    display: block !important;
+  }
+
+  .print-page-root {
+    display: block !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 2mm 0 !important;
+  }
 }

@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function CategoryPage({ params }: PageProps) {
   const { slug } = await params;
   const [products, categories] = await Promise.all([
-    getProducts(),
+    getProducts({ category: slug, per_page: 12, page: 1 }),
     getCategories(),
   ]);
 

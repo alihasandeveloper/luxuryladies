@@ -139,6 +139,7 @@ function normalizeProduct(raw: any): WooCommerceProduct {
  * Fetch all products from WooCommerce REST API
  */
 export async function getProducts(params?: {
+  page?: number;
   per_page?: number;
   category?: string;
   search?: string;
@@ -152,7 +153,10 @@ export async function getProducts(params?: {
     }
 
     const query = new URLSearchParams();
-    query.set("per_page", String(params?.per_page || 100));
+    query.set("per_page", String(params?.per_page || 12));
+    if (params?.page) {
+      query.set("page", String(params.page));
+    }
     query.set("status", "publish");
     if (params?.search) query.set("search", params.search);
     if (params?.featured !== undefined) query.set("featured", String(params.featured));
