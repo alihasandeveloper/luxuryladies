@@ -17,7 +17,6 @@ export interface FilterState {
     newArrival: boolean;
     trending: boolean;
   };
-  freeDeliveryOnly: boolean;
 }
 
 interface ShopArchiveProps {
@@ -80,7 +79,6 @@ export default function ShopArchive({
   const [visibleCategoryCount, setVisibleCategoryCount] = useState<number>(5);
   const [inStock, setInStock] = useState<boolean>(false);
   const [outOfStock, setOutOfStock] = useState<boolean>(false);
-  const [freeDelivery, setFreeDelivery] = useState<boolean>(false);
   const [selectedOffers, setSelectedOffers] = useState<{
     bestPrice: boolean;
     hotDeals: boolean;
@@ -137,7 +135,6 @@ export default function ShopArchive({
     setSelectedCategories([]);
     setInStock(false);
     setOutOfStock(false);
-    setFreeDelivery(false);
     setSelectedOffers({
       bestPrice: false,
       hotDeals: false,
@@ -154,7 +151,6 @@ export default function ShopArchive({
       selectedCategories.length > 0 ||
       inStock ||
       outOfStock ||
-      freeDelivery ||
       Object.values(selectedOffers).some(Boolean)
     );
   }, [
@@ -166,7 +162,6 @@ export default function ShopArchive({
     selectedCategories,
     inStock,
     outOfStock,
-    freeDelivery,
     selectedOffers,
   ]);
 
@@ -351,23 +346,7 @@ export default function ShopArchive({
         </div>
       </div>
 
-      {/* ── Free Delivery (Right under Price Range) ── */}
-      <div>
-        <label className="flex items-center gap-3 cursor-pointer group select-none text-xs md:text-sm text-[#444] hover:text-[#ff0080] transition-colors">
-          <div
-            className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${freeDelivery
-              ? "bg-[#ff0080] border-[#ff0080] text-white"
-              : "border-[#d8cad0] bg-white group-hover:border-[#ff0080]"
-              }`}
-            onClick={() => setFreeDelivery(!freeDelivery)}
-          >
-            {freeDelivery && <Check size={12} strokeWidth={3} />}
-          </div>
-          <span onClick={() => setFreeDelivery(!freeDelivery)}>Free Delivery</span>
-        </label>
-      </div>
-
-      {/* ── Offers Filter (Right under Free Delivery) ── */}
+      {/* ── Offers Filter ── */}
       <div className="pt-2">
         <h3 className="text-sm font-semibold text-[#222] mb-3">Offers</h3>
         <div className="space-y-2.5">
@@ -658,7 +637,7 @@ export default function ShopArchive({
               <button
                 type="button"
                 onClick={() => setMobileFilterOpen(false)}
-                className="w-full py-3 !bg-[#ff0080] hover:!bg-[#d4006a] !text-white rounded-lg text-xs font-semibold shadow-xs transition-colors flex items-center justify-center gap-2"
+                className="w-full py-3 !bg-[#ff0080] hover:!bg-[#d4006a] !text-white rounded-md text-xs font-semibold shadow-xs transition-colors flex items-center justify-center gap-2"
               >
                 <span>View {filteredProducts.length} Results</span>
               </button>

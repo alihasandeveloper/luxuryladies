@@ -51,7 +51,7 @@ export default function CartView() {
 
             <Link
               href="/shop"
-              className="inline-flex items-center justify-center px-8 py-3 rounded-xl bg-[#ff0080] hover:bg-[#d4006a] !text-white text-xs sm:text-sm font-bold shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              className="inline-flex items-center justify-center px-8 py-3 rounded-md bg-[#ff0080] hover:bg-[#d4006a] !text-white text-xs sm:text-sm font-bold shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
             >
               Start Shopping
             </Link>
@@ -81,14 +81,14 @@ export default function CartView() {
                   return (
                     <div
                       key={item.id}
-                      className="bg-white rounded-2xl border border-gray-200/80 p-4 sm:p-5 shadow-2xs hover:border-[#ff0080]/30 transition-colors"
+                      className="bg-white rounded-md border border-gray-200/80 p-4 sm:p-5 shadow-2xs hover:border-[#ff0080]/30 transition-colors"
                     >
                       {/* Top Row: Thumbnail + Info + Trash/Quantity */}
                       <div className="flex items-start gap-4">
                         {/* Product Thumbnail */}
                         <Link
                           href={`/product/${item.slug}`}
-                          className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-gray-50 border border-gray-100 shrink-0 group/img"
+                          className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-md overflow-hidden bg-gray-50 border border-gray-100 shrink-0 group/img"
                         >
                           <Image
                             src={item.image || "/woocommerce-placeholder.webp"}
@@ -123,7 +123,7 @@ export default function CartView() {
                                 ([attrKey, attrVal]) => (
                                   <span
                                     key={attrKey}
-                                    className="px-2 py-0.5 rounded border border-slate-300 text-[10px] sm:text-[11px] font-semibold text-slate-700 uppercase"
+                                    className="px-2 py-0.5 rounded-md border border-slate-300 text-[10px] sm:text-[11px] font-semibold text-slate-700 uppercase"
                                   >
                                     {attrKey}: <span className="font-bold text-slate-900">{attrVal}</span>
                                   </span>
@@ -195,8 +195,8 @@ export default function CartView() {
             </div>
 
             {/* ── Right Column: Order Summary (4 cols on lg) ── */}
-            <div className="lg:col-span-4 sticky top-24 flex flex-col">
-              <div className="bg-white rounded-2xl border border-gray-200/80 p-5 sm:p-6 shadow-2xs">
+            <div className="lg:col-span-4 lg:sticky lg:top-[150px] flex flex-col">
+              <div className="bg-white rounded-md border border-gray-200/80 p-5 sm:p-6 shadow-2xs">
                 {/* Header */}
                 <div className="flex items-center gap-2 text-base font-bold text-[#1e293b] mb-4">
                   <Package size={18} className="text-[#475569]" />
@@ -223,7 +223,7 @@ export default function CartView() {
                 </div>
 
                 {/* Trust Badge */}
-                <div className="bg-[#F0FDF4] text-[#15803D] border border-[#DCFCE7] px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 mb-4">
+                <div className="bg-[#F0FDF4] text-[#15803D] border border-[#DCFCE7] px-3.5 py-2.5 rounded-md text-xs font-semibold flex items-center justify-center gap-2 mb-4">
                   <ShieldCheck size={16} className="text-[#16a34a]" />
                   <span>Secure Checkout & COD Available</span>
                 </div>
@@ -232,7 +232,7 @@ export default function CartView() {
                 <div className="space-y-2.5">
                   <Link
                     href="/checkout"
-                    className="w-full py-3 px-4 rounded-xl bg-[#ff0080] hover:bg-[#d4006a] !text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
+                    className="w-full py-3 px-4 rounded-md bg-[#ff0080] hover:bg-[#d4006a] !text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
                   >
                     <CreditCard size={15} />
                     <span>Proceed to Checkout</span>
@@ -240,7 +240,7 @@ export default function CartView() {
 
                   <Link
                     href="/shop"
-                    className="w-full py-3 px-4 rounded-xl border border-[#ff0080] text-[#ff0080] hover:bg-[#FFF0F5] text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                    className="w-full py-3 px-4 rounded-md border border-[#ff0080] text-[#ff0080] hover:bg-[#FFF0F5] text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
                   >
                     <Truck size={15} />
                     <span>Continue Shopping</span>

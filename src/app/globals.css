@@ -55,8 +55,8 @@ button {
 
   /* Radius */
   --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
+  --radius-md: 6px;
+  --radius-lg: 6px;
   --radius-full: 9999px;
 
   /* Shadow */

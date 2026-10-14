@@ -47,12 +47,6 @@ export default function ShopSkeleton() {
                 </div>
               </div>
 
-              {/* Free Delivery Skeleton */}
-              <div className="flex items-center gap-3">
-                <div className="w-4 h-4 rounded-xs bg-gray-200" />
-                <div className="h-3.5 w-24 bg-gray-200 rounded-xs" />
-              </div>
-
               {/* Offers Filter Skeleton */}
               <div className="pt-2 border-t border-gray-100 space-y-3">
                 <div className="h-4 w-16 bg-gray-300 rounded-xs mb-3" />

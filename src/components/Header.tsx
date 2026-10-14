@@ -83,7 +83,7 @@ export default function Header() {
           setLiveProducts(data);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
 
     fetch("/api/products?type=categories")
       .then((res) => res.json())
@@ -100,7 +100,7 @@ export default function Header() {
           );
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -117,12 +117,12 @@ export default function Header() {
 
   const matchingSuggestions = searchQuery.trim()
     ? liveProducts
-        .filter((p) =>
-          p.name.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
-          p.sku?.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
-          p.categories?.some((c: any) => c.name.toLowerCase().includes(searchQuery.trim().toLowerCase()))
-        )
-        .slice(0, 5)
+      .filter((p) =>
+        p.name.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
+        p.sku?.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
+        p.categories?.some((c: any) => c.name.toLowerCase().includes(searchQuery.trim().toLowerCase()))
+      )
+      .slice(0, 5)
     : [];
 
   return (
@@ -268,20 +268,18 @@ export default function Header() {
       {/* ── Top Slide-down Mobile Search Wrapper ── */}
       {/* Search Backdrop Overlay */}
       <div
-        className={`fixed inset-0 bg-black/50 backdrop-blur-xs z-[120] transition-opacity duration-300 md:hidden ${
-          mobileSearchOpen
+        className={`fixed inset-0 bg-black/50 backdrop-blur-xs z-[120] transition-opacity duration-300 md:hidden ${mobileSearchOpen
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
-        }`}
+          }`}
         onClick={() => setMobileSearchOpen(false)}
         aria-hidden="true"
       />
 
       {/* Slide-Down Search Panel from Top */}
       <div
-        className={`fixed top-0 left-0 right-0 bg-white z-[130] shadow-xl border-b border-[#F2E6EC] transition-transform duration-300 ease-out md:hidden ${
-          mobileSearchOpen ? "translate-y-0" : "-translate-y-full"
-        }`}
+        className={`fixed top-0 left-0 right-0 bg-white z-[130] shadow-xl border-b border-[#F2E6EC] transition-transform duration-300 ease-out md:hidden ${mobileSearchOpen ? "translate-y-0" : "-translate-y-full"
+          }`}
       >
         <div className="px-5 pt-3.5 pb-5 flex flex-col gap-2.5">
           {/* Top row with subtle close button on right */}
@@ -411,11 +409,10 @@ export default function Header() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setDrawerOpen(false)}
-                  className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                    active
+                  className={`flex items-center justify-between px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${active
                       ? "text-[#ff0080] bg-[#FFF5F8]"
                       : "text-slate-600 hover:text-[#ff0080] hover:bg-[#FFF5F8]"
-                  }`}
+                    }`}
                 >
                   <span>{link.label}</span>
                   <ChevronRight size={15} className={active ? "text-[#ff0080]" : "text-slate-600"} />
@@ -441,11 +438,10 @@ export default function Header() {
                     key={cat.slug}
                     href={catHref}
                     onClick={() => setDrawerOpen(false)}
-                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-[13px] transition-colors ${
-                      active
+                    className={`flex items-center justify-between px-3 py-2 rounded-md text-[13px] transition-colors ${active
                         ? "text-[#ff0080] bg-[#FFF5F8]"
                         : "text-slate-600 hover:text-[#ff0080] hover:bg-[#FFF5F8]"
-                    }`}
+                      }`}
                   >
                     <span className="font-normal">{cat.label}</span>
                     <ChevronRight size={13} className={active ? "text-[#ff0080]" : "text-slate-600"} />
@@ -467,11 +463,10 @@ export default function Header() {
               <Link
                 href="/wishlist"
                 onClick={() => setDrawerOpen(false)}
-                className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-lg border text-xs font-medium gap-1.5 transition-colors ${
-                  pathname === "/wishlist"
+                className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-md border text-xs font-medium gap-1.5 transition-colors ${pathname === "/wishlist"
                     ? "border-[#ff0080] text-[#ff0080] bg-[#FFF5F8]"
                     : "border-[#F2E6EC] hover:border-[#ff0080] hover:text-[#ff0080] text-slate-600"
-                }`}
+                  }`}
               >
                 <Heart size={16} strokeWidth={1.75} />
                 <span>Wishlist</span>
@@ -479,11 +474,10 @@ export default function Header() {
               <Link
                 href="/shop"
                 onClick={() => setDrawerOpen(false)}
-                className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-lg border text-xs font-medium gap-1.5 transition-colors ${
-                  pathname === "/shop"
+                className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-md border text-xs font-medium gap-1.5 transition-colors ${pathname === "/shop"
                     ? "border-[#ff0080] text-[#ff0080] bg-[#FFF5F8]"
                     : "border-[#F2E6EC] hover:border-[#ff0080] hover:text-[#ff0080] text-slate-600"
-                }`}
+                  }`}
               >
                 <ArrowLeftRight size={16} strokeWidth={1.75} />
                 <span>Compare</span>
@@ -491,11 +485,10 @@ export default function Header() {
               <Link
                 href="/account"
                 onClick={() => setDrawerOpen(false)}
-                className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-lg border text-xs font-medium gap-1.5 transition-colors ${
-                  pathname === "/account"
+                className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-md border text-xs font-medium gap-1.5 transition-colors ${pathname === "/account"
                     ? "border-[#ff0080] text-[#ff0080] bg-[#FFF5F8]"
                     : "border-[#F2E6EC] hover:border-[#ff0080] hover:text-[#ff0080] text-slate-600"
-                }`}
+                  }`}
               >
                 <User size={16} strokeWidth={1.75} />
                 <span>Account</span>
@@ -509,7 +502,7 @@ export default function Header() {
           <a
             href="/signin"
             onClick={() => setDrawerOpen(false)}
-            className="w-full flex items-center justify-center gap-2 py-2.5 !bg-[#ff0080] hover:!bg-[#d4006a] !text-white rounded-lg text-xs font-semibold shadow-xs transition-colors"
+            className="w-full flex items-center justify-center gap-2 py-2.5 !bg-[#ff0080] hover:!bg-[#d4006a] !text-white rounded-md text-xs font-semibold shadow-xs transition-colors"
           >
             <LogIn size={15} className="!text-white shrink-0" />
             <span className="!text-white text-inherit">Sign In</span>

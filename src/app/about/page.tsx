@@ -1,18 +1,18 @@
 import { Metadata } from "next";
 import Link from "next/link";
-import { 
-  Sparkles, 
-  ShoppingBag, 
-  DollarSign, 
-  Truck, 
-  HeartHandshake, 
-  ShieldCheck, 
-  Lock, 
-  Headphones, 
-  Mail, 
-  Phone, 
-  Globe, 
-  ArrowRight 
+import {
+  Sparkles,
+  ShoppingBag,
+  DollarSign,
+  Truck,
+  HeartHandshake,
+  ShieldCheck,
+  Lock,
+  Headphones,
+  Mail,
+  Phone,
+  Globe,
+  ArrowRight
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -64,9 +64,9 @@ export default function AboutPage() {
         {/* ── Who We Are & Mission Grid ── */}
         <section className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
           {/* Who We Are */}
-          <div className="bg-white rounded-2xl p-7 md:p-10 border border-[#F2E4EA] shadow-xs flex flex-col justify-between">
+          <div className="bg-white rounded-md p-7 md:p-10 border border-[#F2E4EA] shadow-xs flex flex-col justify-between">
             <div>
-              <div className="w-11 h-11 rounded-xl bg-[#FFF0F5] text-[#ff0080] flex items-center justify-center mb-5">
+              <div className="w-11 h-11 rounded-md bg-[#FFF0F5] text-[#ff0080] flex items-center justify-center mb-5">
                 <ShoppingBag size={22} strokeWidth={2} />
               </div>
               <h2 className="text-xl md:text-2xl font-bold text-[#1f191c] mb-3">
@@ -82,9 +82,9 @@ export default function AboutPage() {
           </div>
 
           {/* Our Mission */}
-          <div className="bg-gradient-to-br from-[#111827] to-[#1f1620] text-white rounded-2xl p-7 md:p-10 shadow-md flex flex-col justify-between">
+          <div className="bg-gradient-to-br from-[#111827] to-[#1f1620] text-white rounded-md p-7 md:p-10 shadow-md flex flex-col justify-between">
             <div>
-              <div className="w-11 h-11 rounded-xl bg-white/10 text-[#ff0080] flex items-center justify-center mb-5">
+              <div className="w-11 h-11 rounded-md bg-white/10 text-[#ff0080] flex items-center justify-center mb-5">
                 <HeartHandshake size={22} strokeWidth={2} />
               </div>
               <h2 className="text-xl md:text-2xl font-bold text-white mb-3">
@@ -136,9 +136,9 @@ export default function AboutPage() {
             ].map((item, idx) => (
               <div
                 key={idx}
-                className="bg-white rounded-xl p-6 border border-[#F2E4EA] hover:border-[#ff0080]/40 transition-all duration-300 shadow-xs hover:shadow-sm"
+                className="bg-white rounded-md p-6 border border-[#F2E4EA] hover:border-[#ff0080]/40 transition-all duration-300 shadow-xs hover:shadow-sm"
               >
-                <div className="w-10 h-10 rounded-lg bg-[#FFF2F7] text-[#ff0080] flex items-center justify-center mb-4">
+                <div className="w-10 h-10 rounded-md bg-[#FFF2F7] text-[#ff0080] flex items-center justify-center mb-4">
                   {item.icon}
                 </div>
                 <h3 className="text-base font-bold text-[#1f191c] mb-2">{item.title}</h3>
@@ -149,7 +149,7 @@ export default function AboutPage() {
         </section>
 
         {/* ── Why Choose Us ── */}
-        <section className="bg-white rounded-2xl p-8 md:p-12 border border-[#F2E4EA] shadow-xs">
+        <section className="bg-white rounded-md p-8 md:p-12 border border-[#F2E4EA] shadow-xs">
           <div className="text-center max-w-xl mx-auto mb-10">
             <span className="text-xs font-semibold tracking-widest text-[#ff0080] uppercase block mb-2">
               Your Peace of Mind
@@ -193,7 +193,7 @@ export default function AboutPage() {
         </section>
 
         {/* ── Join Our Journey ── */}
-        <section className="bg-gradient-to-r from-[#FFF0F5] via-[#FFF6F9] to-white rounded-2xl p-8 md:p-12 border border-[#F2D7E2] text-center max-w-3xl mx-auto">
+        <section className="bg-gradient-to-r from-[#FFF0F5] via-[#FFF6F9] to-white rounded-md p-8 md:p-12 border border-[#F2D7E2] text-center max-w-3xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-bold text-[#1f191c] mb-4">
             Join Our Journey
           </h2>
@@ -206,7 +206,7 @@ export default function AboutPage() {
         </section>
 
         {/* ── Contact Us ── */}
-        <section className="bg-white rounded-2xl p-8 md:p-10 border border-[#F2E4EA] shadow-xs">
+        <section className="bg-white rounded-md p-8 md:p-10 border border-[#F2E4EA] shadow-xs">
           <div className="text-center max-w-md mx-auto mb-8">
             <span className="text-xs font-semibold tracking-widest text-[#ff0080] uppercase block mb-2">
               Get in Touch
@@ -222,7 +222,7 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
             <a
               href="mailto:support@luxuryladies.com"
-              className="flex flex-col items-center text-center p-5 rounded-xl bg-[#FAFAFA] hover:bg-[#FFF0F5] transition-colors group border border-transparent hover:border-[#F2D7E2]"
+              className="flex flex-col items-center text-center p-5 rounded-md bg-[#FAFAFA] hover:bg-[#FFF0F5] transition-colors group border border-transparent hover:border-[#F2D7E2]"
             >
               <div className="w-10 h-10 rounded-full bg-white shadow-xs text-[#ff0080] flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                 <Mail size={18} />
@@ -235,7 +235,7 @@ export default function AboutPage() {
 
             <a
               href="tel:+8801XXXXXXXX"
-              className="flex flex-col items-center text-center p-5 rounded-xl bg-[#FAFAFA] hover:bg-[#FFF0F5] transition-colors group border border-transparent hover:border-[#F2D7E2]"
+              className="flex flex-col items-center text-center p-5 rounded-md bg-[#FAFAFA] hover:bg-[#FFF0F5] transition-colors group border border-transparent hover:border-[#F2D7E2]"
             >
               <div className="w-10 h-10 rounded-full bg-white shadow-xs text-[#ff0080] flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                 <Phone size={18} />
@@ -250,7 +250,7 @@ export default function AboutPage() {
               href="https://www.luxuryladies.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-col items-center text-center p-5 rounded-xl bg-[#FAFAFA] hover:bg-[#FFF0F5] transition-colors group border border-transparent hover:border-[#F2D7E2]"
+              className="flex flex-col items-center text-center p-5 rounded-md bg-[#FAFAFA] hover:bg-[#FFF0F5] transition-colors group border border-transparent hover:border-[#F2D7E2]"
             >
               <div className="w-10 h-10 rounded-full bg-white shadow-xs text-[#ff0080] flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                 <Globe size={18} />

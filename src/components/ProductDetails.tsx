@@ -8,8 +8,6 @@ import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
 import {
   Heart,
-  Share2,
-  Truck,
   RotateCcw,
   ShieldCheck,
   Check,
@@ -51,7 +49,7 @@ function normalizeOptionString(str: string): string {
   if (!str) return "";
   try {
     str = decodeURIComponent(str);
-  } catch {}
+  } catch { }
   return str
     .toLowerCase()
     .trim()
@@ -392,8 +390,8 @@ export default function ProductDetails({
   const isCurrentOutOfStock = isVariableProduct
     ? isAllAttributesSelected
       ? !matchingVariation ||
-        matchingVariation.stock_status === "outofstock" ||
-        matchingVariation.purchasable === false
+      matchingVariation.stock_status === "outofstock" ||
+      matchingVariation.purchasable === false
       : !hasAnyInStock
     : product.stock_status === "outofstock" || product.purchasable === false;
 
@@ -452,8 +450,8 @@ export default function ProductDetails({
     const currentVal = selectedAttributes[attrName];
     const isCurrentlySelected = Boolean(
       currentVal &&
-        (currentVal.toLowerCase().trim() === optionVal.toLowerCase().trim() ||
-          normalizeOptionString(currentVal) === normalizeOptionString(optionVal))
+      (currentVal.toLowerCase().trim() === optionVal.toLowerCase().trim() ||
+        normalizeOptionString(currentVal) === normalizeOptionString(optionVal))
     );
 
     // If clicking already selected option, toggle it off (deselect)
@@ -546,7 +544,6 @@ export default function ProductDetails({
 
   const [quantity, setQuantity] = useState<number>(1);
   const [isWishlisted, setIsWishlisted] = useState<boolean>(false);
-  const [copied, setCopied] = useState<boolean>(false);
   const [justAdded, setJustAdded] = useState<boolean>(false);
   const [showVariantAlert, setShowVariantAlert] = useState<boolean>(false);
   const alertTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -567,14 +564,6 @@ export default function ProductDetails({
       if (rect.top < 0 || rect.bottom > window.innerHeight) {
         variantSectionRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
       }
-    }
-  };
-
-  const handleShare = () => {
-    if (typeof window !== "undefined") {
-      navigator.clipboard?.writeText(window.location.href);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
     }
   };
 
@@ -649,7 +638,7 @@ export default function ProductDetails({
       },
       quantity
     );
-    router.push("/cart");
+    router.push("/checkout");
   };
 
   const handleQuantityChange = (delta: number) => {
@@ -830,16 +819,6 @@ export default function ProductDetails({
                       className={isWishlisted ? "fill-[#ff0080]" : ""}
                     />
                   </button>
-
-                  <button
-                    type="button"
-                    onClick={handleShare}
-                    className="w-9 h-9 rounded-full flex items-center justify-center border border-[#E5D7DD] text-[#555] hover:border-[#ff0080] hover:text-[#ff0080] bg-white transition-colors cursor-pointer"
-                    aria-label="Share"
-                    title={copied ? "Copied Link!" : "Share Link"}
-                  >
-                    <Share2 size={17} />
-                  </button>
                 </div>
               </div>
 
@@ -940,18 +919,17 @@ export default function ProductDetails({
 
                             {/* Options box with pink outline when validation fails (matching reference image) */}
                             <div
-                              className={`p-2 rounded-xl transition-all duration-300 ${
-                                isMissing
+                              className={`p-2 rounded-md transition-all duration-300 ${isMissing
                                   ? "border-2 border-[#ff0080]"
                                   : "border-2 border-transparent"
-                              }`}
+                                }`}
                             >
                               <div className="flex flex-wrap gap-2">
                                 {attr.options.map((option) => {
                                   const isSelected = Boolean(
                                     currentVal &&
-                                      (currentVal.toLowerCase().trim() === option.toLowerCase().trim() ||
-                                        normalizeOptionString(currentVal) === normalizeOptionString(option))
+                                    (currentVal.toLowerCase().trim() === option.toLowerCase().trim() ||
+                                      normalizeOptionString(currentVal) === normalizeOptionString(option))
                                   );
                                   const { inStock } = getOptionStatus(attr.name, option);
 
@@ -960,15 +938,14 @@ export default function ProductDetails({
                                       key={option}
                                       type="button"
                                       onClick={() => handleSelectAttributeOption(attr.name, option)}
-                                      className={`min-w-[44px] h-9 px-3 rounded-md text-xs font-semibold flex items-center justify-center border transition-all cursor-pointer relative ${
-                                        isSelected
+                                      className={`min-w-[44px] h-9 px-3 rounded-md text-xs font-semibold flex items-center justify-center border transition-all cursor-pointer relative ${isSelected
                                           ? inStock
                                             ? "bg-[#ff0080] text-white border-[#ff0080] shadow-xs ring-2 ring-[#ff0080]/30"
                                             : "bg-[#E53935] text-white border-[#E53935] shadow-xs ring-2 ring-[#E53935]/30"
                                           : !inStock
                                             ? "border-[#E8DFE3] text-[#888] bg-[#FAF8F9] line-through hover:border-[#ff0080] hover:text-[#ff0080]"
                                             : "border-[#E0D3D9] text-[#333] bg-white hover:border-[#ff0080] hover:text-[#ff0080]"
-                                      }`}
+                                        }`}
                                       title={!inStock ? `${option} (Out of stock)` : option}
                                     >
                                       {option}
@@ -986,9 +963,8 @@ export default function ProductDetails({
                   {/* Stock status text */}
                   <div className="mb-5 flex items-center">
                     <span
-                      className={`text-xs font-medium flex items-center gap-1.5 ${
-                        isCurrentOutOfStock ? "text-[#E53935]" : "text-[#1E824C]"
-                      }`}
+                      className={`text-xs font-medium flex items-center gap-1.5 ${isCurrentOutOfStock ? "text-[#E53935]" : "text-[#1E824C]"
+                        }`}
                     >
                       <span className="text-base leading-none select-none">•</span>
                       <span>
@@ -1027,17 +1003,11 @@ export default function ProductDetails({
 
                   {/* Action Buttons */}
                   <div className="space-y-3 mb-6">
-                    {/* Cash on Delivery Feature Pill Banner */}
-                    <div className="w-full py-2.5 px-4 bg-[#FFF0F5] text-[#ff0080] border border-[#FFD6E3] rounded-md text-xs font-semibold text-center tracking-wide shadow-2xs flex items-center justify-center gap-2">
-                      <Truck size={16} />
-                      <span>Cash On Delivery Available Nationwide</span>
-                    </div>
-
                     <div className="relative">
                       {/* Floating tooltip bubble matching reference image */}
                       {showVariantAlert && (
                         <div className="absolute -top-11 left-1/2 -translate-x-1/2 z-30 animate-in fade-in zoom-in-95 duration-200 pointer-events-none drop-shadow-md">
-                          <div className="relative bg-white text-[#1e293b] border border-gray-200 shadow-md px-4 py-2 rounded-2xl flex items-center gap-2 whitespace-nowrap text-xs sm:text-[13px] font-semibold">
+                          <div className="relative bg-white text-[#1e293b] border border-gray-200 shadow-md px-4 py-2 rounded-md flex items-center gap-2 whitespace-nowrap text-xs sm:text-[13px] font-semibold">
                             <Info size={16} className="text-[#ff0080] shrink-0" />
                             <span>Please select all variants first</span>
                             {/* Downward pointing arrow */}
@@ -1051,11 +1021,10 @@ export default function ProductDetails({
                           type="button"
                           disabled={isCurrentOutOfStock}
                           onClick={handleBuyNow}
-                          className={`w-full py-3 rounded-md text-xs font-bold tracking-wide shadow-xs transition-all duration-200 !bg-[#ff0080] !text-white ${
-                            isCurrentOutOfStock
+                          className={`w-full py-3 rounded-md text-xs font-bold tracking-wide shadow-xs transition-all duration-200 !bg-[#ff0080] !text-white ${isCurrentOutOfStock
                               ? "opacity-50 cursor-not-allowed"
                               : "hover:!bg-[#d4006a] cursor-pointer active:scale-[0.99]"
-                          }`}
+                            }`}
                         >
                           {isCurrentOutOfStock ? "Out of Stock" : "Buy Now"}
                         </button>
@@ -1064,13 +1033,12 @@ export default function ProductDetails({
                           type="button"
                           disabled={isCurrentOutOfStock}
                           onClick={handleAddToCart}
-                          className={`w-full py-3 rounded-md text-xs font-bold tracking-wide transition-all duration-200 ${
-                            isCurrentOutOfStock
+                          className={`w-full py-3 rounded-md text-xs font-bold tracking-wide transition-all duration-200 ${isCurrentOutOfStock
                               ? "bg-white text-[#ff0080] border-2 border-[#ff0080] opacity-50 cursor-not-allowed"
                               : justAdded
-                              ? "bg-emerald-600 text-white border-2 border-emerald-600 shadow-xs"
-                              : "bg-white hover:bg-[#FFF0F5] text-[#ff0080] border-2 border-[#ff0080] cursor-pointer active:scale-[0.99]"
-                          }`}
+                                ? "bg-emerald-600 text-white border-2 border-emerald-600 shadow-xs"
+                                : "bg-white hover:bg-[#FFF0F5] text-[#ff0080] border-2 border-[#ff0080] cursor-pointer active:scale-[0.99]"
+                            }`}
                         >
                           {isCurrentOutOfStock ? (
                             "Out of Stock"
@@ -1106,13 +1074,6 @@ export default function ProductDetails({
                     <strong className="text-[#222]">COD Available</strong>
                   </span>
                 </div>
-
-                <div className="pt-2">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#FFF5F8] text-[#ff0080] text-xs font-medium border border-[#F2E6EC]">
-                    <Truck size={14} />
-                    <span>Free Shipping on Pre-orders</span>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -1121,8 +1082,8 @@ export default function ProductDetails({
         {/* ── Key Highlights Cards Grid ── */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 mb-8">
           {(matchingVariation?.sku || product.sku) && (
-            <div className="bg-white p-4 rounded-xl border border-[#F2E6EC] flex items-center gap-3 shadow-2xs">
-              <div className="w-10 h-10 rounded-lg bg-[#FFF0F5] text-[#ff0080] flex items-center justify-center shrink-0">
+            <div className="bg-white p-4 rounded-md border border-[#F2E6EC] flex items-center gap-3 shadow-2xs">
+              <div className="w-10 h-10 rounded-md bg-[#FFF0F5] text-[#ff0080] flex items-center justify-center shrink-0">
                 <Layers size={18} />
               </div>
               <div>
@@ -1134,8 +1095,8 @@ export default function ProductDetails({
             </div>
           )}
 
-          <div className="bg-white p-4 rounded-xl border border-[#F2E6EC] flex items-center gap-3 shadow-2xs">
-            <div className="w-10 h-10 rounded-lg bg-[#FFF0F5] text-[#ff0080] flex items-center justify-center shrink-0">
+          <div className="bg-white p-4 rounded-md border border-[#F2E6EC] flex items-center gap-3 shadow-2xs">
+            <div className="w-10 h-10 rounded-md bg-[#FFF0F5] text-[#ff0080] flex items-center justify-center shrink-0">
               <Clock size={18} />
             </div>
             <div>
@@ -1145,8 +1106,8 @@ export default function ProductDetails({
           </div>
 
           {isVariableProduct && (
-            <div className="bg-white p-4 rounded-xl border border-[#F2E6EC] flex items-center gap-3 shadow-2xs">
-              <div className="w-10 h-10 rounded-lg bg-[#FFF0F5] text-[#ff0080] flex items-center justify-center shrink-0">
+            <div className="bg-white p-4 rounded-md border border-[#F2E6EC] flex items-center gap-3 shadow-2xs">
+              <div className="w-10 h-10 rounded-md bg-[#FFF0F5] text-[#ff0080] flex items-center justify-center shrink-0">
                 <Layers size={18} />
               </div>
               <div>
@@ -1159,8 +1120,8 @@ export default function ProductDetails({
           )}
 
           {product.total_sales !== undefined && product.total_sales !== null && (
-            <div className="bg-white p-4 rounded-xl border border-[#F2E6EC] flex items-center gap-3 shadow-2xs">
-              <div className="w-10 h-10 rounded-lg bg-[#E8F8EE] text-[#1E824C] flex items-center justify-center shrink-0">
+            <div className="bg-white p-4 rounded-md border border-[#F2E6EC] flex items-center gap-3 shadow-2xs">
+              <div className="w-10 h-10 rounded-md bg-[#E8F8EE] text-[#1E824C] flex items-center justify-center shrink-0">
                 <Check size={18} strokeWidth={2.5} />
               </div>
               <div>
@@ -1175,7 +1136,7 @@ export default function ProductDetails({
 
         {/* ── Product Description Section ── */}
         {(product.description || product.short_description) && (
-          <div className="bg-white rounded-xl border border-[#F2E6EC] p-6 mb-10 shadow-xs">
+          <div className="bg-white rounded-md border border-[#F2E6EC] p-6 mb-10 shadow-xs">
             <div className="flex items-center gap-2 mb-4 pb-3 border-b border-[#F7E7EC]">
               <Info size={17} className="text-[#ff0080]" />
               <h2 className="text-base font-semibold">

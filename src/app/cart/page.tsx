@@ -5,7 +5,7 @@ import { getProducts } from "@/lib/woocommerce";
 export const metadata: Metadata = {
   title: "Shopping Cart | luxuryladies - Premium Contemporary Fashion",
   description:
-    "Review your luxury heels, designer bags, and premium sleepwear. Free delivery nationwide on orders over Tk 3,000.",
+    "Review your luxury heels, designer bags, and premium sleepwear.",
 };
 
 export default function CartPage() {

@@ -84,3 +84,104 @@ export interface WooCommerceProduct {
     value: string;
   }[];
 }
+
+export interface WooCommerceOrderBilling {
+  first_name: string;
+  last_name?: string;
+  address_1: string;
+  address_2?: string;
+  city: string;
+  state?: string;
+  postcode?: string;
+  country?: string;
+  email?: string;
+  phone: string;
+}
+
+export interface WooCommerceOrderShipping {
+  first_name: string;
+  last_name?: string;
+  address_1: string;
+  address_2?: string;
+  city: string;
+  state?: string;
+  postcode?: string;
+  country?: string;
+}
+
+export interface WooCommerceOrderLineItem {
+  product_id: number;
+  variation_id?: number;
+  quantity: number;
+  name?: string;
+  subtotal?: string;
+  total?: string;
+  meta_data?: { key: string; value: string }[];
+}
+
+export interface CreateOrderPayload {
+  status?: string;
+  payment_method: string;
+  payment_method_title: string;
+  set_paid?: boolean;
+  billing: WooCommerceOrderBilling;
+  shipping: WooCommerceOrderShipping;
+  line_items: WooCommerceOrderLineItem[];
+  shipping_lines?: {
+    method_id: string;
+    method_title: string;
+    total: string;
+  }[];
+  coupon_lines?: { code: string }[];
+  customer_note?: string;
+  meta_data?: { key: string; value: string }[];
+}
+
+export interface WooCommerceOrderResponse {
+  id: number;
+  order_key?: string;
+  status: string;
+  currency: string;
+  total: string;
+  billing: WooCommerceOrderBilling;
+  shipping: WooCommerceOrderShipping;
+  payment_method: string;
+  payment_method_title: string;
+  line_items: WooCommerceOrderLineItem[];
+  date_created?: string;
+}
+
+export interface WooCommercePaymentGateway {
+  id: string;
+  title: string;
+  description?: string;
+  order?: number;
+  enabled: boolean;
+  method_title?: string;
+  method_description?: string;
+  instructions?: string;
+  settings?: Record<string, any>;
+}
+
+export interface WooCommerceShippingMethod {
+  id: string;
+  instance_id: number;
+  zone_id: number;
+  zone_name: string;
+  method_id: string;
+  method_title: string;
+  title: string;
+  cost: number;
+  enabled: boolean;
+  min_amount?: number;
+  requires?: string;
+  description?: string;
+}
+
+export interface WooCommerceState {
+  code: string;
+  name: string;
+}
+
+
+
