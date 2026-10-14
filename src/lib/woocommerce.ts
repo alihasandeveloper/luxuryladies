@@ -73,8 +73,17 @@ function normalizeProduct(raw: any): WooCommerceProduct {
   }
 
   const regularPrice = raw.regular_price || raw.price || "0";
-  const salePrice = raw.sale_price || raw.price || regularPrice;
-  const price = raw.price || salePrice || regularPrice;
+  const rawSale = raw.sale_price || "";
+  const hasSalePrice = Boolean(
+    rawSale &&
+    rawSale.trim() !== "" &&
+    regularPrice &&
+    regularPrice.trim() !== "" &&
+    Number(regularPrice) > Number(rawSale) &&
+    Number(rawSale) > 0
+  );
+  const salePrice = hasSalePrice ? String(rawSale) : "";
+  const price = raw.price || (hasSalePrice ? salePrice : regularPrice);
 
   return {
     id: raw.id,
@@ -94,8 +103,8 @@ function normalizeProduct(raw: any): WooCommerceProduct {
     sku: raw.sku || `SKU-${raw.id}`,
     price: String(price),
     regular_price: String(regularPrice),
-    sale_price: String(salePrice),
-    on_sale: Boolean(raw.on_sale || (regularPrice && salePrice && Number(regularPrice) > Number(salePrice))),
+    sale_price: salePrice,
+    on_sale: Boolean(hasSalePrice || (raw.on_sale && hasSalePrice)),
     purchasable: raw.purchasable ?? true,
     total_sales: raw.total_sales || 0,
     stock_status: (raw.stock_status as any) || "instock",
@@ -205,28 +214,35 @@ export async function getProductVariations(productId: number): Promise<WooCommer
     if (!Array.isArray(rawVars)) return [];
 
     return rawVars.map((v: any) => {
+      // In WooCommerce REST API, stock_status is the authoritative stock field
       const isOutOfStock =
         v.stock_status === "outofstock" ||
-        v.in_stock === false ||
-        (v.manage_stock &&
+        (Boolean(v.manage_stock) &&
           v.stock_quantity !== null &&
           v.stock_quantity !== undefined &&
-          Number(v.stock_quantity) <= 0);
+          Number(v.stock_quantity) <= 0 &&
+          !v.backorders_allowed);
 
       const rawReg = v.regular_price || v.price || "0";
       const rawSale = v.sale_price || "";
-      const rawPrice = v.price || rawSale || rawReg;
+      const hasSalePrice = Boolean(
+        rawSale &&
+        rawSale.trim() !== "" &&
+        rawReg &&
+        rawReg.trim() !== "" &&
+        Number(rawReg) > Number(rawSale) &&
+        Number(rawSale) > 0
+      );
+      const rawPrice = hasSalePrice ? rawSale : (v.price || rawReg);
 
       return {
         id: v.id,
         sku: v.sku || "",
         price: String(rawPrice),
         regular_price: String(rawReg),
-        sale_price: String(rawSale),
-        on_sale: Boolean(
-          v.on_sale || (rawReg && rawSale && Number(rawReg) > Number(rawSale))
-        ),
-        purchasable: isOutOfStock ? false : (v.purchasable ?? true),
+        sale_price: hasSalePrice ? String(rawSale) : "",
+        on_sale: hasSalePrice,
+        purchasable: isOutOfStock ? false : Boolean(v.purchasable ?? true),
         stock_status: isOutOfStock
           ? "outofstock"
           : ((v.stock_status as any) || "instock"),

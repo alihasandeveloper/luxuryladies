@@ -152,9 +152,16 @@ export default function ProductDetails({
     }
   };
 
+  // Check if product actually has configured variations in WooCommerce
+  const hasConfiguredVariations = Boolean(
+    (product.variations && product.variations.length > 0) ||
+    (product.variations_data && product.variations_data.length > 0)
+  );
+
   // Determine if product is variable and extract genuine variation attributes
   const variationAttributes = useMemo(() => {
     if (!product.attributes || product.attributes.length === 0) return [];
+    if (!hasConfiguredVariations) return [];
 
     // If variations_data exists, find attributes that actually participate in variations
     if (product.variations_data && product.variations_data.length > 0) {
@@ -174,14 +181,9 @@ export default function ProductDetails({
     }
 
     return (product.attributes || []).filter((a) => a.variation);
-  }, [product.attributes, product.variations_data]);
+  }, [product.attributes, product.variations_data, hasConfiguredVariations]);
 
-  const isVariableProduct =
-    Boolean(
-      product.type === "variable" ||
-      (product.variations && product.variations.length > 0) ||
-      (product.variations_data && product.variations_data.length > 0)
-    ) && variationAttributes.length > 0;
+  const isVariableProduct = hasConfiguredVariations && variationAttributes.length > 0;
 
   // Helper to extract default selections ONLY if explicitly set in WooCommerce backend
   const computeInitialSelections = (): Record<string, string> => {
@@ -235,29 +237,56 @@ export default function ProductDetails({
       return null;
     }
 
-    return (
-      product.variations_data.find((v) => {
-        if (!v.attributes || v.attributes.length === 0) {
-          return true;
+    if (!isAllAttributesSelected) {
+      return null;
+    }
+
+    // 1. Exact match pass: all attributes match specific variation options
+    const exactMatch = product.variations_data.find((v) => {
+      if (!v.attributes || v.attributes.length === 0) return false;
+
+      return variationAttributes.every((attr) => {
+        const selectedVal = selectedAttributes[attr.name];
+        if (!selectedVal) return false;
+
+        const vAttr = v.attributes.find(
+          (a) =>
+            (attr.id && a.id && attr.id === a.id) ||
+            matchAttributeKey(a.name, attr.name, attr.slug)
+        );
+
+        if (!vAttr || !vAttr.option || vAttr.option.trim() === "") {
+          return false;
         }
 
-        return v.attributes.every((vAttr) => {
-          // Empty option in WooCommerce variation means "Any"
-          if (!vAttr.option || vAttr.option.trim() === "") {
-            return true;
-          }
+        const optionsToCompare = [vAttr.option];
+        if (vAttr.slug && vAttr.slug !== vAttr.option) {
+          optionsToCompare.push(vAttr.slug);
+        }
 
-          const matchedProductAttr = variationAttributes.find(
-            (pa) =>
-              (vAttr.id && pa.id && vAttr.id === pa.id) ||
-              matchAttributeKey(vAttr.name, pa.name, pa.slug)
+        return Boolean(findMatchingOption(optionsToCompare, selectedVal));
+      });
+    });
+
+    if (exactMatch) return exactMatch;
+
+    // 2. Wildcard match pass: variation has "Any" for some attributes
+    return (
+      product.variations_data.find((v) => {
+        if (!v.attributes || v.attributes.length === 0) return true;
+
+        return variationAttributes.every((attr) => {
+          const selectedVal = selectedAttributes[attr.name];
+          if (!selectedVal) return false;
+
+          const vAttr = v.attributes.find(
+            (a) =>
+              (attr.id && a.id && attr.id === a.id) ||
+              matchAttributeKey(a.name, attr.name, attr.slug)
           );
 
-          const key = matchedProductAttr ? matchedProductAttr.name : vAttr.name;
-          const selectedVal = selectedAttributes[key] || selectedAttributes[vAttr.name];
-
-          if (!selectedVal) {
-            return false;
+          if (!vAttr || !vAttr.option || vAttr.option.trim() === "") {
+            return true;
           }
 
           const optionsToCompare = [vAttr.option];
@@ -269,7 +298,7 @@ export default function ProductDetails({
         });
       }) || null
     );
-  }, [isVariableProduct, product.variations_data, variationAttributes, selectedAttributes]);
+  }, [isVariableProduct, product.variations_data, variationAttributes, selectedAttributes, isAllAttributesSelected]);
 
   // When variation has its own image, automatically switch active image in gallery; revert to primary when deselected
   useEffect(() => {
@@ -312,29 +341,52 @@ export default function ProductDetails({
     );
   }, [isVariableProduct, product.variations_data, product.stock_status, product.purchasable]);
 
-  // Calculate pricing based on matching variation or product
-  const rawVarRegular = matchingVariation?.regular_price || matchingVariation?.price;
-  const parsedVarRegular = rawVarRegular ? parseFloat(rawVarRegular) : 0;
-  const regularPrice =
-    parsedVarRegular > 0
-      ? parsedVarRegular
-      : parseFloat(product.regular_price || product.price || "0");
+  // Calculate pricing strictly for selected variation without inheriting another variation's sale price
+  const { regularPrice, currentPrice, isOnSale, discountPercent } = useMemo(() => {
+    if (matchingVariation) {
+      const varReg = parseFloat(matchingVariation.regular_price || "0");
+      const varSale = parseFloat(matchingVariation.sale_price || "0");
+      const varPrice = parseFloat(matchingVariation.price || "0");
 
-  const rawVarCurrent = matchingVariation?.sale_price || matchingVariation?.price;
-  const parsedVarCurrent = rawVarCurrent ? parseFloat(rawVarCurrent) : 0;
-  const currentPrice =
-    parsedVarCurrent > 0
-      ? parsedVarCurrent
-      : parseFloat(product.sale_price || product.price || "0");
+      if (varSale > 0 && varReg > 0 && varReg > varSale) {
+        return {
+          regularPrice: varReg,
+          currentPrice: varSale,
+          isOnSale: true,
+          discountPercent: Math.round(((varReg - varSale) / varReg) * 100),
+        };
+      } else {
+        const finalPrice = varReg > 0 ? varReg : varPrice;
+        return {
+          regularPrice: finalPrice,
+          currentPrice: finalPrice,
+          isOnSale: false,
+          discountPercent: 0,
+        };
+      }
+    }
 
-  const isOnSale = matchingVariation
-    ? Boolean(matchingVariation.on_sale || regularPrice > currentPrice)
-    : Boolean(product.on_sale && regularPrice > currentPrice);
+    const prodReg = parseFloat(product.regular_price || "0");
+    const prodSale = parseFloat(product.sale_price || "0");
+    const prodPrice = parseFloat(product.price || "0");
 
-  const discountPercent =
-    isOnSale && regularPrice > currentPrice
-      ? Math.round(((regularPrice - currentPrice) / regularPrice) * 100)
-      : 0;
+    if (prodSale > 0 && prodReg > 0 && prodReg > prodSale) {
+      return {
+        regularPrice: prodReg,
+        currentPrice: prodSale,
+        isOnSale: true,
+        discountPercent: Math.round(((prodReg - prodSale) / prodReg) * 100),
+      };
+    }
+
+    const fallbackPrice = prodReg > 0 ? prodReg : prodPrice;
+    return {
+      regularPrice: fallbackPrice,
+      currentPrice: prodSale > 0 ? prodSale : fallbackPrice,
+      isOnSale: Boolean(product.on_sale && fallbackPrice > prodSale && prodSale > 0),
+      discountPercent: 0,
+    };
+  }, [matchingVariation, product]);
 
   // Accurate stock status for current selection
   const isCurrentOutOfStock = isVariableProduct
@@ -345,7 +397,12 @@ export default function ProductDetails({
       : !hasAnyInStock
     : product.stock_status === "outofstock" || product.purchasable === false;
 
-  // Helper to check if a specific attribute option exists and has available stock
+  // A variable product with 0 variations created in WooCommerce is unconfigured and unavailable
+  const isUnconfiguredOrUnavailable =
+    (product.type === "variable" && !hasConfiguredVariations) ||
+    (product.purchasable === false && currentPrice <= 0);
+
+  // Helper to check if a specific attribute option exists and has available stock across the product
   const getOptionStatus = (
     attrName: string,
     optionVal: string
@@ -359,45 +416,23 @@ export default function ProductDetails({
     const matchingVars = product.variations_data.filter((v) => {
       if (!v.attributes || v.attributes.length === 0) return true;
 
-      // 1. Check target attribute
       const thisVAttr = v.attributes.find(
         (a) =>
           (targetAttr && a.id && targetAttr.id && a.id === targetAttr.id) ||
           matchAttributeKey(a.name, attrName, targetAttr?.slug)
       );
-      if (thisVAttr && thisVAttr.option && thisVAttr.option.trim() !== "") {
-        const optionsToCompare = [thisVAttr.option];
-        if (thisVAttr.slug && thisVAttr.slug !== thisVAttr.option) {
-          optionsToCompare.push(thisVAttr.slug);
-        }
-        if (!findMatchingOption(optionsToCompare, optionVal)) {
-          return false;
-        }
+
+      // Empty option means "Any" in WooCommerce
+      if (!thisVAttr || !thisVAttr.option || thisVAttr.option.trim() === "") {
+        return true;
       }
 
-      // 2. Check other selected attributes
-      for (const otherAttr of variationAttributes) {
-        if (otherAttr.name === attrName) continue;
-        const otherSelectedVal = selectedAttributes[otherAttr.name];
-        if (!otherSelectedVal) continue;
-
-        const otherVAttr = v.attributes.find(
-          (a) =>
-            (otherAttr.id && a.id && otherAttr.id === a.id) ||
-            matchAttributeKey(a.name, otherAttr.name, otherAttr.slug)
-        );
-        if (otherVAttr && otherVAttr.option && otherVAttr.option.trim() !== "") {
-          const otherOptions = [otherVAttr.option];
-          if (otherVAttr.slug && otherVAttr.slug !== otherVAttr.option) {
-            otherOptions.push(otherVAttr.slug);
-          }
-          if (!findMatchingOption(otherOptions, otherSelectedVal)) {
-            return false;
-          }
-        }
+      const optionsToCompare = [thisVAttr.option];
+      if (thisVAttr.slug && thisVAttr.slug !== thisVAttr.option) {
+        optionsToCompare.push(thisVAttr.slug);
       }
 
-      return true;
+      return Boolean(findMatchingOption(optionsToCompare, optionVal));
     });
 
     if (matchingVars.length === 0) {
@@ -411,11 +446,129 @@ export default function ProductDetails({
     return { exists: true, inStock };
   };
 
+  const handleSelectAttributeOption = (attrName: string, optionVal: string) => {
+    setShowVariantAlert(false);
+
+    const currentVal = selectedAttributes[attrName];
+    const isCurrentlySelected = Boolean(
+      currentVal &&
+        (currentVal.toLowerCase().trim() === optionVal.toLowerCase().trim() ||
+          normalizeOptionString(currentVal) === normalizeOptionString(optionVal))
+    );
+
+    // If clicking already selected option, toggle it off (deselect)
+    if (isCurrentlySelected) {
+      setSelectedAttributes((prev) => {
+        const next = { ...prev };
+        delete next[attrName];
+        return next;
+      });
+      return;
+    }
+
+    // New candidate selections
+    const newSelections: Record<string, string> = {
+      ...selectedAttributes,
+      [attrName]: optionVal,
+    };
+
+    // If variable product has variations_data, ensure cross-attribute compatibility
+    if (product.variations_data && product.variations_data.length > 0) {
+      // 1. Check if new selections match any existing variation
+      const exactMatch = product.variations_data.find((v) => {
+        if (!v.attributes || v.attributes.length === 0) return true;
+        return v.attributes.every((vAttr) => {
+          if (!vAttr.option || vAttr.option.trim() === "") return true;
+          const matchedPa = variationAttributes.find(
+            (pa) =>
+              (vAttr.id && pa.id && vAttr.id === pa.id) ||
+              matchAttributeKey(vAttr.name, pa.name, pa.slug)
+          );
+          const key = matchedPa ? matchedPa.name : vAttr.name;
+          const selVal = newSelections[key];
+          if (!selVal) return true;
+          const opts = [vAttr.option];
+          if (vAttr.slug && vAttr.slug !== vAttr.option) opts.push(vAttr.slug);
+          return Boolean(findMatchingOption(opts, selVal));
+        });
+      });
+
+      if (exactMatch) {
+        setSelectedAttributes(newSelections);
+        return;
+      }
+
+      // 2. If incompatible with current other selections, find compatible variation for clicked option
+      const targetAttr = variationAttributes.find((a) => a.name === attrName);
+      const compatibleVars = product.variations_data.filter((v) => {
+        if (!v.attributes || v.attributes.length === 0) return true;
+        const thisVAttr = v.attributes.find(
+          (a) =>
+            (targetAttr && a.id && targetAttr.id && a.id === targetAttr.id) ||
+            matchAttributeKey(a.name, attrName, targetAttr?.slug)
+        );
+        if (!thisVAttr || !thisVAttr.option || thisVAttr.option.trim() === "") return true;
+        const opts = [thisVAttr.option];
+        if (thisVAttr.slug && thisVAttr.slug !== thisVAttr.option) opts.push(thisVAttr.slug);
+        return Boolean(findMatchingOption(opts, optionVal));
+      });
+
+      if (compatibleVars.length > 0) {
+        // Prefer an in-stock compatible variation
+        const preferredVar =
+          compatibleVars.find(
+            (v) => v.stock_status !== "outofstock" && v.purchasable !== false
+          ) || compatibleVars[0];
+
+        const updatedSelections: Record<string, string> = { [attrName]: optionVal };
+        variationAttributes.forEach((otherAttr) => {
+          if (otherAttr.name === attrName) return;
+          const otherVAttr = preferredVar.attributes?.find(
+            (a) =>
+              (otherAttr.id && a.id && otherAttr.id === a.id) ||
+              matchAttributeKey(a.name, otherAttr.name, otherAttr.slug)
+          );
+          if (otherVAttr && otherVAttr.option && otherVAttr.option.trim() !== "") {
+            const matchedOpt = findMatchingOption(otherAttr.options, otherVAttr.option);
+            if (matchedOpt) {
+              updatedSelections[otherAttr.name] = matchedOpt;
+            }
+          }
+        });
+
+        setSelectedAttributes(updatedSelections);
+        return;
+      }
+    }
+
+    setSelectedAttributes(newSelections);
+  };
+
   const [quantity, setQuantity] = useState<number>(1);
   const [isWishlisted, setIsWishlisted] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
   const [justAdded, setJustAdded] = useState<boolean>(false);
+  const [showVariantAlert, setShowVariantAlert] = useState<boolean>(false);
+  const alertTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const variantSectionRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    return () => {
+      if (alertTimeoutRef.current) clearTimeout(alertTimeoutRef.current);
+    };
+  }, []);
+
+  const triggerVariantAlert = () => {
+    setShowVariantAlert(true);
+    if (alertTimeoutRef.current) clearTimeout(alertTimeoutRef.current);
+    alertTimeoutRef.current = setTimeout(() => setShowVariantAlert(false), 3000);
+    if (variantSectionRef.current) {
+      const rect = variantSectionRef.current.getBoundingClientRect();
+      if (rect.top < 0 || rect.bottom > window.innerHeight) {
+        variantSectionRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  };
 
   const handleShare = () => {
     if (typeof window !== "undefined") {
@@ -427,12 +580,7 @@ export default function ProductDetails({
 
   const handleAddToCart = () => {
     if (isVariableProduct && !isAllAttributesSelected) {
-      const missingAttr = variationAttributes.find((a) => !selectedAttributes[a.name]);
-      toast.error(
-        missingAttr
-          ? `Please select "${missingAttr.name}" before adding to cart!`
-          : "Please select all product options before adding to cart!"
-      );
+      triggerVariantAlert();
       return;
     }
 
@@ -476,12 +624,7 @@ export default function ProductDetails({
 
   const handleBuyNow = () => {
     if (isVariableProduct && !isAllAttributesSelected) {
-      const missingAttr = variationAttributes.find((a) => !selectedAttributes[a.name]);
-      toast.error(
-        missingAttr
-          ? `Please select "${missingAttr.name}" before proceeding!`
-          : "Please select all product options before proceeding!"
-      );
+      triggerVariantAlert();
       return;
     }
 
@@ -708,29 +851,31 @@ export default function ProductDetails({
               )}
 
               {/* Price Row */}
-              <div className="flex items-baseline gap-3 mb-2">
-                {isVariableProduct && !isAllAttributesSelected && priceRange?.isRange ? (
-                  <h3 className="text-2xl md:text-3xl font-bold">
-                    Tk {priceRange.min.toLocaleString()} – Tk {priceRange.max.toLocaleString()}
-                  </h3>
-                ) : (
-                  <>
+              {!isUnconfiguredOrUnavailable && (currentPrice > 0 || priceRange) && (
+                <div className="flex items-baseline gap-3 mb-2">
+                  {isVariableProduct && !isAllAttributesSelected && priceRange?.isRange ? (
                     <h3 className="text-2xl md:text-3xl font-bold">
-                      Tk {currentPrice.toLocaleString()}
+                      Tk {priceRange.min.toLocaleString()} – Tk {priceRange.max.toLocaleString()}
                     </h3>
-                    {regularPrice > currentPrice && (
-                      <span className="text-base text-[#8C7B82] line-through">
-                        Tk {regularPrice.toLocaleString()}
-                      </span>
-                    )}
-                    {discountPercent > 0 && (
-                      <span className="px-2 py-0.5 bg-[#E8F8EE] text-[#1E824C] border border-[#C6EBD3] rounded-md text-xs font-bold">
-                        {discountPercent}% OFF
-                      </span>
-                    )}
-                  </>
-                )}
-              </div>
+                  ) : (
+                    <>
+                      <h3 className="text-2xl md:text-3xl font-bold">
+                        Tk {currentPrice.toLocaleString()}
+                      </h3>
+                      {regularPrice > currentPrice && (
+                        <span className="text-base text-[#8C7B82] line-through">
+                          Tk {regularPrice.toLocaleString()}
+                        </span>
+                      )}
+                      {discountPercent > 0 && (
+                        <span className="px-2 py-0.5 bg-[#E8F8EE] text-[#1E824C] border border-[#C6EBD3] rounded-md text-xs font-bold">
+                          {discountPercent}% OFF
+                        </span>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
 
               {/* Short Description */}
               {product.short_description && (
@@ -740,194 +885,209 @@ export default function ProductDetails({
                 />
               )}
 
-              {/* Dynamic Attribute Selectors */}
-              {isVariableProduct && (
-                <div className="space-y-4 mb-5">
-                  {variationAttributes.map((attr) => {
-                    const currentVal = selectedAttributes[attr.name];
+              {isUnconfiguredOrUnavailable ? (
+                <div className="my-6 py-5 border-t border-b border-[#F2E6EC] space-y-3">
+                  <p className="text-sm md:text-base text-[#444] font-medium">
+                    This product is currently out of stock and unavailable.
+                  </p>
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-[#777] pt-1">
+                    {product.sku && (
+                      <span>
+                        <strong className="text-[#333]">SKU:</strong> {product.sku}
+                      </span>
+                    )}
+                    {product.categories?.[0]?.name && (
+                      <span>
+                        <strong className="text-[#333]">Category:</strong> {product.categories[0].name}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Dynamic Attribute Selectors */}
+                  {isVariableProduct && (
+                    <div ref={variantSectionRef} className="space-y-4 mb-5 scroll-mt-24">
+                      {variationAttributes.map((attr) => {
+                        const currentVal = selectedAttributes[attr.name];
+                        const isMissing = showVariantAlert && !currentVal;
 
-                    return (
-                      <div key={attr.id || attr.name}>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs font-semibold text-[#222]">
-                            Select {attr.name}:{" "}
-                            <span className="font-bold text-[#ff0080]">
-                              {currentVal || "Choose an option"}
-                            </span>
-                          </span>
-                          {currentVal && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedAttributes((prev) => {
-                                  const next = { ...prev };
-                                  delete next[attr.name];
-                                  return next;
-                                });
-                              }}
-                              className="text-[11px] font-medium text-[#8C7B82] hover:text-[#ff0080] transition-colors cursor-pointer underline"
-                            >
-                              Clear
-                            </button>
-                          )}
-                        </div>
-
-                        <div className="flex flex-wrap gap-2">
-                          {attr.options.map((option) => {
-                            const isSelected = Boolean(
-                              currentVal &&
-                                (currentVal.toLowerCase().trim() === option.toLowerCase().trim() ||
-                                  normalizeOptionString(currentVal) === normalizeOptionString(option))
-                            );
-                            const { exists, inStock } = getOptionStatus(attr.name, option);
-
-                            return (
-                              <button
-                                key={option}
-                                type="button"
-                                disabled={!exists}
-                                onClick={() => {
-                                  setSelectedAttributes((prev) => {
-                                    if (isSelected) {
+                        return (
+                          <div key={attr.id || attr.name}>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-xs font-semibold text-[#222]">
+                                Select {attr.name}:{" "}
+                                <span className="font-bold text-[#ff0080]">
+                                  {currentVal || "Choose an option"}
+                                </span>
+                              </span>
+                              {currentVal && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedAttributes((prev) => {
                                       const next = { ...prev };
                                       delete next[attr.name];
                                       return next;
-                                    }
-                                    return {
-                                      ...prev,
-                                      [attr.name]: option,
-                                    };
-                                  });
-                                }}
-                                className={`min-w-[44px] h-9 px-3 rounded-md text-xs font-semibold flex items-center justify-center border transition-all cursor-pointer relative ${
-                                  isSelected
-                                    ? inStock
-                                      ? "bg-[#ff0080] text-white border-[#ff0080] shadow-xs ring-2 ring-[#ff0080]/30"
-                                      : "bg-[#E53935] text-white border-[#E53935] shadow-xs ring-2 ring-[#E53935]/30"
-                                    : !exists
-                                      ? "border-[#E8DFE3] text-[#B8ABB2] bg-[#FAF8F9] line-through cursor-not-allowed opacity-40 pointer-events-none"
-                                      : !inStock
-                                        ? "border-[#F2D6D6] text-[#C53030] bg-[#FFF5F5] line-through hover:border-[#E53935]"
-                                        : "border-[#E0D3D9] text-[#333] bg-white hover:border-[#ff0080] hover:text-[#ff0080]"
-                                }`}
-                                title={
-                                  !exists
-                                    ? `${option} (Not available)`
-                                    : !inStock
-                                      ? `${option} (Out of stock)`
-                                      : option
-                                }
-                              >
-                                {option}
-                              </button>
-                            );
-                          })}
-                        </div>
+                                    });
+                                  }}
+                                  className="text-[11px] font-medium text-[#8C7B82] hover:text-[#ff0080] transition-colors cursor-pointer underline"
+                                >
+                                  Clear
+                                </button>
+                              )}
+                            </div>
 
-                        {/* Helper message when this attribute is not yet selected */}
-                        {!currentVal && (
-                          <p className="text-[11px] text-[#ff0080] font-medium mt-2 flex items-center gap-1.5">
-                            <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#ff0080]" />
-                            <span>Please select a {attr.name}</span>
-                          </p>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+                            {/* Options box with pink outline when validation fails (matching reference image) */}
+                            <div
+                              className={`p-2 rounded-xl transition-all duration-300 ${
+                                isMissing
+                                  ? "border-2 border-[#ff0080]"
+                                  : "border-2 border-transparent"
+                              }`}
+                            >
+                              <div className="flex flex-wrap gap-2">
+                                {attr.options.map((option) => {
+                                  const isSelected = Boolean(
+                                    currentVal &&
+                                      (currentVal.toLowerCase().trim() === option.toLowerCase().trim() ||
+                                        normalizeOptionString(currentVal) === normalizeOptionString(option))
+                                  );
+                                  const { inStock } = getOptionStatus(attr.name, option);
 
-              {/* Stock status text */}
-              <div className="mb-5 flex items-center">
-                <span
-                  className={`text-xs font-medium flex items-center gap-1.5 ${
-                    isCurrentOutOfStock ? "text-[#E53935]" : "text-[#1E824C]"
-                  }`}
-                >
-                  <span className="text-base leading-none select-none">•</span>
-                  <span>
-                    {isCurrentOutOfStock ? "Out of stock" : "Stock available"}
-                  </span>
-                </span>
-              </div>
+                                  return (
+                                    <button
+                                      key={option}
+                                      type="button"
+                                      onClick={() => handleSelectAttributeOption(attr.name, option)}
+                                      className={`min-w-[44px] h-9 px-3 rounded-md text-xs font-semibold flex items-center justify-center border transition-all cursor-pointer relative ${
+                                        isSelected
+                                          ? inStock
+                                            ? "bg-[#ff0080] text-white border-[#ff0080] shadow-xs ring-2 ring-[#ff0080]/30"
+                                            : "bg-[#E53935] text-white border-[#E53935] shadow-xs ring-2 ring-[#E53935]/30"
+                                          : !inStock
+                                            ? "border-[#E8DFE3] text-[#888] bg-[#FAF8F9] line-through hover:border-[#ff0080] hover:text-[#ff0080]"
+                                            : "border-[#E0D3D9] text-[#333] bg-white hover:border-[#ff0080] hover:text-[#ff0080]"
+                                      }`}
+                                      title={!inStock ? `${option} (Out of stock)` : option}
+                                    >
+                                      {option}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
 
-              {/* Quantity Selector */}
-              <div className="mb-6">
-                <span className="block text-xs font-semibold text-[#222] mb-2">
-                  Quantity
-                </span>
-                <div className="inline-flex items-center border border-[#E0D3D9] rounded-md bg-white">
-                  <button
-                    type="button"
-                    onClick={() => handleQuantityChange(-1)}
-                    className="w-8 h-8 flex items-center justify-center text-[#555] hover:text-[#ff0080] transition-colors cursor-pointer"
-                    aria-label="Decrease quantity"
-                  >
-                    <Minus size={13} strokeWidth={2.5} />
-                  </button>
-                  <span className="w-10 text-center text-xs font-bold text-[#111]">
-                    {quantity}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => handleQuantityChange(1)}
-                    className="w-8 h-8 flex items-center justify-center text-[#555] hover:text-[#ff0080] transition-colors cursor-pointer"
-                    aria-label="Increase quantity"
-                  >
-                    <Plus size={13} strokeWidth={2.5} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="space-y-3 mb-6">
-                {/* Cash on Delivery Feature Pill Banner */}
-                <div className="w-full py-2.5 px-4 bg-[#FFF0F5] text-[#ff0080] border border-[#FFD6E3] rounded-md text-xs font-semibold text-center tracking-wide shadow-2xs flex items-center justify-center gap-2">
-                  <Truck size={16} />
-                  <span>Cash On Delivery Available Nationwide</span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    disabled={isCurrentOutOfStock || (isVariableProduct && !isAllAttributesSelected)}
-                    onClick={handleBuyNow}
-                    className={`w-full py-3 rounded-md text-xs font-bold tracking-wide shadow-xs transition-all duration-200 !bg-[#ff0080] !text-white ${
-                      isCurrentOutOfStock || (isVariableProduct && !isAllAttributesSelected)
-                        ? "opacity-50 cursor-not-allowed"
-                        : "hover:!bg-[#d4006a] cursor-pointer"
-                    }`}
-                  >
-                    {isCurrentOutOfStock ? "Out of Stock" : "Buy Now"}
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={isCurrentOutOfStock || (isVariableProduct && !isAllAttributesSelected)}
-                    onClick={handleAddToCart}
-                    className={`w-full py-3 rounded-md text-xs font-bold tracking-wide transition-all duration-200 ${
-                      justAdded
-                        ? "bg-emerald-600 text-white border-2 border-emerald-600 shadow-xs"
-                        : isCurrentOutOfStock || (isVariableProduct && !isAllAttributesSelected)
-                        ? "bg-white text-[#ff0080] border-2 border-[#ff0080] opacity-50 cursor-not-allowed"
-                        : "bg-white hover:bg-[#FFF0F5] text-[#ff0080] border-2 border-[#ff0080] cursor-pointer"
-                    }`}
-                  >
-                    {isCurrentOutOfStock ? (
-                      "Unavailable"
-                    ) : justAdded ? (
-                      <span className="flex items-center justify-center gap-1.5 animate-in zoom-in-95">
-                        <Check size={16} strokeWidth={2.5} />
-                        Added to Cart
+                  {/* Stock status text */}
+                  <div className="mb-5 flex items-center">
+                    <span
+                      className={`text-xs font-medium flex items-center gap-1.5 ${
+                        isCurrentOutOfStock ? "text-[#E53935]" : "text-[#1E824C]"
+                      }`}
+                    >
+                      <span className="text-base leading-none select-none">•</span>
+                      <span>
+                        {isCurrentOutOfStock ? "Out of stock" : "Stock available"}
                       </span>
-                    ) : (
-                      "Add to Cart"
-                    )}
-                  </button>
-                </div>
+                    </span>
+                  </div>
 
+                  {/* Quantity Selector */}
+                  <div className="mb-6">
+                    <span className="block text-xs font-semibold text-[#222] mb-2">
+                      Quantity
+                    </span>
+                    <div className="inline-flex items-center border border-[#E0D3D9] rounded-md bg-white">
+                      <button
+                        type="button"
+                        onClick={() => handleQuantityChange(-1)}
+                        className="w-8 h-8 flex items-center justify-center text-[#555] hover:text-[#ff0080] transition-colors cursor-pointer"
+                        aria-label="Decrease quantity"
+                      >
+                        <Minus size={13} strokeWidth={2.5} />
+                      </button>
+                      <span className="w-10 text-center text-xs font-bold text-[#111]">
+                        {quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleQuantityChange(1)}
+                        className="w-8 h-8 flex items-center justify-center text-[#555] hover:text-[#ff0080] transition-colors cursor-pointer"
+                        aria-label="Increase quantity"
+                      >
+                        <Plus size={13} strokeWidth={2.5} />
+                      </button>
+                    </div>
+                  </div>
 
-              </div>
+                  {/* Action Buttons */}
+                  <div className="space-y-3 mb-6">
+                    {/* Cash on Delivery Feature Pill Banner */}
+                    <div className="w-full py-2.5 px-4 bg-[#FFF0F5] text-[#ff0080] border border-[#FFD6E3] rounded-md text-xs font-semibold text-center tracking-wide shadow-2xs flex items-center justify-center gap-2">
+                      <Truck size={16} />
+                      <span>Cash On Delivery Available Nationwide</span>
+                    </div>
+
+                    <div className="relative">
+                      {/* Floating tooltip bubble matching reference image */}
+                      {showVariantAlert && (
+                        <div className="absolute -top-11 left-1/2 -translate-x-1/2 z-30 animate-in fade-in zoom-in-95 duration-200 pointer-events-none drop-shadow-md">
+                          <div className="relative bg-white text-[#1e293b] border border-gray-200 shadow-md px-4 py-2 rounded-2xl flex items-center gap-2 whitespace-nowrap text-xs sm:text-[13px] font-semibold">
+                            <Info size={16} className="text-[#ff0080] shrink-0" />
+                            <span>Please select all variants first</span>
+                            {/* Downward pointing arrow */}
+                            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-r border-b border-gray-200 rotate-45" />
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button
+                          type="button"
+                          disabled={isCurrentOutOfStock}
+                          onClick={handleBuyNow}
+                          className={`w-full py-3 rounded-md text-xs font-bold tracking-wide shadow-xs transition-all duration-200 !bg-[#ff0080] !text-white ${
+                            isCurrentOutOfStock
+                              ? "opacity-50 cursor-not-allowed"
+                              : "hover:!bg-[#d4006a] cursor-pointer active:scale-[0.99]"
+                          }`}
+                        >
+                          {isCurrentOutOfStock ? "Out of Stock" : "Buy Now"}
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={isCurrentOutOfStock}
+                          onClick={handleAddToCart}
+                          className={`w-full py-3 rounded-md text-xs font-bold tracking-wide transition-all duration-200 ${
+                            isCurrentOutOfStock
+                              ? "bg-white text-[#ff0080] border-2 border-[#ff0080] opacity-50 cursor-not-allowed"
+                              : justAdded
+                              ? "bg-emerald-600 text-white border-2 border-emerald-600 shadow-xs"
+                              : "bg-white hover:bg-[#FFF0F5] text-[#ff0080] border-2 border-[#ff0080] cursor-pointer active:scale-[0.99]"
+                          }`}
+                        >
+                          {isCurrentOutOfStock ? (
+                            "Out of Stock"
+                          ) : justAdded ? (
+                            <span className="flex items-center justify-center gap-1.5 animate-in zoom-in-95">
+                              <Check size={16} strokeWidth={2.5} />
+                              Added to Cart
+                            </span>
+                          ) : (
+                            "Add to Cart"
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
 
               {/* Delivery Meta Information Details */}
               <div className="pt-4 border-t border-[#F2E6EC] space-y-2.5 text-xs text-[#555]">
