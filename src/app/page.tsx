@@ -34,7 +34,7 @@ export default async function Home() {
       <section className="w-full relative h-[240px] sm:h-[380px] md:h-[520px] lg:h-[708px] overflow-hidden bg-[#FFF5F8]">
         <Image
           src="/anniversary-banner.jpeg"
-          alt="Anniversary Luxury Collection - NextCart"
+          alt="Anniversary Luxury Collection - luxuryladies"
           fill
           priority
           sizes="100vw"

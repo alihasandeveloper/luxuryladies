@@ -26,8 +26,8 @@ const contactInfo = [
   {
     icon: <Mail size={15} strokeWidth={1.75} />,
     label: "EMAIL US",
-    value: "support@nextcart.com",
-    href: "mailto:support@nextcart.com",
+    value: "support@luxuryladies.com",
+    href: "mailto:support@luxuryladies.com",
   },
   {
     icon: <MapPin size={15} strokeWidth={1.75} />,
@@ -139,8 +139,8 @@ export default function Footer() {
       <div className="footer-bottom">
         <div className="container footer-bottom-inner">
           <p className="footer-copy">
-            © 2026 NextCart. All rights reserved.{" "}
-            <span>Designed &amp; Developed by <strong>NextCart Team</strong></span>
+            © 2026 luxuryladies. All rights reserved.{" "}
+            <span>Designed &amp; Developed by <strong>Ali Hasan</strong></span>
           </p>
           <nav className="footer-bottom-links">
             {bottomLinks.map((link, i) => (
