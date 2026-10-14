@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -21,6 +21,11 @@ import {
   ChevronRight,
   Clock,
   Wallet,
+  Search,
+  ChevronDown,
+  Check,
+  X,
+  Truck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useCart } from "@/context/CartContext";
@@ -62,12 +67,14 @@ interface CheckoutViewProps {
   initialGateways?: WooCommercePaymentGateway[];
   initialShippingMethods?: WooCommerceShippingMethod[];
   initialStates?: WooCommerceState[];
+  initialCountry?: string;
 }
 
 export default function CheckoutView({
   initialGateways = [],
   initialShippingMethods = [],
   initialStates = [],
+  initialCountry = "BD",
 }: CheckoutViewProps) {
   const {
     cart,
@@ -104,10 +111,10 @@ export default function CheckoutView({
     phone: "",
     altPhone: "",
     email: "",
-    country: "BD",
-    district: initialStates.length > 0 ? initialStates[0].name : "Dhaka",
-    state: initialStates.length > 0 ? initialStates[0].name : "Dhaka",
-    city: "Dhaka",
+    country: initialCountry || "BD",
+    district: "",
+    state: "",
+    city: "",
     address: "",
     address2: "",
     postalCode: "",
@@ -119,6 +126,47 @@ export default function CheckoutView({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [placedOrder, setPlacedOrder] = useState<PlacedOrderInfo | null>(null);
+
+  // Searchable District dropdown state
+  const [isDistrictOpen, setIsDistrictOpen] = useState(false);
+  const [districtSearch, setDistrictSearch] = useState("");
+  const districtRef = useRef<HTMLDivElement>(null);
+
+  // Close district dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (districtRef.current && !districtRef.current.contains(e.target as Node)) {
+        setIsDistrictOpen(false);
+        setDistrictSearch("");
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filteredStates = useMemo(() => {
+    if (!districtSearch.trim()) return states;
+    const q = districtSearch.trim().toLowerCase();
+    return states.filter((st) => st.name.toLowerCase().includes(q));
+  }, [states, districtSearch]);
+
+  const handleSelectDistrict = (districtName: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      district: districtName,
+      state: districtName,
+      city: districtName,
+    }));
+    setDistrictSearch("");
+    setIsDistrictOpen(false);
+    if (errors.district) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next.district;
+        return next;
+      });
+    }
+  };
 
   // Fetch Payment Gateways from backend if not preloaded
   useEffect(() => {
@@ -152,29 +200,44 @@ export default function CheckoutView({
     };
   }, [initialGateways, selectedPaymentId]);
 
-  // Fetch Shipping options from backend if not preloaded
+  // Fetch Shipping options dynamically based on selected District / State
+  const selectedDistrict = formData.district || formData.state || "";
+
   useEffect(() => {
-    if (initialShippingMethods && initialShippingMethods.length > 0) {
-      setShippingMethods(initialShippingMethods);
-      if (!selectedShippingId) {
-        setSelectedShippingId(initialShippingMethods[0].id);
-      }
+    if (!selectedDistrict) {
+      setShippingMethods([]);
+      setSelectedShippingId("");
       setIsLoadingShipping(false);
       return;
     }
 
     let isMounted = true;
     setIsLoadingShipping(true);
-    fetch("/api/shipping-methods")
+
+    fetch(
+      `/api/shipping-methods?district=${encodeURIComponent(selectedDistrict)}&country=${encodeURIComponent(
+        formData.country || initialCountry || ""
+      )}`
+    )
       .then((res) => res.json())
       .then((data) => {
         if (!isMounted) return;
         if (data.success && Array.isArray(data.shippingMethods) && data.shippingMethods.length > 0) {
           setShippingMethods(data.shippingMethods);
-          setSelectedShippingId((prev) => (prev ? prev : data.shippingMethods[0].id));
+          setSelectedShippingId((prev) => {
+            const stillValid = data.shippingMethods.some((m: WooCommerceShippingMethod) => m.id === prev);
+            return stillValid ? prev : data.shippingMethods[0].id;
+          });
+        } else {
+          setShippingMethods([]);
+          setSelectedShippingId("");
         }
       })
-      .catch((err) => console.error("Error loading Shipping options:", err))
+      .catch((err) => {
+        console.error("Error loading Shipping options for district:", err);
+        setShippingMethods([]);
+        setSelectedShippingId("");
+      })
       .finally(() => {
         if (isMounted) setIsLoadingShipping(false);
       });
@@ -182,7 +245,7 @@ export default function CheckoutView({
     return () => {
       isMounted = false;
     };
-  }, [initialShippingMethods, selectedShippingId]);
+  }, [selectedDistrict, formData.country, initialCountry]);
 
   // Fetch Country States / Districts from backend if not preloaded
   useEffect(() => {
@@ -192,16 +255,16 @@ export default function CheckoutView({
     }
 
     let isMounted = true;
-    fetch("/api/country-states?country=BD")
+    const countryParam = formData.country || initialCountry || "";
+    fetch(`/api/country-states${countryParam ? `?country=${encodeURIComponent(countryParam)}` : ""}`)
       .then((res) => res.json())
       .then((data) => {
         if (!isMounted) return;
         if (data.success && Array.isArray(data.states) && data.states.length > 0) {
           setStates(data.states);
-          setFormData((prev) => ({
-            ...prev,
-            state: prev.state || data.states[0].name,
-          }));
+          if (data.country && !formData.country) {
+            setFormData((prev) => ({ ...prev, country: data.country }));
+          }
         }
       })
       .catch((err) => console.error("Error loading states:", err));
@@ -209,7 +272,7 @@ export default function CheckoutView({
     return () => {
       isMounted = false;
     };
-  }, [initialStates]);
+  }, [initialStates, formData.country, initialCountry]);
 
   // Active Shipping & Calculations
   const activeShippingMethod =
@@ -280,11 +343,15 @@ export default function CheckoutView({
       newErrors.fullName = "Full name is required";
     }
 
-    const cleanPhone = formData.phone.trim().replace(/\D/g, "");
+    let cleanPhone = formData.phone.trim().replace(/[\s-]/g, "");
+    if (/^1[3-9]\d{8}$/.test(cleanPhone)) {
+      cleanPhone = "0" + cleanPhone;
+    }
+    const bdPhoneRegex = /^(?:\+?88)?01[3-9]\d{8}$/;
     if (!cleanPhone) {
       newErrors.phone = "Phone number is required";
-    } else if (cleanPhone.length < 8) {
-      newErrors.phone = "Please enter a valid phone number";
+    } else if (!bdPhoneRegex.test(cleanPhone)) {
+      newErrors.phone = "Enter a valid Bangladeshi number (e.g. 017XXXXXXXX)";
     }
 
     if (!formData.district?.trim()) {
@@ -295,7 +362,9 @@ export default function CheckoutView({
       newErrors.address = "Delivery address is required";
     }
 
-    if (!selectedShippingId && shippingMethods.length > 0) {
+    if (shippingMethods.length === 0) {
+      newErrors.shipping = "No shipping options available for the selected district";
+    } else if (!selectedShippingId) {
       newErrors.shipping = "Please select a shipping method";
     }
 
@@ -327,9 +396,15 @@ export default function CheckoutView({
     setIsSubmitting(true);
 
     try {
+      let formattedPhone = formData.phone.trim().replace(/[\s-]/g, "");
+      if (/^1[3-9]\d{8}$/.test(formattedPhone)) {
+        formattedPhone = "0" + formattedPhone;
+      }
+
       const orderPayload = {
         customer: {
           ...formData,
+          phone: formattedPhone,
           fullName: formData.fullName || formData.firstName,
           firstName: formData.firstName || (formData.fullName ? formData.fullName.split(" ")[0] : "Customer"),
           lastName: formData.lastName || (formData.fullName ? formData.fullName.split(" ").slice(1).join(" ") : ""),
@@ -626,7 +701,7 @@ export default function CheckoutView({
               <div className="bg-white rounded-md border border-gray-200/80 p-5 sm:p-7 shadow-2xs">
                 <div className="flex items-center gap-2.5 pb-4 mb-5 border-b border-gray-100">
                   <div className="w-8 h-8 rounded-md bg-[#FFF0F5] text-[#ff0080] flex items-center justify-center font-bold text-sm">
-                    1
+                    <MapPin size={16} />
                   </div>
                   <div>
                     <h2 className="text-base sm:text-lg font-bold text-[#1e293b]">
@@ -671,8 +746,16 @@ export default function CheckoutView({
                       <label htmlFor="phone" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                         Phone Number <span className="text-[#ff0080]">*</span>
                       </label>
-                      <div className="relative">
-                        <Phone size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <div
+                        className={`relative flex items-center rounded-md overflow-hidden border transition-all ${
+                          errors.phone
+                            ? "border-rose-400 bg-rose-50/20 ring-1 ring-rose-400"
+                            : "border-gray-200 focus-within:border-[#ff0080] focus-within:ring-2 focus-within:ring-[#ff0080]/20"
+                        }`}
+                      >
+                        <span className="inline-flex items-center px-3.5 h-11 bg-gray-50 border-r border-gray-200 text-xs font-bold text-slate-600 select-none shrink-0 tracking-wide">
+                          +88
+                        </span>
                         <input
                           id="phone"
                           name="phone"
@@ -680,9 +763,8 @@ export default function CheckoutView({
                           required
                           value={formData.phone}
                           onChange={handleChange}
-                          placeholder="e.g. 01XXXXXXXXX"
-                          className={`w-full pl-10 pr-3.5 h-11 rounded-md border text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#ff0080]/20 transition-all ${errors.phone ? "border-rose-400 bg-rose-50/20" : "border-gray-200 focus:border-[#ff0080]"
-                            }`}
+                          placeholder="01XXXXXXXXX"
+                          className="w-full px-3.5 h-11 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none bg-white"
                         />
                       </div>
                       {errors.phone && (
@@ -711,39 +793,113 @@ export default function CheckoutView({
                     </div>
                   </div>
 
-                  {/* 4. District */}
-                  <div>
-                    <label htmlFor="district" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  {/* 4. District Searchable Dropdown */}
+                  <div ref={districtRef} className="relative">
+                    <label htmlFor="district-input" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                       District <span className="text-[#ff0080]">*</span>
                     </label>
                     <div className="relative">
                       <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                      {states.length > 0 ? (
-                        <select
-                          id="district"
-                          name="district"
-                          value={formData.district || formData.state}
-                          onChange={handleChange}
-                          className="w-full pl-10 pr-3.5 h-11 rounded-md border border-gray-200 text-sm text-slate-900 bg-white focus:outline-none focus:border-[#ff0080] transition-all cursor-pointer"
-                        >
-                          {states.map((st) => (
-                            <option key={st.code || st.name} value={st.name}>
-                              {st.name}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <input
-                          id="district"
-                          name="district"
-                          type="text"
-                          value={formData.district || formData.state}
-                          onChange={handleChange}
-                          placeholder="District name"
-                          className="w-full pl-10 pr-3.5 h-11 rounded-md border border-gray-200 text-sm text-slate-900 focus:outline-none focus:border-[#ff0080] transition-all"
+                      <div
+                        id="district-input"
+                        onClick={() => {
+                          setIsDistrictOpen((prev) => {
+                            if (!prev) setDistrictSearch("");
+                            return !prev;
+                          });
+                        }}
+                        className={`w-full pl-10 pr-10 h-11 rounded-md border text-sm flex items-center transition-all cursor-pointer select-none bg-white ${
+                          errors.district
+                            ? "border-rose-400 bg-rose-50/20"
+                            : isDistrictOpen
+                            ? "border-[#ff0080] ring-2 ring-[#ff0080]/20"
+                            : "border-gray-200 hover:border-gray-300"
+                        }`}
+                      >
+                        <span className={formData.district ? "text-slate-900 font-medium" : "text-slate-400"}>
+                          {formData.district || "Select or search district..."}
+                        </span>
+                      </div>
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                        {formData.district && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSelectDistrict("");
+                              setDistrictSearch("");
+                            }}
+                            className="text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                            title="Clear district"
+                          >
+                            <X size={14} />
+                          </button>
+                        )}
+                        <ChevronDown
+                          size={16}
+                          className={`text-slate-400 transition-transform pointer-events-none ${
+                            isDistrictOpen ? "rotate-180 text-[#ff0080]" : ""
+                          }`}
                         />
-                      )}
+                      </div>
                     </div>
+
+                    {/* Searchable Dropdown Menu */}
+                    {isDistrictOpen && (
+                      <div className="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-md border border-gray-200 shadow-xl z-50 overflow-hidden animate-in fade-in duration-150">
+                        <div className="p-2 border-b border-gray-100 bg-gray-50/80">
+                          <div className="relative">
+                            <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                            <input
+                              type="text"
+                              value={districtSearch}
+                              onChange={(e) => setDistrictSearch(e.target.value)}
+                              placeholder="Type to search (e.g. Dhaka, Sylhet)..."
+                              className="w-full pl-8 pr-7 py-1.5 bg-white rounded border border-gray-200 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#ff0080]"
+                              autoFocus
+                            />
+                            {districtSearch && (
+                              <button
+                                type="button"
+                                onClick={() => setDistrictSearch("")}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                                title="Clear search"
+                              >
+                                <X size={12} />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="max-h-56 overflow-y-auto divide-y divide-gray-50 py-1">
+                          {filteredStates.length === 0 ? (
+                            <div className="p-3 text-center text-xs text-slate-400">
+                              No district matching &quot;{districtSearch}&quot;
+                            </div>
+                          ) : (
+                            filteredStates.map((st) => {
+                              const isSelected = formData.district === st.name;
+                              return (
+                                <button
+                                  key={st.code || st.name}
+                                  type="button"
+                                  onClick={() => handleSelectDistrict(st.name)}
+                                  className={`w-full px-3.5 py-2 text-left text-xs sm:text-sm flex items-center justify-between transition-colors cursor-pointer ${
+                                    isSelected
+                                      ? "bg-[#FFF0F5] text-[#ff0080] font-bold"
+                                      : "text-slate-700 hover:bg-gray-50"
+                                  }`}
+                                >
+                                  <span>{st.name}</span>
+                                  {isSelected && <Check size={14} className="text-[#ff0080]" />}
+                                </button>
+                              );
+                            })
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                     {errors.district && (
                       <p className="text-xs text-rose-500 mt-1 flex items-center gap-1">
                         <AlertCircle size={12} /> {errors.district}
@@ -792,72 +948,72 @@ export default function CheckoutView({
                       />
                     </div>
                   </div>
-                </div>
-              </div>
 
-              {/* Card 2: Shipping options from Backend */}
-              <div className="bg-white rounded-md border border-gray-200/80 p-5 sm:p-7 shadow-2xs">
-                <div className="flex items-center gap-2.5 pb-4 mb-5 border-b border-gray-100">
-                  <div className="w-8 h-8 rounded-md bg-[#FFF0F5] text-[#ff0080] flex items-center justify-center font-bold text-sm">
-                    2
-                  </div>
-                  <div>
-                    <h2 className="text-base sm:text-lg font-bold text-[#1e293b]">
-                      Shipping options
-                    </h2>
-                  </div>
-                </div>
+                  {/* 7. Shipping Options inside Billing & Delivery */}
+                  <div className="pt-4 border-t border-gray-100">
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">
+                      Shipping Options <span className="text-[#ff0080]">*</span>
+                    </label>
 
-                <div className="space-y-3">
-                  {isLoadingShipping ? (
-                    <div className="py-6 flex items-center justify-center gap-2.5 text-xs text-slate-500 bg-gray-50/50 rounded-md border border-dashed border-gray-200">
-                      <span className="w-4 h-4 border-2 border-[#ff0080]/30 border-t-[#ff0080] rounded-full animate-spin" />
-                      <span>Loading Shipping options from WooCommerce...</span>
-                    </div>
-                  ) : shippingMethods.length === 0 ? (
-                    <div className="p-4 rounded-md border border-amber-200 bg-amber-50 text-amber-800 text-xs">
-                      No Shipping options currently configured in WooCommerce.
-                    </div>
-                  ) : (
-                    shippingMethods.map((method) => {
-                      const isSelected = selectedShippingId === method.id;
-                      return (
-                        <label
-                          key={method.id}
-                          className={`block p-4 rounded-md border transition-all cursor-pointer ${isSelected
-                            ? "border-[#ff0080] bg-[#FFF5F8] ring-1 ring-[#ff0080]"
-                            : "border-gray-200 hover:border-gray-300 bg-white"
-                            }`}
-                        >
-                          <div className="flex items-start gap-3">
-                            <input
-                              type="radio"
-                              name="shippingMethod"
-                              value={method.id}
-                              checked={isSelected}
-                              onChange={() => setSelectedShippingId(method.id)}
-                              className="mt-1 accent-[#ff0080] cursor-pointer"
-                            />
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between gap-2">
-                                <span className="text-sm font-bold text-slate-900">
-                                  {method.title}
-                                </span>
-                                <span className="text-xs font-extrabold text-[#ff0080] shrink-0">
-                                  {method.cost === 0 ? "FREE" : `Tk ${method.cost.toFixed(2)}`}
-                                </span>
+                    <div className="space-y-2.5">
+                      {!selectedDistrict ? (
+                        <div className="py-5 px-4 rounded-md border border-dashed border-gray-200 bg-gray-50/60 text-center">
+                          <Truck size={20} className="mx-auto text-slate-400 mb-1.5" />
+                          <p className="text-xs font-semibold text-slate-600">
+                            Please select your district above to view available shipping options.
+                          </p>
+                        </div>
+                      ) : isLoadingShipping ? (
+                        <div className="py-5 flex items-center justify-center gap-2.5 text-xs text-slate-500 bg-gray-50/50 rounded-md border border-dashed border-gray-200">
+                          <span className="w-4 h-4 border-2 border-[#ff0080]/30 border-t-[#ff0080] rounded-full animate-spin" />
+                          <span>Loading shipping options from WooCommerce...</span>
+                        </div>
+                      ) : shippingMethods.length === 0 ? (
+                        <div className="p-3.5 rounded-md border border-amber-200 bg-amber-50 text-amber-800 text-xs">
+                          No shipping zone available for {selectedDistrict}. Please select another district.
+                        </div>
+                      ) : (
+                        shippingMethods.map((method) => {
+                          const isSelected = selectedShippingId === method.id;
+                          return (
+                            <label
+                              key={method.id}
+                              className={`block p-3.5 rounded-md border transition-all cursor-pointer ${isSelected
+                                ? "border-[#ff0080] bg-[#FFF5F8] ring-1 ring-[#ff0080]"
+                                : "border-gray-200 hover:border-gray-300 bg-white"
+                                }`}
+                            >
+                              <div className="flex items-start gap-3">
+                                <input
+                                  type="radio"
+                                  name="shippingMethod"
+                                  value={method.id}
+                                  checked={isSelected}
+                                  onChange={() => setSelectedShippingId(method.id)}
+                                  className="mt-0.5 accent-[#ff0080] cursor-pointer"
+                                />
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center justify-between gap-2">
+                                    <span className="text-sm font-bold text-slate-900">
+                                      {method.title}
+                                    </span>
+                                    <span className="text-xs font-extrabold text-[#ff0080] shrink-0">
+                                      {method.cost === 0 ? "FREE" : `Tk ${method.cost.toFixed(2)}`}
+                                    </span>
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                          </div>
-                        </label>
-                      );
-                    })
-                  )}
-                  {errors.shipping && (
-                    <p className="text-xs text-rose-500 mt-1 flex items-center gap-1">
-                      <AlertCircle size={12} /> {errors.shipping}
-                    </p>
-                  )}
+                            </label>
+                          );
+                        })
+                      )}
+                      {errors.shipping && (
+                        <p className="text-xs text-rose-500 mt-1 flex items-center gap-1">
+                          <AlertCircle size={12} /> {errors.shipping}
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -978,7 +1134,9 @@ export default function CheckoutView({
                       )}
                     </span>
                     <span className="font-semibold text-slate-900">
-                      {shippingCost === 0 ? (
+                      {shippingMethods.length === 0 ? (
+                        <span className="text-amber-600 font-medium text-xs">Not available</span>
+                      ) : shippingCost === 0 ? (
                         <span className="text-emerald-600 font-bold">FREE</span>
                       ) : (
                         `Tk ${shippingCost.toFixed(2)}`

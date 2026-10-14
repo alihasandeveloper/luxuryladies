@@ -26,9 +26,20 @@ export async function POST(req: Request) {
       );
     }
 
-    if (!customer?.phone?.trim()) {
+    const cleanPhone = (customer?.phone || "").trim().replace(/[\s-]/g, "");
+    const bdPhoneRegex = /^(?:\+?88)?01[3-9]\d{8}$/;
+    if (!cleanPhone) {
       return NextResponse.json(
         { success: false, error: "Phone number is required." },
+        { status: 400 }
+      );
+    }
+    if (!bdPhoneRegex.test(cleanPhone)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Please enter a valid 11-digit Bangladeshi phone number (e.g. 017XXXXXXXX or +88017XXXXXXXX).",
+        },
         { status: 400 }
       );
     }

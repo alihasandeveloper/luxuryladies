@@ -481,52 +481,210 @@ function getDefaultPaymentGateways(): WooCommercePaymentGateway[] {
   ];
 }
 
-/**
- * Fetch configured shipping zones and methods from WooCommerce REST API
- */
-export async function getShippingMethods(): Promise<WooCommerceShippingMethod[]> {
-  try {
-    const authHeader = getAuthHeader();
-    if (!authHeader) {
-      return getDefaultShippingMethods();
-    }
+interface ZoneWithLocationsAndMethods {
+  zone: { id: number; name: string };
+  locations: Array<{ code: string; type: string }>;
+  methods: WooCommerceShippingMethod[];
+}
 
-    const zonesRes = await fetch(`${getBaseUrl()}/wp-json/wc/v3/shipping/zones`, {
+let cachedShippingData: {
+  timestamp: number;
+  zones: ZoneWithLocationsAndMethods[];
+  zone0Methods: WooCommerceShippingMethod[];
+} | null = null;
+
+/**
+ * Fetch configured shipping zones and methods from WooCommerce REST API,
+ * dynamically filtered for the customer's selected District / State.
+ */
+let cachedStoreCountry: { timestamp: number; country: string } | null = null;
+
+/**
+ * Fetch the store's configured shipping country from WooCommerce general settings.
+ * Checks "Ship to specific countries" (`woocommerce_specific_ship_to_countries`),
+ * "Sell to specific countries" (`woocommerce_specific_allowed_countries`),
+ * and store base location (`woocommerce_default_country`).
+ */
+export async function getStoreDefaultCountry(): Promise<string> {
+  const now = Date.now();
+  if (cachedStoreCountry && now - cachedStoreCountry.timestamp < 60000) {
+    return cachedStoreCountry.country;
+  }
+
+  const authHeader = getAuthHeader();
+  if (!authHeader) return "BD";
+
+  try {
+    const res = await fetch(`${getBaseUrl()}/wp-json/wc/v3/settings/general`, {
       headers: {
         Authorization: authHeader,
         "Content-Type": "application/json",
       },
-      next: { revalidate: 30 },
+      next: { revalidate: 3600 },
     });
 
-    const shippingMethods: WooCommerceShippingMethod[] = [];
+    if (res.ok) {
+      const settings = await res.json();
+      if (Array.isArray(settings)) {
+        // 1. "Ship to specific countries"
+        const shipTo = settings.find((s) => s.id === "woocommerce_ship_to_countries");
+        const specificShip = settings.find((s) => s.id === "woocommerce_specific_ship_to_countries");
+        if (
+          shipTo?.value === "specific" &&
+          Array.isArray(specificShip?.value) &&
+          specificShip.value.length > 0
+        ) {
+          const country = String(specificShip.value[0]).toUpperCase();
+          cachedStoreCountry = { timestamp: now, country };
+          return country;
+        }
 
-    if (zonesRes.ok) {
-      const zones = await zonesRes.json();
-      if (Array.isArray(zones)) {
-        for (const zone of zones) {
-          try {
-            const mRes = await fetch(
-              `${getBaseUrl()}/wp-json/wc/v3/shipping/zones/${zone.id}/methods`,
-              {
-                headers: {
-                  Authorization: authHeader,
-                  "Content-Type": "application/json",
-                },
-                next: { revalidate: 30 },
-              }
-            );
-            if (mRes.ok) {
-              const methods = await mRes.json();
-              if (Array.isArray(methods)) {
-                for (const m of methods) {
+        // 2. "Sell to specific countries"
+        const allowed = settings.find((s) => s.id === "woocommerce_allowed_countries");
+        const specificAllowed = settings.find((s) => s.id === "woocommerce_specific_allowed_countries");
+        if (
+          allowed?.value === "specific" &&
+          Array.isArray(specificAllowed?.value) &&
+          specificAllowed.value.length > 0
+        ) {
+          const country = String(specificAllowed.value[0]).toUpperCase();
+          cachedStoreCountry = { timestamp: now, country };
+          return country;
+        }
+
+        // 3. Store base location (e.g. "BD" or "BD:BD-13")
+        const defaultCountry = settings.find((s) => s.id === "woocommerce_default_country");
+        if (defaultCountry?.value) {
+          const raw = String(defaultCountry.value);
+          const countryPart = raw.split(":")[0].toUpperCase();
+          if (countryPart) {
+            cachedStoreCountry = { timestamp: now, country: countryPart };
+            return countryPart;
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("Failed to fetch store country from WooCommerce settings:", err);
+  }
+
+  return "BD";
+}
+
+let cachedStatesMap = new Map<string, { timestamp: number; states: WooCommerceState[] }>();
+
+/**
+ * Fetch country states / districts dynamically from WooCommerce REST API
+ * using `/wp-json/wc/v3/data/countries/{countryCode}`
+ */
+export async function getCountryStates(
+  countryCode?: string
+): Promise<WooCommerceState[]> {
+  const code = (countryCode || (await getStoreDefaultCountry())).trim().toUpperCase();
+  const now = Date.now();
+  const cached = cachedStatesMap.get(code);
+  if (cached && now - cached.timestamp < 60000) {
+    return cached.states;
+  }
+
+  const authHeader = getAuthHeader();
+  if (!authHeader) {
+    return [];
+  }
+
+  try {
+    const res = await fetch(
+      `${getBaseUrl()}/wp-json/wc/v3/data/countries/${encodeURIComponent(code)}`,
+      {
+        headers: {
+          Authorization: authHeader,
+          "Content-Type": "application/json",
+        },
+        next: { revalidate: 3600 },
+      }
+    );
+
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data?.states)) {
+        const states: WooCommerceState[] = data.states.map((s: any) => ({
+          code: s.code || s.name,
+          name: decodeHtml(s.name || s.code),
+        }));
+        cachedStatesMap.set(code, { timestamp: now, states });
+        return states;
+      }
+    }
+  } catch (err) {
+    console.error(`Failed to fetch states for country ${code}:`, err);
+  }
+
+  return [];
+}
+
+/**
+ * Fetch configured shipping zones and methods from WooCommerce REST API,
+ * dynamically matched against the customer's district and country.
+ */
+export async function getShippingMethods(
+  district?: string,
+  countryCode?: string
+): Promise<WooCommerceShippingMethod[]> {
+  if (!district || !district.trim()) {
+    return [];
+  }
+
+  const authHeader = getAuthHeader();
+  if (!authHeader) {
+    return [];
+  }
+
+  try {
+    const now = Date.now();
+    let shippingData = cachedShippingData;
+
+    // Fetch and cache WooCommerce shipping zones, locations, and methods for 30s
+    if (!shippingData || now - shippingData.timestamp > 30000) {
+      const zonesRes = await fetch(`${getBaseUrl()}/wp-json/wc/v3/shipping/zones`, {
+        headers: {
+          Authorization: authHeader,
+          "Content-Type": "application/json",
+        },
+        cache: "no-store",
+      });
+
+      const zonesWithData: ZoneWithLocationsAndMethods[] = [];
+      let zone0Methods: WooCommerceShippingMethod[] = [];
+
+      if (zonesRes.ok) {
+        const zones = await zonesRes.json();
+        if (Array.isArray(zones)) {
+          for (const zone of zones) {
+            try {
+              const [locRes, mRes] = await Promise.all([
+                fetch(`${getBaseUrl()}/wp-json/wc/v3/shipping/zones/${zone.id}/locations`, {
+                  headers: { Authorization: authHeader, "Content-Type": "application/json" },
+                  cache: "no-store",
+                }),
+                fetch(`${getBaseUrl()}/wp-json/wc/v3/shipping/zones/${zone.id}/methods`, {
+                  headers: { Authorization: authHeader, "Content-Type": "application/json" },
+                  cache: "no-store",
+                }),
+              ]);
+
+              const locations = locRes.ok ? await locRes.json() : [];
+              const rawMethods = mRes.ok ? await mRes.json() : [];
+
+              const methods: WooCommerceShippingMethod[] = [];
+              if (Array.isArray(rawMethods)) {
+                for (const m of rawMethods) {
                   if (m.enabled === true || m.enabled === "yes") {
                     const rawCost = m.settings?.cost?.value ?? m.cost ?? "0";
                     const costNum = parseFloat(String(rawCost).replace(/[^0-9.]/g, "")) || 0;
                     const methodTitle =
                       m.settings?.title?.value || m.title || m.method_title || "Shipping";
 
-                    shippingMethods.push({
+                    methods.push({
                       id: `${m.method_id || "method"}:${m.instance_id || m.id}`,
                       instance_id: m.instance_id || m.id,
                       zone_id: zone.id,
@@ -545,166 +703,148 @@ export async function getShippingMethods(): Promise<WooCommerceShippingMethod[]>
                   }
                 }
               }
-            }
-          } catch (e) {
-            console.warn(`Failed to fetch methods for zone ${zone.id}:`, e);
-          }
-        }
-      }
-    }
 
-    // Also fetch zone 0 (locations not covered by other zones)
-    try {
-      const zone0Res = await fetch(
-        `${getBaseUrl()}/wp-json/wc/v3/shipping/zones/0/methods`,
-        {
-          headers: {
-            Authorization: authHeader,
-            "Content-Type": "application/json",
-          },
-          next: { revalidate: 30 },
-        }
-      );
-      if (zone0Res.ok) {
-        const methods0 = await zone0Res.json();
-        if (Array.isArray(methods0)) {
-          for (const m of methods0) {
-            if (m.enabled === true || m.enabled === "yes") {
-              const rawCost = m.settings?.cost?.value ?? m.cost ?? "0";
-              const costNum = parseFloat(String(rawCost).replace(/[^0-9.]/g, "")) || 0;
-              const methodTitle =
-                m.settings?.title?.value || m.title || m.method_title || "Shipping";
-
-              shippingMethods.push({
-                id: `${m.method_id || "method"}:${m.instance_id || m.id}`,
-                instance_id: m.instance_id || m.id,
-                zone_id: 0,
-                zone_name: "Default Location",
-                method_id: m.method_id || "flat_rate",
-                method_title: decodeHtml(m.method_title || ""),
-                title: decodeHtml(methodTitle),
-                cost: costNum,
-                enabled: true,
-                min_amount: m.settings?.min_amount?.value
-                  ? parseFloat(m.settings.min_amount.value)
-                  : undefined,
-                requires: m.settings?.requires?.value || undefined,
-                description: decodeHtml(m.method_description || ""),
+              zonesWithData.push({
+                zone: { id: zone.id, name: zone.name || "" },
+                locations: Array.isArray(locations) ? locations : [],
+                methods,
               });
+            } catch (e) {
+              console.warn(`Failed to fetch methods for zone ${zone.id}:`, e);
             }
           }
         }
       }
-    } catch (e) {
-      console.warn("Failed to fetch zone 0 Shipping options:", e);
-    }
 
-    if (shippingMethods.length === 0) {
-      return getDefaultShippingMethods();
-    }
+      // Fetch Zone 0 (Locations not covered by other zones)
+      try {
+        const zone0Res = await fetch(
+          `${getBaseUrl()}/wp-json/wc/v3/shipping/zones/0/methods`,
+          {
+            headers: {
+              Authorization: authHeader,
+              "Content-Type": "application/json",
+            },
+            cache: "no-store",
+          }
+        );
+        if (zone0Res.ok) {
+          const methods0 = await zone0Res.json();
+          if (Array.isArray(methods0)) {
+            for (const m of methods0) {
+              if (m.enabled === true || m.enabled === "yes") {
+                const rawCost = m.settings?.cost?.value ?? m.cost ?? "0";
+                const costNum = parseFloat(String(rawCost).replace(/[^0-9.]/g, "")) || 0;
+                const methodTitle =
+                  m.settings?.title?.value || m.title || m.method_title || "Shipping";
 
-    return shippingMethods;
-  } catch (err) {
-    console.error("Failed to fetch Shipping options from WooCommerce:", err);
-    return getDefaultShippingMethods();
-  }
-}
-
-function getDefaultShippingMethods(): WooCommerceShippingMethod[] {
-  return [
-    {
-      id: "flat_rate:1",
-      instance_id: 1,
-      zone_id: 1,
-      zone_name: "Inside Dhaka",
-      method_id: "flat_rate",
-      method_title: "Flat rate",
-      title: "Inside Dhaka Delivery",
-      cost: 60,
-      enabled: true,
-    },
-    {
-      id: "flat_rate:2",
-      instance_id: 2,
-      zone_id: 2,
-      zone_name: "Outside Dhaka",
-      method_id: "flat_rate",
-      method_title: "Flat rate",
-      title: "Outside Dhaka Delivery",
-      cost: 120,
-      enabled: true,
-    },
-  ];
-}
-
-/**
- * Fetch country states / districts from WooCommerce REST API
- */
-export async function getCountryStates(
-  countryCode: string = "BD"
-): Promise<WooCommerceState[]> {
-  try {
-    const authHeader = getAuthHeader();
-    if (!authHeader) {
-      return getDefaultBangladeshStates();
-    }
-
-    const res = await fetch(
-      `${getBaseUrl()}/wp-json/wc/v3/data/countries/${encodeURIComponent(countryCode)}`,
-      {
-        headers: {
-          Authorization: authHeader,
-          "Content-Type": "application/json",
-        },
-        next: { revalidate: 3600 },
+                zone0Methods.push({
+                  id: `${m.method_id || "method"}:${m.instance_id || m.id}`,
+                  instance_id: m.instance_id || m.id,
+                  zone_id: 0,
+                  zone_name: "Default Location",
+                  method_id: m.method_id || "flat_rate",
+                  method_title: decodeHtml(m.method_title || ""),
+                  title: decodeHtml(methodTitle),
+                  cost: costNum,
+                  enabled: true,
+                  min_amount: m.settings?.min_amount?.value
+                    ? parseFloat(m.settings.min_amount.value)
+                    : undefined,
+                  requires: m.settings?.requires?.value || undefined,
+                  description: decodeHtml(m.method_description || ""),
+                });
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to fetch zone 0 Shipping options:", e);
       }
+
+      shippingData = {
+        timestamp: now,
+        zones: zonesWithData,
+        zone0Methods,
+      };
+      cachedShippingData = shippingData;
+    }
+
+    const country = (countryCode || (await getStoreDefaultCountry())).trim().toUpperCase();
+    const states = await getCountryStates(country);
+
+    const target = district.trim().toLowerCase();
+    const matchedState = states.find(
+      (s) =>
+        s.name.toLowerCase() === target ||
+        s.code.toLowerCase() === target ||
+        s.code.toLowerCase().replace(`${country.toLowerCase()}-`, "") === target
     );
 
-    if (!res.ok) {
-      return getDefaultBangladeshStates();
+    const stateCode = matchedState ? matchedState.code.toLowerCase() : "";
+    const stateNum = stateCode.replace(`${country.toLowerCase()}-`, "");
+    const stateName = matchedState ? matchedState.name.toLowerCase() : target;
+
+    // 1. Loop through configured WooCommerce shipping zones
+    for (const z of shippingData.zones) {
+      if (z.methods.length === 0) continue;
+
+      const stateLocations = z.locations.filter((loc) => loc.type === "state");
+      const countryLocations = z.locations.filter((loc) => loc.type === "country");
+
+      // Check 1: If zone has specific state locations, strictly match against customer's district/state
+      if (stateLocations.length > 0) {
+        const hasStateMatch = stateLocations.some((loc) => {
+          const locCode = (loc.code || "").trim().toLowerCase();
+          return (
+            (stateCode && (
+              locCode === `${country.toLowerCase()}:${stateCode}` ||
+              locCode === stateCode ||
+              locCode === `${country.toLowerCase()}:${stateNum}` ||
+              locCode === stateNum
+            )) ||
+            (stateName && (
+              locCode === `${country.toLowerCase()}:${stateName}` ||
+              locCode === stateName
+            )) ||
+            locCode === target ||
+            locCode === `${country.toLowerCase()}:${target}`
+          );
+        });
+
+        if (hasStateMatch) {
+          return z.methods;
+        }
+        // If state locations are defined and this district is not in them, this zone does not cover it
+        continue;
+      }
+
+      // Check 2: If zone has country location with no state restrictions, it covers the entire country
+      const isCountryWide = countryLocations.some(
+        (loc) => (loc.code || "").trim().toUpperCase() === country
+      );
+      if (isCountryWide) {
+        return z.methods;
+      }
+
+      // Check 3: Check if zone name is explicitly named after this specific district
+      const zoneName = z.zone.name.trim().toLowerCase();
+      if (zoneName === target || (stateName && zoneName === stateName)) {
+        return z.methods;
+      }
     }
 
-    const data = await res.json();
-    if (Array.isArray(data?.states) && data.states.length > 0) {
-      return data.states.map((s: any) => ({
-        code: s.code || s.name,
-        name: decodeHtml(s.name || s.code),
-      }));
+    // 2. Fallback to Zone 0 ("Locations not covered by other zones") if enabled
+    if (shippingData.zone0Methods.length > 0) {
+      return shippingData.zone0Methods;
     }
 
-    return getDefaultBangladeshStates();
+    // 3. If WooCommerce zones exist and none cover this district, return empty (no shipping available)
+    return [];
   } catch (err) {
-    console.error(`Failed to fetch states for country ${countryCode}:`, err);
-    return getDefaultBangladeshStates();
+    console.error("Failed to fetch Shipping options from WooCommerce:", err);
+    return [];
   }
-}
-
-function getDefaultBangladeshStates(): WooCommerceState[] {
-  return [
-    { code: "BD-13", name: "Dhaka" },
-    { code: "BD-10", name: "Chattogram" },
-    { code: "BD-18", name: "Gazipur" },
-    { code: "BD-40", name: "Narayanganj" },
-    { code: "BD-60", name: "Sylhet" },
-    { code: "BD-54", name: "Rajshahi" },
-    { code: "BD-27", name: "Khulna" },
-    { code: "BD-06", name: "Barishal" },
-    { code: "BD-55", name: "Rangpur" },
-    { code: "BD-39", name: "Mymensingh" },
-    { code: "BD-08", name: "Cumilla" },
-    { code: "BD-03", name: "Bogura" },
-    { code: "BD-11", name: "Cox's Bazar" },
-    { code: "BD-23", name: "Jessore" },
-    { code: "BD-04", name: "Brahmanbaria" },
-    { code: "BD-14", name: "Dinajpur" },
-    { code: "BD-63", name: "Tangail" },
-    { code: "BD-17", name: "Faridpur" },
-    { code: "BD-49", name: "Pabna" },
-    { code: "BD-42", name: "Narsingdi" },
-    { code: "BD-47", name: "Noakhali" },
-    { code: "BD-16", name: "Feni" },
-    { code: "BD-30", name: "Kushtia" },
-  ];
 }
 
 export interface WooCommerceCoupon {

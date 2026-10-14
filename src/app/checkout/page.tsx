@@ -2,8 +2,8 @@ import { Metadata } from "next";
 import CheckoutView from "@/components/CheckoutView";
 import {
   getPaymentGateways,
-  getShippingMethods,
   getCountryStates,
+  getStoreDefaultCountry,
 } from "@/lib/woocommerce";
 
 export const metadata: Metadata = {
@@ -15,17 +15,19 @@ export const metadata: Metadata = {
 export const revalidate = 60;
 
 export default async function CheckoutPage() {
-  const [paymentGateways, shippingMethods, states] = await Promise.all([
+  const [paymentGateways, storeCountry] = await Promise.all([
     getPaymentGateways(),
-    getShippingMethods(),
-    getCountryStates("BD"),
+    getStoreDefaultCountry(),
   ]);
+
+  const states = await getCountryStates(storeCountry);
 
   return (
     <CheckoutView
       initialGateways={paymentGateways}
-      initialShippingMethods={shippingMethods}
+      initialShippingMethods={[]}
       initialStates={states}
+      initialCountry={storeCountry}
     />
   );
 }
