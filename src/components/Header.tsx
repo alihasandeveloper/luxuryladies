@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Search, Heart, ArrowLeftRight, ShoppingBag, User, X, LogIn, ChevronRight, Menu, Sparkles } from "lucide-react";
 import { WooCommerceProduct } from "@/types/woocommerce";
 
@@ -18,6 +18,17 @@ import { useCart } from "@/context/CartContext";
 interface HeaderCategory {
   label: string;
   slug: string;
+}
+
+function SearchQuerySync({ onQueryChange }: { onQueryChange: (q: string) => void }) {
+  const searchParams = useSearchParams();
+  const q = searchParams.get("q");
+
+  useEffect(() => {
+    onQueryChange(q || "");
+  }, [q, onQueryChange]);
+
+  return null;
 }
 
 export default function Header() {
@@ -105,7 +116,12 @@ export default function Header() {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchQuery.trim()) return;
+    if (!searchQuery.trim()) {
+      if (pathname === "/shop") {
+        router.push("/shop");
+      }
+      return;
+    }
     router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
     setMobileSearchOpen(false);
   };
@@ -127,6 +143,9 @@ export default function Header() {
 
   return (
     <>
+      <Suspense fallback={null}>
+        <SearchQuerySync onQueryChange={setSearchQuery} />
+      </Suspense>
       <header className="site-header">
         {/* ── Top Bar ─────────────────────────────────── */}
         <div className="header-top">
