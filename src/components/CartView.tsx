@@ -8,7 +8,6 @@ import {
   Trash2,
   Minus,
   Plus,
-  ShieldCheck,
   CreditCard,
   Truck,
   Package,
@@ -220,12 +219,6 @@ export default function CartView() {
                   <span className="text-lg text-slate-900">
                     Tk {subtotal.toFixed(2)}
                   </span>
-                </div>
-
-                {/* Trust Badge */}
-                <div className="bg-[#F0FDF4] text-[#15803D] border border-[#DCFCE7] px-3.5 py-2.5 rounded-md text-xs font-semibold flex items-center justify-center gap-2 mb-4">
-                  <ShieldCheck size={16} className="text-[#16a34a]" />
-                  <span>Secure Checkout & COD Available</span>
                 </div>
 
                 {/* Actions */}

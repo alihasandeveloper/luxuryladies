@@ -23,6 +23,9 @@ export interface AppliedCoupon {
   code: string;
   discountPercent?: number;
   discountAmount?: number;
+  freeShipping?: boolean;
+  minSpend?: number;
+  maxSpend?: number;
 }
 
 interface CartContextType {
@@ -42,7 +45,7 @@ interface CartContextType {
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, newQuantity: number) => void;
   clearCart: () => void;
-  applyCoupon: (code: string) => { success: boolean; message: string };
+  applyCoupon: (code: string) => Promise<{ success: boolean; message: string }>;
   removeCoupon: () => void;
 }
 
@@ -104,7 +107,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Calculate discount
   let discount = 0;
   if (appliedCoupon) {
-    if (appliedCoupon.discountPercent) {
+    if (appliedCoupon.minSpend && subtotal < appliedCoupon.minSpend) {
+      discount = 0;
+    } else if (appliedCoupon.discountPercent) {
       discount = Math.round((subtotal * appliedCoupon.discountPercent) / 100);
     } else if (appliedCoupon.discountAmount) {
       discount = Math.min(subtotal, appliedCoupon.discountAmount);
@@ -155,37 +160,50 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setAppliedCoupon(null);
   };
 
-  const applyCoupon = (rawCode: string): { success: boolean; message: string } => {
+  const applyCoupon = async (
+    rawCode: string
+  ): Promise<{ success: boolean; message: string }> => {
     const code = rawCode.trim().toUpperCase();
     if (!code) {
-      return { success: false, message: "Please enter a promo code." };
+      return { success: false, message: "Please enter a coupon code." };
     }
 
-    if (code === "LUXURY10") {
-      setAppliedCoupon({ code, discountPercent: 10 });
-      return { success: true, message: "Coupon applied! 10% discount added." };
-    }
+    try {
+      const res = await fetch("/api/coupon", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code, subtotal }),
+      });
 
-    if (code === "WELCOME200") {
-      if (subtotal < 1000) {
+      const data = await res.json();
+      if (data.success && data.coupon) {
+        setAppliedCoupon({
+          code: data.coupon.code,
+          discountPercent: data.coupon.discountPercent,
+          discountAmount: data.coupon.discountAmount,
+          freeShipping: data.coupon.freeShipping,
+          minSpend: data.coupon.minSpend,
+          maxSpend: data.coupon.maxSpend,
+        });
+        return {
+          success: true,
+          message: data.message || "Coupon applied successfully!",
+        };
+      } else {
         return {
           success: false,
-          message: "WELCOME200 requires minimum order of Tk 1,000.",
+          message: data.message || "Invalid or expired coupon code.",
         };
       }
-      setAppliedCoupon({ code, discountAmount: 200 });
-      return { success: true, message: "Coupon applied! Tk 200 discount added." };
+    } catch (err: any) {
+      console.error("Coupon verification request error:", err);
+      return {
+        success: false,
+        message: "Failed to verify coupon code. Please try again.",
+      };
     }
-
-    if (code === "PINK15") {
-      setAppliedCoupon({ code, discountPercent: 15 });
-      return { success: true, message: "Coupon applied! 15% discount added." };
-    }
-
-    return {
-      success: false,
-      message: "Invalid or expired coupon code.",
-    };
   };
 
   const removeCoupon = () => {

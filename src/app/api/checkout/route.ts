@@ -18,9 +18,10 @@ export async function POST(req: Request) {
     } = body;
 
     // Validate required fields
-    if (!customer?.firstName?.trim()) {
+    const rawName = (customer?.fullName || customer?.firstName || "").trim();
+    if (!rawName) {
       return NextResponse.json(
-        { success: false, error: "First name is required." },
+        { success: false, error: "Full name is required." },
         { status: 400 }
       );
     }
@@ -50,30 +51,36 @@ export async function POST(req: Request) {
     const finalShippingTitle = shippingMethod?.title || "Standard Delivery";
     const finalShippingMethodId = shippingMethod?.method_id || "flat_rate";
 
+    const nameParts = rawName.split(" ");
+    const resolvedFirstName = nameParts[0] || rawName;
+    const resolvedLastName = nameParts.slice(1).join(" ") || customer.lastName?.trim() || "";
+    const resolvedCity = customer.city?.trim() || customer.district?.trim() || customer.state?.trim() || "Dhaka";
+    const resolvedState = customer.state?.trim() || customer.district?.trim() || "Dhaka";
+
     const payload: CreateOrderPayload = {
       status: "processing",
       payment_method: paymentMethod || "cod",
       payment_method_title: finalPaymentTitle,
       set_paid: false,
       billing: {
-        first_name: customer.firstName.trim(),
-        last_name: customer.lastName?.trim() || "",
+        first_name: resolvedFirstName,
+        last_name: resolvedLastName,
         address_1: customer.address.trim(),
         address_2: customer.address2?.trim() || (customer.altPhone ? `Alt Phone: ${customer.altPhone}` : ""),
-        city: customer.city?.trim() || customer.district?.trim() || "Dhaka",
-        state: customer.state?.trim() || customer.district?.trim() || "",
+        city: resolvedCity,
+        state: resolvedState,
         postcode: customer.postalCode?.trim() || "",
         country: customer.country?.trim() || "BD",
         email: customer.email?.trim() || "customer@luxuryladies.com",
         phone: customer.phone.trim(),
       },
       shipping: {
-        first_name: customer.firstName.trim(),
-        last_name: customer.lastName?.trim() || "",
+        first_name: resolvedFirstName,
+        last_name: resolvedLastName,
         address_1: customer.address.trim(),
         address_2: customer.address2?.trim() || (customer.altPhone ? `Alt Phone: ${customer.altPhone}` : ""),
-        city: customer.city?.trim() || customer.district?.trim() || "Dhaka",
-        state: customer.state?.trim() || customer.district?.trim() || "",
+        city: resolvedCity,
+        state: resolvedState,
         postcode: customer.postalCode?.trim() || "",
         country: customer.country?.trim() || "BD",
       },

@@ -707,5 +707,190 @@ function getDefaultBangladeshStates(): WooCommerceState[] {
   ];
 }
 
+export interface WooCommerceCoupon {
+  id: number;
+  code: string;
+  amount: string;
+  discount_type: string;
+  description?: string;
+  date_expires?: string | null;
+  date_expires_gmt?: string | null;
+  usage_count: number;
+  individual_use?: boolean;
+  product_ids?: number[];
+  excluded_product_ids?: number[];
+  usage_limit?: number | null;
+  usage_limit_per_user?: number | null;
+  free_shipping?: boolean;
+  minimum_amount?: string;
+  maximum_amount?: string;
+}
+
+export async function verifyWooCommerceCoupon(
+  code: string,
+  subtotal: number = 0
+): Promise<{
+  success: boolean;
+  message: string;
+  coupon?: {
+    code: string;
+    discountPercent?: number;
+    discountAmount?: number;
+    freeShipping?: boolean;
+    minSpend?: number;
+    maxSpend?: number;
+  };
+}> {
+  const cleanCode = code.trim();
+  if (!cleanCode) {
+    return { success: false, message: "Please enter a coupon code." };
+  }
+
+  const authHeader = getAuthHeader();
+  if (authHeader) {
+    try {
+      let url = `${getBaseUrl()}/wp-json/wc/v3/coupons?code=${encodeURIComponent(cleanCode)}`;
+      let res = await fetch(url, {
+        headers: {
+          Authorization: authHeader,
+          "Content-Type": "application/json",
+        },
+        cache: "no-store",
+      });
+
+      let coupons: WooCommerceCoupon[] = res.ok ? await res.json() : [];
+
+      // If not found with the raw casing, try lowercase
+      if ((!Array.isArray(coupons) || coupons.length === 0) && cleanCode.toLowerCase() !== cleanCode) {
+        const lowerUrl = `${getBaseUrl()}/wp-json/wc/v3/coupons?code=${encodeURIComponent(cleanCode.toLowerCase())}`;
+        const lowerRes = await fetch(lowerUrl, {
+          headers: {
+            Authorization: authHeader,
+            "Content-Type": "application/json",
+          },
+          cache: "no-store",
+        });
+        if (lowerRes.ok) {
+          coupons = await lowerRes.json();
+        }
+      }
+
+      if (Array.isArray(coupons) && coupons.length > 0) {
+        const match = coupons.find(
+          (c) => c.code.toLowerCase() === cleanCode.toLowerCase()
+        );
+
+        if (match) {
+          // Check expiration
+          const exp = match.date_expires_gmt || match.date_expires;
+          if (exp) {
+            const expTime = new Date(exp).getTime();
+            if (!isNaN(expTime) && expTime < Date.now()) {
+              return { success: false, message: "This coupon code has expired." };
+            }
+          }
+
+          // Check usage limit
+          if (match.usage_limit && match.usage_count >= match.usage_limit) {
+            return {
+              success: false,
+              message: "Coupon usage limit has been reached.",
+            };
+          }
+
+          // Check min spend
+          const minAmount = parseFloat(match.minimum_amount || "0");
+          if (minAmount > 0 && subtotal > 0 && subtotal < minAmount) {
+            return {
+              success: false,
+              message: `Coupon "${match.code.toUpperCase()}" requires a minimum order of Tk ${minAmount.toLocaleString()}.`,
+            };
+          }
+
+          // Check max spend
+          const maxAmount = parseFloat(match.maximum_amount || "0");
+          if (maxAmount > 0 && subtotal > 0 && subtotal > maxAmount) {
+            return {
+              success: false,
+              message: `Coupon "${match.code.toUpperCase()}" is only valid for orders up to Tk ${maxAmount.toLocaleString()}.`,
+            };
+          }
+
+          const parsedAmount = parseFloat(match.amount || "0");
+          const isPercent = match.discount_type === "percent";
+          const isFixed =
+            match.discount_type === "fixed_cart" ||
+            match.discount_type === "fixed_product" ||
+            !isPercent;
+
+          let discountPercent: number | undefined;
+          let discountAmount: number | undefined;
+          let successMessage = `Coupon "${match.code.toUpperCase()}" applied!`;
+
+          if (isPercent && parsedAmount > 0) {
+            discountPercent = parsedAmount;
+            successMessage = `Coupon applied! ${parsedAmount}% discount added.`;
+          } else if (isFixed && parsedAmount > 0) {
+            discountAmount = parsedAmount;
+            successMessage = `Coupon applied! Tk ${parsedAmount.toFixed(0)} discount added.`;
+          } else if (match.free_shipping) {
+            successMessage = `Coupon applied! Free shipping added.`;
+          }
+
+          return {
+            success: true,
+            message: successMessage,
+            coupon: {
+              code: match.code.toUpperCase(),
+              discountPercent,
+              discountAmount,
+              freeShipping: Boolean(match.free_shipping),
+              minSpend: minAmount > 0 ? minAmount : undefined,
+              maxSpend: maxAmount > 0 ? maxAmount : undefined,
+            },
+          };
+        }
+      }
+    } catch (err: any) {
+      console.warn("Failed to fetch coupon from WooCommerce:", err.message);
+    }
+  }
+
+  // Fallback demo coupons if offline or testing
+  const upper = cleanCode.toUpperCase();
+  if (upper === "LUXURY10") {
+    return {
+      success: true,
+      message: "Coupon applied! 10% discount added.",
+      coupon: { code: "LUXURY10", discountPercent: 10 },
+    };
+  }
+  if (upper === "WELCOME200") {
+    if (subtotal < 1000) {
+      return {
+        success: false,
+        message: "WELCOME200 requires minimum order of Tk 1,000.",
+      };
+    }
+    return {
+      success: true,
+      message: "Coupon applied! Tk 200 discount added.",
+      coupon: { code: "WELCOME200", discountAmount: 200, minSpend: 1000 },
+    };
+  }
+  if (upper === "PINK15") {
+    return {
+      success: true,
+      message: "Coupon applied! 15% discount added.",
+      coupon: { code: "PINK15", discountPercent: 15 },
+    };
+  }
+
+  return {
+    success: false,
+    message: "Invalid or expired coupon code.",
+  };
+}
+
 
 
