@@ -427,10 +427,10 @@ export default function ShopArchive({
 
         {/* Price Value Indicators */}
         <div className="flex items-center justify-between mt-2">
-          <span className="inline-flex items-center justify-center px-3 py-1 bg-[#FBF0F4] text-xs font-semibold text-[#444] rounded-md min-w-[70px]">
+          <span className="price-indicator inline-flex items-center justify-center px-3 py-1 bg-[#FBF0F4] text-xs font-semibold text-[#444] min-w-[70px]">
             Tk {minPrice.toLocaleString()}
           </span>
-          <span className="inline-flex items-center justify-center px-3 py-1 bg-[#FBF0F4] text-xs font-semibold text-[#444] rounded-md min-w-[70px]">
+          <span className="price-indicator inline-flex items-center justify-center px-3 py-1 bg-[#FBF0F4] text-xs font-semibold text-[#444] min-w-[70px]">
             Tk {maxPrice.toLocaleString()}
           </span>
         </div>

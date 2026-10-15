@@ -1020,20 +1020,8 @@ export default function ProductDetails({
                         <button
                           type="button"
                           disabled={isCurrentOutOfStock}
-                          onClick={handleBuyNow}
-                          className={`w-full py-3 rounded-md text-xs font-bold tracking-wide shadow-xs transition-all duration-200 !bg-[#ff0080] !text-white ${isCurrentOutOfStock
-                              ? "opacity-50 cursor-not-allowed"
-                              : "hover:!bg-[#d4006a] cursor-pointer active:scale-[0.99]"
-                            }`}
-                        >
-                          {isCurrentOutOfStock ? "Out of Stock" : "Buy Now"}
-                        </button>
-
-                        <button
-                          type="button"
-                          disabled={isCurrentOutOfStock}
                           onClick={handleAddToCart}
-                          className={`w-full py-3 rounded-md text-xs font-bold tracking-wide transition-all duration-200 ${isCurrentOutOfStock
+                          className={`w-full py-3 text-xs font-bold tracking-wide transition-all duration-200 ${isCurrentOutOfStock
                               ? "bg-white text-[#ff0080] border-2 border-[#ff0080] opacity-50 cursor-not-allowed"
                               : justAdded
                                 ? "bg-emerald-600 text-white border-2 border-emerald-600 shadow-xs"
@@ -1050,6 +1038,18 @@ export default function ProductDetails({
                           ) : (
                             "Add to Cart"
                           )}
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={isCurrentOutOfStock}
+                          onClick={handleBuyNow}
+                          className={`w-full py-3 text-xs font-bold tracking-wide shadow-xs transition-all duration-200 !bg-[#ff0080] !text-white ${isCurrentOutOfStock
+                              ? "opacity-50 cursor-not-allowed"
+                              : "hover:!bg-[#d4006a] cursor-pointer active:scale-[0.99]"
+                            }`}
+                        >
+                          {isCurrentOutOfStock ? "Out of Stock" : "Buy Now"}
                         </button>
                       </div>
                     </div>

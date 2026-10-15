@@ -154,28 +154,27 @@ export default function ProductCard({
             type="button"
             disabled={isOutOfStock}
             onClick={handleCartClick}
-            className={`w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm flex-shrink-0 ${
-              isOutOfStock
+            className={`w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm flex-shrink-0 ${isOutOfStock
                 ? "bg-[#e2d8dc] text-[#8C7B82] cursor-not-allowed opacity-70"
                 : justAdded
-                ? "bg-emerald-600 text-white scale-105"
-                : "bg-[var(--color-primary)] text-white hover:scale-110 active:scale-95 cursor-pointer"
-            }`}
+                  ? "bg-emerald-600 text-white scale-105"
+                  : "bg-[var(--color-primary)] text-white hover:scale-110 active:scale-95 cursor-pointer"
+              }`}
             aria-label={
               isOutOfStock
                 ? `${product.name} is out of stock`
                 : isVariable
-                ? `Select options for ${product.name}`
-                : `Add ${product.name} to cart`
+                  ? `Select options for ${product.name}`
+                  : `Add ${product.name} to cart`
             }
             title={
               isOutOfStock
                 ? "Out of Stock"
                 : isVariable
-                ? "Select Options"
-                : justAdded
-                ? "Added to Cart!"
-                : "Add to Cart"
+                  ? "Select Options"
+                  : justAdded
+                    ? "Added to Cart!"
+                    : "Add to Cart"
             }
           >
             {justAdded ? (
