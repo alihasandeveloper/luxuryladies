@@ -7,27 +7,44 @@
   --color-secondary: #F8BBD0;
   --color-dark: #191426;
   --color-text: #191426;
+  --color-text-muted: #6F6470;
   --color-description: #6F6470;
   --color-bg: #FFF5F7;
+  --color-surface: #ffffff;
   --color-border: #E8E2E5;
   --color-error: #E53935;
   --color-success: #2E7D32;
-  --radius-xs: 0px;
-  --radius-sm: 0px;
-  --radius-md: 0px;
-  --radius-lg: 0px;
-  --radius-xl: 0px;
-  --radius-2xl: 0px;
-  --radius-3xl: 0px;
-  --radius-4xl: 0px;
-  --radius: 0px;
+  --color-success-bg: #E8F5E9;
+
+  --radius-none: 0px;
+  --radius-md: 6px;
+  --radius-full: 9999px;
+
+  /* Spacing helpers for custom CSS */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+
+  /* Shadow helpers */
+  --shadow-xs: 0 1px 3px rgba(37, 26, 31, 0.06);
+  --shadow-sm: 0 2px 8px rgba(37, 26, 31, 0.08);
+  --shadow-md: 0 4px 16px rgba(37, 26, 31, 0.10);
+
+  /* Transition helper */
+  --transition: 0.2s ease;
 }
 
 /* ─── Reset ─────────────────────────────────────────────── */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    border-color: var(--color-border);
+  }
 }
 
 /* ─── Global Interactive Element Fixes (Mobile/iOS) ──────── */
@@ -49,119 +66,6 @@ button {
   -webkit-user-select: none;
   user-select: none;
   cursor: pointer;
-}
-
-/* ─── Corner Radius Reset (No border radius on buttons, carts, cards, boxes) ─── */
-button:not(.rounded-full):not(.action-btn):not(.hamburger-btn),
-input:not(.rounded-full),
-select:not(.rounded-full),
-textarea:not(.rounded-full) {
-  border-radius: 0 !important;
-}
-
-/* Enforce 0 border-radius on all rectangular rounded utilities while preserving pill borders */
-.rounded,
-.rounded-xs,
-.rounded-sm,
-.rounded-md,
-.rounded-lg,
-.rounded-xl,
-.rounded-2xl,
-.rounded-3xl,
-.rounded-4xl,
-.rounded-t,
-.rounded-t-xs,
-.rounded-t-sm,
-.rounded-t-md,
-.rounded-t-lg,
-.rounded-t-xl,
-.rounded-b,
-.rounded-b-xs,
-.rounded-b-sm,
-.rounded-b-md,
-.rounded-b-lg,
-.rounded-b-xl,
-.rounded-l,
-.rounded-l-xs,
-.rounded-l-sm,
-.rounded-l-md,
-.rounded-l-lg,
-.rounded-r,
-.rounded-r-xs,
-.rounded-r-sm,
-.rounded-r-md,
-.rounded-r-lg,
-.rounded-tl,
-.rounded-tl-xs,
-.rounded-tl-sm,
-.rounded-tl-md,
-.rounded-tl-lg,
-.rounded-tr,
-.rounded-tr-xs,
-.rounded-tr-sm,
-.rounded-tr-md,
-.rounded-tr-lg,
-.rounded-bl,
-.rounded-bl-xs,
-.rounded-bl-sm,
-.rounded-bl-md,
-.rounded-bl-lg,
-.rounded-br,
-.rounded-br-xs,
-.rounded-br-sm,
-.rounded-br-md,
-.rounded-br-lg {
-  border-radius: 0 !important;
-}
-
-/* ─── Design Tokens ──────────────────────────────────────── */
-:root {
-  /* Brand Colors */
-  --primary: #E91E63;
-  --primary-mid: #FF4081;
-  --primary-dark: #C2185B;
-  --color-primary: #E91E63;
-  --color-primary-light: #FF4081;
-  --color-dark: #191426;
-  --color-accent: #FF4081;
-  --color-secondary: #F8BBD0;
-  --color-bg: #FFF5F7;
-  --color-text: #191426;
-  --color-text-muted: #6F6470;
-  --color-description: #6F6470;
-  --color-border: #E8E2E5;
-  --color-surface: #ffffff;
-  --color-error: #E53935;
-  --color-success: #2E7D32;
-  --color-success-bg: #E8F5E9;
-
-  /* Spacing scale */
-  --space-xs: 0.25rem;
-  --space-sm: 0.5rem;
-  --space-md: 1rem;
-  --space-lg: 1.5rem;
-  --space-xl: 2rem;
-  --space-2xl: 3rem;
-
-  /* Radius (0 for all buttons, cards, carts, boxes; 9999px for pill borders) */
-  --radius-xs: 0px;
-  --radius-sm: 0px;
-  --radius-md: 0px;
-  --radius-lg: 0px;
-  --radius-xl: 0px;
-  --radius-2xl: 0px;
-  --radius-3xl: 0px;
-  --radius-4xl: 0px;
-  --radius: 0px;
-  --radius-full: 9999px;
-
-  /* Shadow */
-  --shadow-xs: 0 1px 3px rgba(37, 26, 31, 0.06);
-  --shadow-sm: 0 2px 8px rgba(37, 26, 31, 0.08);
-  --shadow-md: 0 4px 16px rgba(37, 26, 31, 0.10);
-
-  /* Transition */
-  --transition: 0.2s ease;
 }
 
 /* ─── Base ───────────────────────────────────────────────── */
@@ -294,7 +198,7 @@ a {
   font-weight: 500;
   color: var(--color-text-muted);
   padding: 0.375rem 0.75rem;
-  border-radius: 6px !important;
+  border-radius: var(--radius-md);
   transition: color var(--transition), background-color var(--transition);
   letter-spacing: 0.01em;
 }
@@ -371,7 +275,7 @@ a.action-btn {
   color: var(--color-text-muted);
   width: 38px;
   height: 38px;
-  border-radius: 6px !important;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -468,7 +372,7 @@ a.action-btn {
   cursor: pointer;
   width: 38px;
   height: 38px;
-  border-radius: 6px !important;
+  border-radius: var(--radius-md);
   flex-shrink: 0;
   transition: all var(--transition);
   color: var(--color-text-muted);
@@ -485,12 +389,12 @@ a.action-btn {
 /* Mobile Drawer navigation links & quick icon cards */
 .drawer nav a,
 .drawer .grid a {
-  border-radius: 6px !important;
+  border-radius: var(--radius-md);
 }
 
 /* Price range value indicators */
 .price-indicator {
-  border-radius: 6px !important;
+  border-radius: var(--radius-md);
 }
 
 /* ─────────────────────────────────────────────────────────── */
@@ -746,7 +650,7 @@ a.action-btn {
   justify-content: center;
   width: 30px;
   height: 30px;
-  border-radius: 6px !important;
+  border-radius: var(--radius-md);
   background-color: var(--color-bg);
   color: var(--color-primary);
   border: 1px solid var(--color-secondary);
@@ -1013,15 +917,20 @@ a.action-btn {
 }
 
 [data-sonner-toaster] [data-close-button] {
+  left: auto !important;
+  right: 0 !important;
+  top: 0 !important;
+  transform: translate(35%, -35%) !important;
   color: #6F6470 !important;
   border-color: #E8E2E5 !important;
   background-color: #ffffff !important;
-  transition: color 0.15s ease, border-color 0.15s ease !important;
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease !important;
 }
 
 [data-sonner-toaster] [data-close-button]:hover {
   color: #E91E63 !important;
   border-color: #E91E63 !important;
+  background-color: #FFF5F7 !important;
 }
 
 [data-sonner-toaster] [data-type="error"] {

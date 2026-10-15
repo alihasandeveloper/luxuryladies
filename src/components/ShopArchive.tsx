@@ -368,15 +368,15 @@ export default function ShopArchive({
   const FilterContent = (
     <div className="flex flex-col space-y-6">
       {/* Header (desktop only - mobile uses dedicated modal header) */}
-      <div className="hidden md:flex items-center justify-between pb-3 border-b border-[#E8E2E5]">
+      <div className="hidden md:flex items-center justify-between pb-3 border-b border-border">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-[#E91E63]" strokeWidth={2} />
-          <h2 className="text-lg font-bold text-[#191426] tracking-tight">Filter</h2>
+          <Sparkles className="w-5 h-5 text-primary" strokeWidth={2} />
+          <h2 className="text-lg font-bold text-dark tracking-tight">Filter</h2>
         </div>
         <button
           type="button"
           onClick={handleClearAll}
-          className="text-xs font-semibold text-[#E91E63] hover:text-[#C2185B] transition-colors cursor-pointer"
+          className="text-xs font-semibold text-primary hover:text-primary-hover transition-colors cursor-pointer"
         >
           Clear All
         </button>
@@ -384,16 +384,16 @@ export default function ShopArchive({
 
       {/* ── 1. Price Multi-Range Slider ── */}
       <div>
-        <span className="block text-sm font-semibold text-[#191426] mb-3">
+        <span className="block text-sm font-semibold text-dark mb-3">
           Price Range
         </span>
         <div className="relative h-6 flex items-center">
           {/* Background Track */}
-          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-1.5 bg-[#E8E2E5] rounded-full pointer-events-none" />
+          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-1.5 bg-border rounded-full pointer-events-none" />
 
           {/* Active Highlight Range Track */}
           <div
-            className="absolute top-1/2 -translate-y-1/2 h-1.5 bg-[#E91E63] rounded-full pointer-events-none"
+            className="absolute top-1/2 -translate-y-1/2 h-1.5 bg-primary rounded-full pointer-events-none"
             style={{
               left: `${minPercent}%`,
               width: `${Math.max(0, maxPercent - minPercent)}%`,
@@ -427,10 +427,10 @@ export default function ShopArchive({
 
         {/* Price Value Indicators */}
         <div className="flex items-center justify-between mt-2">
-          <span className="price-indicator inline-flex items-center justify-center px-3 py-1 bg-[#FFF5F7] border border-[#E8E2E5] text-xs font-semibold text-[#191426] min-w-[70px]">
+          <span className="price-indicator inline-flex items-center justify-center px-3 py-1 bg-bg rounded-md text-xs font-semibold text-dark min-w-[70px]">
             Tk {minPrice.toLocaleString()}
           </span>
-          <span className="price-indicator inline-flex items-center justify-center px-3 py-1 bg-[#FFF5F7] border border-[#E8E2E5] text-xs font-semibold text-[#191426] min-w-[70px]">
+          <span className="price-indicator inline-flex items-center justify-center px-3 py-1 bg-bg rounded-md text-xs font-semibold text-dark min-w-[70px]">
             Tk {maxPrice.toLocaleString()}
           </span>
         </div>
@@ -438,7 +438,7 @@ export default function ShopArchive({
 
       {/* ── Offers Filter ── */}
       <div className="pt-2">
-        <h3 className="text-sm font-semibold text-[#191426] mb-3">Offers</h3>
+        <h3 className="text-sm font-semibold text-dark mb-3">Offers</h3>
         <div className="space-y-2.5">
           {[
             { key: "bestPrice" as const, label: "BEST PRICE" },
@@ -450,12 +450,12 @@ export default function ShopArchive({
             return (
               <label
                 key={key}
-                className="flex items-center gap-3 cursor-pointer group select-none text-xs md:text-sm text-[#191426] hover:text-[#E91E63] transition-colors uppercase tracking-wide font-normal"
+                className="flex items-center gap-3 cursor-pointer group select-none text-xs md:text-sm text-dark hover:text-primary transition-colors uppercase tracking-wide font-normal"
               >
                 <div
                   className={`w-4 h-4 rounded-none border flex items-center justify-center transition-all ${isChecked
-                    ? "bg-[#E91E63] border-[#E91E63] text-white"
-                    : "border-[#E8E2E5] bg-white group-hover:border-[#E91E63]"
+                    ? "bg-primary border-primary text-white"
+                    : "border-border bg-white group-hover:border-primary"
                     }`}
                   onClick={() => toggleOffer(key)}
                 >
@@ -469,24 +469,24 @@ export default function ShopArchive({
       </div>
 
       {/* Subtle Divider */}
-      <div className="w-full h-[1px] bg-[#E8E2E5]" />
+      <div className="w-full h-[1px] bg-border" />
 
       {/* ── Category Filter (Ordered by count, showing 5 initially with Show More) ── */}
       <div className="pt-2">
-        <h3 className="text-sm font-semibold text-[#191426] mb-3">Category</h3>
+        <h3 className="text-sm font-semibold text-dark mb-3">Category</h3>
         <div className="space-y-2.5">
           {categoriesWithCount.slice(0, visibleCategoryCount).map((cat) => {
             const isChecked = selectedCategories.includes(cat.slug);
             return (
               <label
                 key={cat.slug}
-                className="flex items-center justify-between cursor-pointer group select-none text-xs md:text-sm text-[#191426] hover:text-[#E91E63] transition-colors"
+                className="flex items-center justify-between cursor-pointer group select-none text-xs md:text-sm text-dark hover:text-primary transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <div
                     className={`w-4 h-4 rounded-none border flex items-center justify-center transition-all ${isChecked
-                      ? "bg-[#E91E63] border-[#E91E63] text-white"
-                      : "border-[#E8E2E5] bg-white group-hover:border-[#E91E63]"
+                      ? "bg-primary border-primary text-white"
+                      : "border-border bg-white group-hover:border-primary"
                       }`}
                     onClick={() => toggleCategory(cat.slug)}
                   >
@@ -495,7 +495,7 @@ export default function ShopArchive({
                   <span onClick={() => toggleCategory(cat.slug)}>{cat.name}</span>
                 </div>
                 {/* Category Count */}
-                <span className="text-[11px] text-[#6F6470] group-hover:text-[#E91E63] transition-colors font-medium">
+                <span className="text-[11px] text-description group-hover:text-primary transition-colors font-medium">
                   ({cat.count})
                 </span>
               </label>
@@ -508,7 +508,7 @@ export default function ShopArchive({
           <button
             type="button"
             onClick={() => setVisibleCategoryCount((prev) => prev + 5)}
-            className="mt-3 text-xs font-semibold text-[#E91E63] hover:underline cursor-pointer inline-flex items-center gap-1 transition-colors"
+            className="mt-3 text-xs font-semibold text-primary hover:underline cursor-pointer inline-flex items-center gap-1 transition-colors"
           >
             + Show More
           </button>
@@ -516,17 +516,17 @@ export default function ShopArchive({
       </div>
 
       {/* Subtle Divider */}
-      <div className="w-full h-[1px] bg-[#E8E2E5]" />
+      <div className="w-full h-[1px] bg-border" />
 
       {/* ── 4. Stock Status ── */}
       <div className="pt-2">
-        <h3 className="text-sm font-semibold text-[#191426] mb-3">Stock Status</h3>
+        <h3 className="text-sm font-semibold text-dark mb-3">Stock Status</h3>
         <div className="space-y-2.5">
-          <label className="flex items-center gap-3 cursor-pointer group select-none text-xs md:text-sm text-[#191426] hover:text-[#E91E63] transition-colors">
+          <label className="flex items-center gap-3 cursor-pointer group select-none text-xs md:text-sm text-dark hover:text-primary transition-colors">
             <div
               className={`w-4 h-4 rounded-none border flex items-center justify-center transition-all ${inStock
-                ? "bg-[#E91E63] border-[#E91E63] text-white"
-                : "border-[#E8E2E5] bg-white group-hover:border-[#E91E63]"
+                ? "bg-primary border-primary text-white"
+                : "border-border bg-white group-hover:border-primary"
                 }`}
               onClick={() => setInStock(!inStock)}
             >
@@ -535,11 +535,11 @@ export default function ShopArchive({
             <span onClick={() => setInStock(!inStock)}>In Stock</span>
           </label>
 
-          <label className="flex items-center gap-3 cursor-pointer group select-none text-xs md:text-sm text-[#191426] hover:text-[#E91E63] transition-colors">
+          <label className="flex items-center gap-3 cursor-pointer group select-none text-xs md:text-sm text-dark hover:text-primary transition-colors">
             <div
               className={`w-4 h-4 rounded-none border flex items-center justify-center transition-all ${outOfStock
-                ? "bg-[#E91E63] border-[#E91E63] text-white"
-                : "border-[#E8E2E5] bg-white group-hover:border-[#E91E63]"
+                ? "bg-primary border-primary text-white"
+                : "border-border bg-white group-hover:border-primary"
                 }`}
               onClick={() => setOutOfStock(!outOfStock)}
             >
@@ -557,16 +557,16 @@ export default function ShopArchive({
       {/* ── Breadcrumb & Top Bar ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
-          <nav className="flex items-center gap-2 text-xs text-[#6F6470] mb-1">
-            <Link href="/" className="hover:text-[#E91E63] transition-colors">
+          <nav className="flex items-center gap-2 text-xs text-description mb-1">
+            <Link href="/" className="hover:text-primary transition-colors">
               Home
             </Link>
             <span>/</span>
-            <span className="text-[#191426] font-medium">Shop</span>
+            <span className="text-dark font-medium">Shop</span>
             {categorySlug && (
               <>
                 <span>/</span>
-                <span className="text-[#E91E63] capitalize">
+                <span className="text-primary capitalize">
                   {categorySlug.replace(/-/g, " ")}
                 </span>
               </>
@@ -574,17 +574,17 @@ export default function ShopArchive({
             {searchQuery.trim() && (
               <>
                 <span>/</span>
-                <span className="text-[#E91E63]">
+                <span className="text-primary">
                   Search: &ldquo;{searchQuery.trim()}&rdquo;
                 </span>
               </>
             )}
           </nav>
-          <h1 className="text-xl md:text-2xl text-[#191426]">
+          <h1 className="text-xl md:text-2xl text-dark">
             {searchQuery.trim() ? (
               <span>
                 Search results for{" "}
-                <span className="text-[#E91E63]">&ldquo;{searchQuery.trim()}&rdquo;</span>
+                <span className="text-primary">&ldquo;{searchQuery.trim()}&rdquo;</span>
               </span>
             ) : categorySlug ? (
               activeCategories.find((c) => c.slug === categorySlug)?.name || "Shop Archive"
@@ -600,10 +600,10 @@ export default function ShopArchive({
           <button
             type="button"
             onClick={() => setMobileFilterOpen(true)}
-            className="md:hidden flex items-center gap-2 px-3.5 py-2 text-xs font-semibold bg-white border border-[#E8E2E5] rounded-[6px] text-[#191426] hover:border-[#E91E63]"
+            className="md:hidden flex items-center gap-2 px-3.5 py-2 text-xs font-semibold bg-white border border-border rounded-md text-dark hover:border-primary"
           >
-            <SlidersHorizontal size={14} className="text-[#E91E63]" />
-            Filters {isFilterActive && <span className="w-2 h-2 rounded-full bg-[#E91E63]" />}
+            <SlidersHorizontal size={14} className="text-primary" />
+            Filters {isFilterActive && <span className="w-2 h-2 rounded-full bg-primary" />}
           </button>
 
           {/* Sort dropdown */}
@@ -611,7 +611,7 @@ export default function ShopArchive({
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="appearance-none bg-white border border-[#E8E2E5] rounded-[6px] px-4 py-2 pr-9 text-xs md:text-sm font-medium text-[#191426] focus:outline-none focus:border-[#E91E63] cursor-pointer"
+              className="appearance-none bg-white border border-border rounded-md px-4 py-2 pr-9 text-xs md:text-sm font-medium text-dark focus:outline-none focus:border-primary cursor-pointer"
             >
               <option value="newest">Newest Arrivals</option>
               <option value="price-low-high">Price: Low to High</option>
@@ -620,7 +620,7 @@ export default function ShopArchive({
             </select>
             <ChevronDown
               size={14}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6F6470] pointer-events-none"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-description pointer-events-none"
             />
           </div>
         </div>
@@ -629,7 +629,7 @@ export default function ShopArchive({
       {/* ── Main Layout: Sidebar + Product Grid ── */}
       <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-12 gap-6 md:gap-8 items-start">
         {/* Desktop Sidebar (Left side, exactly matching user mockup) */}
-        <aside className="hidden md:block md:col-span-1 lg:col-span-3 bg-white p-5 shadow-xs sticky top-28 border border-[#E8E2E5]">
+        <aside className="hidden md:block md:col-span-1 lg:col-span-3 bg-white p-5 shadow-xs sticky top-28">
           {FilterContent}
         </aside>
 
@@ -637,8 +637,8 @@ export default function ShopArchive({
         <main className="col-span-1 md:col-span-3 lg:col-span-9">
           {/* Result Count and Active Tags */}
           <div className="flex items-center justify-between mb-4">
-            <p className="text-xs text-[#6F6470]">
-              Showing <span className="font-semibold text-[#191426]">{filteredProducts.length}</span>
+            <p className="text-xs text-description">
+              Showing <span className="font-semibold text-dark">{filteredProducts.length}</span>
               {filteredProducts.length !== allProducts.length ? ` of ${allProducts.length}` : ""} products
             </p>
 
@@ -646,7 +646,7 @@ export default function ShopArchive({
               <button
                 type="button"
                 onClick={handleClearAll}
-                className="text-xs text-[#E91E63] hover:underline cursor-pointer"
+                className="text-xs text-primary hover:underline cursor-pointer"
               >
                 Reset filters
               </button>
@@ -665,26 +665,26 @@ export default function ShopArchive({
               {/* Infinite Scroll Sentinel & Status Indicator */}
               <div ref={observerTargetRef} className={`w-full flex flex-col items-center justify-center ${isLoadingMore ? "py-8" : "h-2"}`}>
                 {isLoadingMore && (
-                  <div className="flex items-center gap-2.5 text-xs font-semibold text-[#6F6470]">
-                    <span className="w-4 h-4 border-2 border-[#E91E63]/30 border-t-[#E91E63] rounded-full animate-spin" />
+                  <div className="flex items-center gap-2.5 text-xs font-semibold text-description">
+                    <span className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                     <span>Loading more products...</span>
                   </div>
                 )}
               </div>
             </>
           ) : (
-            <div className="bg-white p-12 text-center flex flex-col items-center justify-center border border-[#E8E2E5]">
-              <div className="w-16 h-16 rounded-full bg-[#FFF5F7] flex items-center justify-center text-[#E91E63] mb-4">
+            <div className="bg-white p-12 text-center flex flex-col items-center justify-center border border-border">
+              <div className="w-16 h-16 rounded-full bg-bg flex items-center justify-center text-primary mb-4">
                 <SlidersHorizontal size={24} />
               </div>
-              <h3 className="text-base font-semibold text-[#191426] mb-1">No products found</h3>
-              <p className="text-xs text-[#6F6470] max-w-sm mb-5">
+              <h3 className="text-base font-semibold text-dark mb-1">No products found</h3>
+              <p className="text-xs text-description max-w-sm mb-5">
                 We couldn&apos;t find any items matching your current filters. Try resetting or adjusting your price and filter options.
               </p>
               <Link
                 href="/shop"
                 onClick={handleClearAll}
-                className="px-5 py-2.5 bg-[#E91E63] hover:bg-[#C2185B] !text-white text-xs font-semibold rounded-none transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
+                className="px-5 py-2.5 bg-primary hover:bg-primary-hover !text-white text-xs font-semibold rounded-none transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
               >
                 <span className="!text-white text-inherit">All products</span>
               </Link>
@@ -705,23 +705,23 @@ export default function ShopArchive({
           {/* Full Screen Drawer Panel */}
           <div className="relative ml-auto w-full max-w-[340px] h-[100dvh] bg-white shadow-2xl flex flex-col z-10 animate-in slide-in-from-right duration-200">
             {/* Clean Modal Header */}
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#E8E2E5] bg-white shrink-0">
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-white shrink-0">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#E91E63]" strokeWidth={2} />
-                <span className="font-bold text-sm text-[#191426] tracking-tight">Filter Products</span>
+                <Sparkles className="w-4 h-4 text-primary" strokeWidth={2} />
+                <span className="font-bold text-sm text-dark tracking-tight">Filter Products</span>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={handleClearAll}
-                  className="text-xs font-semibold text-[#E91E63] hover:text-[#C2185B] transition-colors cursor-pointer mr-1"
+                  className="text-xs font-semibold text-primary hover:text-primary-hover transition-colors cursor-pointer mr-1"
                 >
                   Clear All
                 </button>
                 <button
                   type="button"
                   onClick={() => setMobileFilterOpen(false)}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-[#6F6470] hover:text-[#E91E63] hover:bg-[#FFF5F7] transition-colors cursor-pointer"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-description hover:text-primary hover:bg-bg transition-colors cursor-pointer"
                   aria-label="Close filters"
                 >
                   <X size={18} strokeWidth={2} />
@@ -735,11 +735,11 @@ export default function ShopArchive({
             </div>
 
             {/* Bottom Sticky Action Button */}
-            <div className="p-4 border-t border-[#E8E2E5] bg-white shrink-0 shadow-lg">
+            <div className="p-4 border-t border-border bg-white shrink-0 shadow-lg">
               <button
                 type="button"
                 onClick={() => setMobileFilterOpen(false)}
-                className="w-full py-3 !bg-[#E91E63] hover:!bg-[#C2185B] !text-white rounded-none text-xs font-semibold shadow-xs transition-colors flex items-center justify-center gap-2"
+                className="w-full py-3 !bg-primary hover:!bg-primary-hover !text-white rounded-none text-xs font-semibold shadow-xs transition-colors flex items-center justify-center gap-2"
               >
                 <span>View {filteredProducts.length} Results</span>
               </button>

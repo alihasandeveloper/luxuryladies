@@ -21,9 +21,12 @@ import {
   ShoppingBag,
   Info,
   ZoomIn,
+  ZoomOut,
+  X,
 } from "lucide-react";
 import { WooCommerceProduct } from "@/types/woocommerce";
 import ProductCard from "@/components/ProductCard";
+import Button from "@/components/Button";
 
 interface ProductDetailsProps {
   product: WooCommerceProduct;
@@ -102,7 +105,30 @@ export default function ProductDetails({
   const [showThumbNav, setShowThumbNav] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [lightboxZoom, setLightboxZoom] = useState(1);
   const thumbnailsRef = useRef<HTMLDivElement>(null);
+
+  // Close lightbox on Escape and support keyboard arrow navigation
+  useEffect(() => {
+    if (!isLightboxOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsLightboxOpen(false);
+      } else if (e.key === "ArrowLeft") {
+        setActiveImageIndex((prev) => (prev === 0 ? galleryImages.length - 1 : prev - 1));
+      } else if (e.key === "ArrowRight") {
+        setActiveImageIndex((prev) => (prev === galleryImages.length - 1 ? 0 : prev + 1));
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isLightboxOpen, galleryImages.length]);
 
   // Ensure product details page always scrolls to top on initial load or product change
   useEffect(() => {
@@ -111,6 +137,7 @@ export default function ProductDetails({
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    if (!width || !height) return;
     const x = Math.max(0, Math.min(100, ((e.clientX - left) / width) * 100));
     const y = Math.max(0, Math.min(100, ((e.clientY - top) / height) * 100));
     setZoomPosition({ x, y });
@@ -649,12 +676,12 @@ export default function ProductDetails({
     <div className="w-full py-6 md:py-10">
       <div className="container max-w-[1328px] mx-auto">
         {/* ── Breadcrumb Navigation ── */}
-        <nav className="flex items-center gap-1.5 md:gap-2 text-xs text-[#6F6470] mb-6 w-full lg:max-w-[calc(50%-1.5rem)] min-w-0">
-          <Link href="/" className="hover:text-[#E91E63] transition-colors shrink-0">
+        <nav className="flex items-center gap-1.5 md:gap-2 text-xs text-description mb-6 w-full lg:max-w-[calc(50%-1.5rem)] min-w-0">
+          <Link href="/" className="hover:text-primary transition-colors shrink-0">
             Home
           </Link>
           <span className="shrink-0">/</span>
-          <Link href="/shop" className="hover:text-[#E91E63] transition-colors shrink-0">
+          <Link href="/shop" className="hover:text-primary transition-colors shrink-0">
             Shop
           </Link>
           {product.categories?.[0] && (
@@ -662,7 +689,7 @@ export default function ProductDetails({
               <span className="shrink-0">/</span>
               <Link
                 href={`/category/${product.categories[0].slug}`}
-                className="hover:text-[#E91E63] transition-colors shrink-0 max-w-[140px] truncate"
+                className="hover:text-primary transition-colors shrink-0 max-w-[140px] truncate"
                 title={product.categories[0].name}
               >
                 {product.categories[0].name}
@@ -672,7 +699,7 @@ export default function ProductDetails({
           <span className="shrink-0">/</span>
           {product.name && (
             <span
-              className="text-[#191426] font-medium truncate min-w-0 flex-1"
+              className="text-dark font-medium truncate min-w-0 flex-1"
               title={product.name}
             >
               {product.name}
@@ -687,41 +714,43 @@ export default function ProductDetails({
             <div className="lg:col-span-6 flex flex-col gap-4">
               {/* Main Featured Image with Magnifier Lens / Zoom Effect */}
               <div
-                className="relative aspect-square w-full overflow-hidden bg-[#FFF5F7]/30 border border-[#E8E2E5] cursor-zoom-in group/zoom"
+                className="relative aspect-square w-full overflow-hidden bg-bg/30 border border-border cursor-zoom-in group/zoom select-none"
                 onMouseEnter={() => setIsZoomed(true)}
                 onMouseLeave={() => setIsZoomed(false)}
                 onMouseMove={handleMouseMove}
+                onClick={() => {
+                  setLightboxZoom(1);
+                  setIsLightboxOpen(true);
+                }}
               >
                 <Image
-                  src={galleryImages[activeImageIndex]?.src || galleryImages[0].src}
+                  src={galleryImages[activeImageIndex]?.src || galleryImages[0]?.src || "/woocommerce-placeholder.webp"}
                   alt={galleryImages[activeImageIndex]?.alt || product.name || "Product"}
                   fill
                   priority
                   sizes="(max-width: 1024px) 100vw, 50vw"
-                  className={`object-cover object-center transition-transform duration-150 ${isZoomed ? "opacity-0" : "opacity-100"
-                    }`}
+                  className="object-cover object-center pointer-events-none transition-transform duration-150 ease-out will-change-transform"
+                  style={{
+                    transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                    transform: isZoomed ? "scale(2.2)" : "scale(1)",
+                  }}
                   unoptimized={Boolean((galleryImages[activeImageIndex]?.src || galleryImages[0]?.src)?.startsWith("/"))}
                 />
 
-                {/* Magnified zoom layer */}
-                {isZoomed && (
-                  <div
-                    className="absolute inset-0 pointer-events-none transition-opacity duration-200"
-                    style={{
-                      backgroundImage: `url(${galleryImages[activeImageIndex]?.src || galleryImages[0].src})`,
-                      backgroundPosition: `${zoomPosition.x}% ${zoomPosition.y}%`,
-                      backgroundSize: "220%",
-                      backgroundRepeat: "no-repeat",
-                    }}
-                  />
-                )}
-
-                {/* Magnifier Glass Icon Badge */}
-                {!isZoomed && (
-                  <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/85 backdrop-blur-xs border border-[#E8E2E5] shadow-xs flex items-center justify-center text-[#555] pointer-events-none transition-opacity group-hover/zoom:text-[#E91E63]">
-                    <ZoomIn size={16} />
-                  </div>
-                )}
+                {/* Magnifier Glass Icon Button */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLightboxZoom(1);
+                    setIsLightboxOpen(true);
+                  }}
+                  className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 hover:bg-white text-dark hover:text-primary backdrop-blur-xs border border-border shadow-xs flex items-center justify-center transition-all cursor-pointer z-10 hover:scale-110 active:scale-95"
+                  title="Click to view full image"
+                  aria-label="Zoom and view full image"
+                >
+                  <ZoomIn size={17} />
+                </button>
               </div>
 
               {/* Thumbnails Row (Only render if there are multiple images) */}
@@ -738,7 +767,7 @@ export default function ProductDetails({
                       scrollThumbnails("left");
                     }}
                     aria-label="Scroll thumbnails left"
-                    className={`absolute -left-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white shadow-md border border-[#E8E2E5] text-[#444] hover:text-[#E91E63] flex items-center justify-center z-10 transition-all cursor-pointer ${showThumbNav
+                    className={`absolute -left-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white shadow-md border border-border text-description hover:text-primary flex items-center justify-center z-10 transition-all cursor-pointer ${showThumbNav
                       ? "opacity-100 scale-100 pointer-events-auto"
                       : "opacity-0 group-hover/thumbs:opacity-100 pointer-events-none group-hover/thumbs:pointer-events-auto"
                       }`}
@@ -758,9 +787,9 @@ export default function ProductDetails({
                           e.stopPropagation();
                           handleSelectImage(idx);
                         }}
-                        className={`relative w-18 h-18 md:w-20 md:h-20 overflow-hidden border-2 transition-all cursor-pointer shrink-0 bg-[#fbfbfb] ${activeImageIndex === idx
-                          ? "border-[#E91E63] shadow-xs"
-                          : "border-[#E8E2E5] hover:border-[#E91E63]/50 opacity-75 hover:opacity-100"
+                        className={`relative w-18 h-18 md:w-20 md:h-20 overflow-hidden border-2 transition-all cursor-pointer shrink-0 bg-bg/40 ${activeImageIndex === idx
+                          ? "border-primary shadow-xs"
+                          : "border-border hover:border-primary/50 opacity-75 hover:opacity-100"
                           }`}
                       >
                         <Image
@@ -783,7 +812,7 @@ export default function ProductDetails({
                       scrollThumbnails("right");
                     }}
                     aria-label="Scroll thumbnails right"
-                    className={`absolute -right-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white shadow-md border border-[#E8E2E5] text-[#444] hover:text-[#E91E63] flex items-center justify-center z-10 transition-all cursor-pointer ${showThumbNav
+                    className={`absolute -right-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white shadow-md border border-border text-description hover:text-primary flex items-center justify-center z-10 transition-all cursor-pointer ${showThumbNav
                       ? "opacity-100 scale-100 pointer-events-auto"
                       : "opacity-0 group-hover/thumbs:opacity-100 pointer-events-none group-hover/thumbs:pointer-events-auto"
                       }`}
@@ -799,7 +828,7 @@ export default function ProductDetails({
               {/* Top Tag & Actions */}
               <div className="flex items-center justify-between gap-4 mb-2">
                 {product.categories?.[0]?.name ? (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#FFF5F7] text-[#E91E63] border border-[#E8E2E5]">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-bg text-primary border border-secondary">
                     ✦ {product.categories[0].name}
                   </span>
                 ) : <span />}
@@ -809,14 +838,14 @@ export default function ProductDetails({
                     type="button"
                     onClick={() => setIsWishlisted(!isWishlisted)}
                     className={`w-9 h-9 rounded-full flex items-center justify-center border transition-colors cursor-pointer ${isWishlisted
-                      ? "bg-[#FFF5F7] border-[#E91E63] text-[#E91E63]"
-                      : "border-[#E8E2E5] text-[#555] hover:border-[#E91E63] hover:text-[#E91E63] bg-white"
+                      ? "bg-bg border-primary text-primary"
+                      : "border-border text-description hover:border-primary hover:text-primary bg-white"
                       }`}
                     aria-label="Wishlist"
                   >
                     <Heart
                       size={18}
-                      className={isWishlisted ? "fill-[#E91E63]" : ""}
+                      className={isWishlisted ? "fill-primary" : ""}
                     />
                   </button>
                 </div>
@@ -824,7 +853,7 @@ export default function ProductDetails({
 
               {/* Product Title */}
               {product.name && (
-                <h1 className="text-2xl md:text-3xl mb-2 text-[#191426]">
+                <h1 className="text-2xl md:text-3xl mb-2 text-dark">
                   {product.name}
                 </h1>
               )}
@@ -833,21 +862,21 @@ export default function ProductDetails({
               {!isUnconfiguredOrUnavailable && (currentPrice > 0 || priceRange) && (
                 <div className="flex items-baseline gap-3 mb-2">
                   {isVariableProduct && !isAllAttributesSelected && priceRange?.isRange ? (
-                    <h3 className="text-2xl md:text-3xl font-bold text-[#E91E63]">
+                    <h3 className="text-2xl md:text-3xl font-bold text-primary">
                       Tk {priceRange.min.toLocaleString()} – Tk {priceRange.max.toLocaleString()}
                     </h3>
                   ) : (
                     <>
-                      <h3 className="text-2xl md:text-3xl font-bold text-[#E91E63]">
+                      <h3 className="text-2xl md:text-3xl font-bold text-primary">
                         Tk {currentPrice.toLocaleString()}
                       </h3>
                       {regularPrice > currentPrice && (
-                        <span className="text-base text-[#6F6470] line-through">
+                        <span className="text-base text-description line-through">
                           Tk {regularPrice.toLocaleString()}
                         </span>
                       )}
                       {discountPercent > 0 && (
-                        <span className="px-2 py-0.5 bg-[#FFF5F7] text-[#FF4081] border border-[#E8E2E5] rounded-md text-xs font-bold">
+                        <span className="px-2 py-0.5 bg-bg text-accent border border-secondary rounded-md text-xs font-bold">
                           {discountPercent}% OFF
                         </span>
                       )}
@@ -859,25 +888,25 @@ export default function ProductDetails({
               {/* Short Description */}
               {product.short_description && (
                 <div
-                  className="text-sm md:text-[15px] text-[#6F6470] leading-relaxed mb-5 pb-3 border-b border-[#E8E2E5]"
+                  className="text-sm md:text-[15px] text-description leading-relaxed mb-5 pb-3 border-b border-border"
                   dangerouslySetInnerHTML={{ __html: product.short_description }}
                 />
               )}
 
               {isUnconfiguredOrUnavailable ? (
-                <div className="my-6 py-5 border-t border-b border-[#E8E2E5] space-y-3">
-                  <p className="text-sm md:text-base text-[#191426] font-medium">
+                <div className="my-6 py-5 border-t border-b border-border space-y-3">
+                  <p className="text-sm md:text-base text-dark font-medium">
                     This product is currently out of stock and unavailable.
                   </p>
-                  <div className="flex flex-wrap items-center gap-4 text-xs text-[#6F6470] pt-1">
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-description pt-1">
                     {product.sku && (
                       <span>
-                        <strong className="text-[#191426]">SKU:</strong> {product.sku}
+                        <strong className="text-dark">SKU:</strong> {product.sku}
                       </span>
                     )}
                     {product.categories?.[0]?.name && (
                       <span>
-                        <strong className="text-[#191426]">Category:</strong> {product.categories[0].name}
+                        <strong className="text-dark">Category:</strong> {product.categories[0].name}
                       </span>
                     )}
                   </div>
@@ -894,9 +923,9 @@ export default function ProductDetails({
                         return (
                           <div key={attr.id || attr.name}>
                             <div className="flex items-center justify-between mb-2">
-                              <span className="text-xs font-semibold text-[#191426]">
+                              <span className="text-xs font-semibold text-dark">
                                 Select {attr.name}:{" "}
-                                <span className="font-bold text-[#E91E63]">
+                                <span className="font-bold text-primary">
                                   {currentVal || "Choose an option"}
                                 </span>
                               </span>
@@ -910,7 +939,7 @@ export default function ProductDetails({
                                       return next;
                                     });
                                   }}
-                                  className="text-[11px] font-medium text-[#6F6470] hover:text-[#E91E63] transition-colors cursor-pointer underline"
+                                  className="text-[11px] font-medium text-description hover:text-primary transition-colors cursor-pointer underline"
                                 >
                                   Clear
                                 </button>
@@ -920,7 +949,7 @@ export default function ProductDetails({
                             {/* Options box with pink outline when validation fails */}
                             <div
                               className={`p-2 rounded-md transition-all duration-300 ${isMissing
-                                  ? "border-2 border-[#E91E63]"
+                                  ? "border-2 border-primary"
                                   : "border-2 border-transparent"
                                 }`}
                             >
@@ -940,11 +969,11 @@ export default function ProductDetails({
                                       onClick={() => handleSelectAttributeOption(attr.name, option)}
                                       className={`min-w-[44px] h-9 px-3 rounded-md text-xs font-semibold flex items-center justify-center border transition-all cursor-pointer relative ${isSelected
                                           ? inStock
-                                            ? "bg-[#E91E63] text-white border-[#E91E63] shadow-xs ring-2 ring-[#E91E63]/30"
-                                            : "bg-[#E53935] text-white border-[#E53935] shadow-xs ring-2 ring-[#E53935]/30"
+                                            ? "bg-primary text-white border-primary shadow-xs ring-2 ring-primary/30"
+                                            : "bg-error text-white border-error shadow-xs ring-2 ring-error/30"
                                           : !inStock
-                                            ? "border-[#E8DFE3] text-[#888] bg-[#FAF8F9] line-through hover:border-[#E91E63] hover:text-[#E91E63]"
-                                            : "border-[#E8E2E5] text-[#333] bg-white hover:border-[#E91E63] hover:text-[#E91E63]"
+                                            ? "border-border text-description bg-bg/40 line-through hover:border-primary hover:text-primary"
+                                            : "border-border text-dark bg-white hover:border-primary hover:text-primary"
                                         }`}
                                       title={!inStock ? `${option} (Out of stock)` : option}
                                     >
@@ -963,7 +992,7 @@ export default function ProductDetails({
                   {/* Stock status text */}
                   <div className="mb-5 flex items-center">
                     <span
-                      className={`text-xs font-medium flex items-center gap-1.5 ${isCurrentOutOfStock ? "text-[#E53935]" : "text-[#1E824C]"
+                      className={`text-xs font-medium flex items-center gap-1.5 ${isCurrentOutOfStock ? "text-error" : "text-success"
                         }`}
                     >
                       <span className="text-base leading-none select-none">•</span>
@@ -975,25 +1004,25 @@ export default function ProductDetails({
 
                   {/* Quantity Selector */}
                   <div className="mb-6">
-                    <span className="block text-xs font-semibold text-[#191426] mb-2">
+                    <span className="block text-xs font-semibold text-dark mb-2">
                       Quantity
                     </span>
-                    <div className="inline-flex items-center border border-[#E8E2E5] rounded-none bg-white">
+                    <div className="inline-flex items-center border border-border rounded-none bg-white">
                       <button
                         type="button"
                         onClick={() => handleQuantityChange(-1)}
-                        className="w-8 h-8 flex items-center justify-center text-[#6F6470] hover:text-[#E91E63] transition-colors cursor-pointer"
+                        className="w-8 h-8 flex items-center justify-center text-description hover:text-primary transition-colors cursor-pointer"
                         aria-label="Decrease quantity"
                       >
                         <Minus size={13} strokeWidth={2.5} />
                       </button>
-                      <span className="w-10 text-center text-xs font-bold text-[#191426]">
+                      <span className="w-10 text-center text-xs font-bold text-dark">
                         {quantity}
                       </span>
                       <button
                         type="button"
                         onClick={() => handleQuantityChange(1)}
-                        className="w-8 h-8 flex items-center justify-center text-[#6F6470] hover:text-[#E91E63] transition-colors cursor-pointer"
+                        className="w-8 h-8 flex items-center justify-center text-description hover:text-primary transition-colors cursor-pointer"
                         aria-label="Increase quantity"
                       >
                         <Plus size={13} strokeWidth={2.5} />
@@ -1007,50 +1036,45 @@ export default function ProductDetails({
                       {/* Floating tooltip bubble matching reference image */}
                       {showVariantAlert && (
                         <div className="absolute -top-11 left-1/2 -translate-x-1/2 z-30 animate-in fade-in zoom-in-95 duration-200 pointer-events-none drop-shadow-md">
-                          <div className="relative bg-white text-[#191426] border border-[#E8E2E5] shadow-md px-4 py-2 rounded-none flex items-center gap-2 whitespace-nowrap text-xs sm:text-[13px] font-semibold">
-                            <Info size={16} className="text-[#E91E63] shrink-0" />
+                          <div className="relative bg-white text-dark border border-border shadow-md px-4 py-2 rounded-none flex items-center gap-2 whitespace-nowrap text-xs sm:text-[13px] font-semibold">
+                            <Info size={16} className="text-primary shrink-0" />
                             <span>Please select all variants first</span>
                             {/* Downward pointing arrow */}
-                            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-r border-b border-[#E8E2E5] rotate-45" />
+                            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-r border-b border-border rotate-45" />
                           </div>
                         </div>
                       )}
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <button
-                          type="button"
+                        <Button
+                          variant="secondary"
+                          size="lg"
+                          fullWidth
                           disabled={isCurrentOutOfStock}
                           onClick={handleAddToCart}
-                          className={`w-full py-3 text-xs font-bold tracking-wide transition-all duration-200 ${isCurrentOutOfStock
-                              ? "bg-white text-[#E91E63] border-2 border-[#E91E63] opacity-50 cursor-not-allowed"
-                              : justAdded
-                                ? "bg-[#2E7D32] text-white border-2 border-[#2E7D32] shadow-xs"
-                                : "bg-white hover:bg-[#FFF5F7] text-[#E91E63] border-2 border-[#E91E63] cursor-pointer active:scale-[0.99]"
-                            }`}
+                          className={
+                            justAdded
+                              ? "!bg-success !text-white !border-success"
+                              : ""
+                          }
+                          icon={justAdded ? <Check size={16} strokeWidth={2.5} /> : undefined}
                         >
-                          {isCurrentOutOfStock ? (
-                            "Out of Stock"
-                          ) : justAdded ? (
-                            <span className="flex items-center justify-center gap-1.5 animate-in zoom-in-95">
-                              <Check size={16} strokeWidth={2.5} />
-                              Added to Cart
-                            </span>
-                          ) : (
-                            "Add to Cart"
-                          )}
-                        </button>
+                          {isCurrentOutOfStock
+                            ? "Out of Stock"
+                            : justAdded
+                              ? "Added to Cart"
+                              : "Add to Cart"}
+                        </Button>
 
-                        <button
-                          type="button"
+                        <Button
+                          variant="primary"
+                          size="lg"
+                          fullWidth
                           disabled={isCurrentOutOfStock}
                           onClick={handleBuyNow}
-                          className={`w-full py-3 text-xs font-bold tracking-wide shadow-xs transition-all duration-200 !bg-[#E91E63] !text-white ${isCurrentOutOfStock
-                              ? "opacity-50 cursor-not-allowed"
-                              : "hover:!bg-[#C2185B] cursor-pointer active:scale-[0.99]"
-                            }`}
                         >
                           {isCurrentOutOfStock ? "Out of Stock" : "Buy Now"}
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -1058,20 +1082,20 @@ export default function ProductDetails({
               )}
 
               {/* Delivery Meta Information Details */}
-              <div className="pt-4 border-t border-[#E8E2E5] space-y-2.5 text-xs text-[#6F6470]">
+              <div className="pt-4 border-t border-border space-y-2.5 text-xs text-description">
                 <div className="flex items-center gap-2">
-                  <Clock size={15} className="text-[#6F6470] shrink-0" />
+                  <Clock size={15} className="text-description shrink-0" />
                   <span>
                     Delivery Time:{" "}
-                    <strong className="text-[#191426]">3-5 days</strong>
+                    <strong className="text-dark">3-5 days</strong>
                   </span>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <ShieldCheck size={15} className="text-[#6F6470] shrink-0" />
+                  <ShieldCheck size={15} className="text-description shrink-0" />
                   <span>
                     Payment:{" "}
-                    <strong className="text-[#191426]">COD Available</strong>
+                    <strong className="text-dark">COD Available</strong>
                   </span>
                 </div>
               </div>
@@ -1082,37 +1106,37 @@ export default function ProductDetails({
         {/* ── Key Highlights Cards Grid ── */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 mb-8">
           {(matchingVariation?.sku || product.sku) && (
-            <div className="bg-white p-4 rounded-none border border-[#E8E2E5] flex items-center gap-3 shadow-2xs">
-              <div className="w-10 h-10 rounded-none bg-[#FFF5F7] text-[#E91E63] flex items-center justify-center shrink-0">
+            <div className="bg-white p-4 rounded-none border border-border flex items-center gap-3 shadow-2xs">
+              <div className="w-10 h-10 rounded-none bg-bg text-primary flex items-center justify-center shrink-0">
                 <Layers size={18} />
               </div>
               <div>
-                <p className="text-[11px] text-[#6F6470]">SKU</p>
-                <p className="text-xs font-bold text-[#191426] truncate">
+                <p className="text-[11px] text-description">SKU</p>
+                <p className="text-xs font-bold text-dark truncate">
                   {matchingVariation?.sku || product.sku}
                 </p>
               </div>
             </div>
           )}
 
-          <div className="bg-white p-4 rounded-none border border-[#E8E2E5] flex items-center gap-3 shadow-2xs">
-            <div className="w-10 h-10 rounded-none bg-[#FFF5F7] text-[#E91E63] flex items-center justify-center shrink-0">
+          <div className="bg-white p-4 rounded-none border border-border flex items-center gap-3 shadow-2xs">
+            <div className="w-10 h-10 rounded-none bg-bg text-primary flex items-center justify-center shrink-0">
               <Clock size={18} />
             </div>
             <div>
-              <p className="text-[11px] text-[#6F6470]">Delivery Time</p>
-              <p className="text-xs font-bold text-[#191426]">3-5 days</p>
+              <p className="text-[11px] text-description">Delivery Time</p>
+              <p className="text-xs font-bold text-dark">3-5 days</p>
             </div>
           </div>
 
           {isVariableProduct && (
-            <div className="bg-white p-4 rounded-none border border-[#E8E2E5] flex items-center gap-3 shadow-2xs">
-              <div className="w-10 h-10 rounded-none bg-[#FFF5F7] text-[#E91E63] flex items-center justify-center shrink-0">
+            <div className="bg-white p-4 rounded-none border border-border flex items-center gap-3 shadow-2xs">
+              <div className="w-10 h-10 rounded-none bg-bg text-primary flex items-center justify-center shrink-0">
                 <Layers size={18} />
               </div>
               <div>
-                <p className="text-[11px] text-[#6F6470]">Variants</p>
-                <p className="text-xs font-bold text-[#191426]">
+                <p className="text-[11px] text-description">Variants</p>
+                <p className="text-xs font-bold text-dark">
                   {product.variations_data?.length || "Available"}
                 </p>
               </div>
@@ -1120,13 +1144,13 @@ export default function ProductDetails({
           )}
 
           {product.total_sales !== undefined && product.total_sales !== null && (
-            <div className="bg-white p-4 rounded-none border border-[#E8E2E5] flex items-center gap-3 shadow-2xs">
-              <div className="w-10 h-10 rounded-none bg-[#E8F5E9] text-[#2E7D32] flex items-center justify-center shrink-0">
+            <div className="bg-white p-4 rounded-none border border-border flex items-center gap-3 shadow-2xs">
+              <div className="w-10 h-10 rounded-none bg-success-bg text-success flex items-center justify-center shrink-0">
                 <Check size={18} strokeWidth={2.5} />
               </div>
               <div>
-                <p className="text-[11px] text-[#6F6470]">Total Sold</p>
-                <p className="text-xs font-bold text-[#191426]">
+                <p className="text-[11px] text-description">Total Sold</p>
+                <p className="text-xs font-bold text-dark">
                   {product.total_sales} units
                 </p>
               </div>
@@ -1136,25 +1160,25 @@ export default function ProductDetails({
 
         {/* ── Product Description Section ── */}
         {(product.description || product.short_description) && (
-          <div className="bg-white rounded-none border border-[#E8E2E5] p-6 mb-10 shadow-xs">
-            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-[#E8E2E5]">
-              <Info size={17} className="text-[#E91E63]" />
-              <h2 className="text-base font-semibold text-[#191426]">
+          <div className="bg-white rounded-none border border-border p-6 mb-10 shadow-xs">
+            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border">
+              <Info size={17} className="text-primary" />
+              <h2 className="text-base font-semibold text-dark">
                 Product Description
               </h2>
             </div>
-            <div className="min-h-[140px] text-sm md:text-[15px] text-[#6F6470] leading-relaxed">
-              <p className="font-semibold text-base text-[#191426] mb-3">
+            <div className="min-h-[140px] text-sm md:text-[15px] text-description leading-relaxed">
+              <p className="font-semibold text-base text-dark mb-3">
                 {product.name} {product.sku ? `(${product.sku})` : ""}
               </p>
               {product.description ? (
                 <div
-                  className="mb-2 prose prose-sm max-w-none text-sm md:text-[15px] text-[#6F6470] leading-relaxed [&>p]:mb-3 [&>ul]:space-y-1.5 [&>ul]:pl-5 [&>ul]:list-disc"
+                  className="mb-2 prose prose-sm max-w-none text-sm md:text-[15px] text-description leading-relaxed [&>p]:mb-3 [&>ul]:space-y-1.5 [&>ul]:pl-5 [&>ul]:list-disc"
                   dangerouslySetInnerHTML={{ __html: product.description }}
                 />
               ) : product.short_description ? (
                 <div
-                  className="mb-2 prose prose-sm max-w-none text-sm md:text-[15px] text-[#6F6470] leading-relaxed"
+                  className="mb-2 prose prose-sm max-w-none text-sm md:text-[15px] text-description leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: product.short_description }}
                 />
               ) : null}
@@ -1165,14 +1189,14 @@ export default function ProductDetails({
         {/* ── Related Products ── */}
         <div>
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-lg md:text-xl font-semibold text-[#191426]">
+            <h2 className="text-lg md:text-xl font-semibold text-dark">
               Related Products
             </h2>
             <Link
               href="/shop"
-              className="text-xs md:text-sm font-medium text-[#6F6470] hover:!text-[#E91E63] inline-flex items-center gap-0.5 transition-colors group cursor-pointer"
+              className="text-xs md:text-sm font-medium text-description hover:!text-primary inline-flex items-center gap-0.5 transition-colors group cursor-pointer"
             >
-              <span className="hover:!text-[#E91E63]">See More</span>
+              <span className="hover:!text-primary">See More</span>
               <ChevronRight
                 size={15}
                 strokeWidth={2}
@@ -1195,13 +1219,183 @@ export default function ProductDetails({
           <div className="text-center mt-8">
             <Link
               href="/shop"
-              className="inline-flex items-center justify-center px-8 py-2.5 bg-[#E91E63] hover:bg-[#C2185B] !text-white text-xs font-bold rounded-none shadow-xs transition-colors"
+              className="inline-flex items-center justify-center px-8 py-2.5 bg-primary hover:bg-primary-hover !text-white text-xs font-bold rounded-none shadow-xs transition-colors"
             >
               See More
             </Link>
           </div>
         </div>
       </div>
+
+      {/* ── Fullscreen Lightbox / Zoom Modal ── */}
+      {isLightboxOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col justify-between p-3 sm:p-6 animate-in fade-in duration-200 select-none"
+          onClick={() => setIsLightboxOpen(false)}
+        >
+          {/* Top Bar */}
+          <div
+            className="flex items-center justify-between gap-3 text-white z-20 shrink-0"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-2.5 truncate max-w-[60%] sm:max-w-[70%]">
+              <span className="text-xs sm:text-sm font-semibold text-white/90 truncate">
+                {product.name}
+              </span>
+              <span className="text-[11px] sm:text-xs text-white/50 shrink-0">
+                ({activeImageIndex + 1} / {galleryImages.length})
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              {/* Zoom Out */}
+              <button
+                type="button"
+                onClick={() => setLightboxZoom((prev) => Math.max(1, +(prev - 0.5).toFixed(1)))}
+                disabled={lightboxZoom <= 1}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:hover:bg-white/10 flex items-center justify-center text-white transition-colors cursor-pointer"
+                title="Zoom Out"
+              >
+                <ZoomOut size={16} />
+              </button>
+
+              {/* Zoom percentage */}
+              <span className="text-[11px] sm:text-xs font-mono font-bold text-white/90 min-w-[38px] text-center">
+                {Math.round(lightboxZoom * 100)}%
+              </span>
+
+              {/* Zoom In */}
+              <button
+                type="button"
+                onClick={() => setLightboxZoom((prev) => Math.min(3, +(prev + 0.5).toFixed(1)))}
+                disabled={lightboxZoom >= 3}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:hover:bg-white/10 flex items-center justify-center text-white transition-colors cursor-pointer"
+                title="Zoom In"
+              >
+                <ZoomIn size={16} />
+              </button>
+
+              {/* Reset Zoom */}
+              {lightboxZoom > 1 && (
+                <button
+                  type="button"
+                  onClick={() => setLightboxZoom(1)}
+                  className="px-2 py-1 rounded-full bg-white/15 hover:bg-white/25 text-[10px] sm:text-xs font-semibold text-white transition-colors cursor-pointer"
+                >
+                  Reset
+                </button>
+              )}
+
+              {/* Close Button */}
+              <button
+                type="button"
+                onClick={() => setIsLightboxOpen(false)}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/15 hover:bg-white/30 flex items-center justify-center text-white transition-colors cursor-pointer ml-1"
+                title="Close (Esc)"
+              >
+                <X size={18} />
+              </button>
+            </div>
+          </div>
+
+          {/* Center Stage: Image and Navigation */}
+          <div
+            className="relative flex-1 flex items-center justify-center overflow-hidden my-2 sm:my-4"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setIsLightboxOpen(false);
+              }
+            }}
+          >
+            {/* Prev Button */}
+            {galleryImages.length > 1 && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePrevImage();
+                }}
+                className="absolute left-1 sm:left-4 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/60 hover:bg-black/90 border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer shadow-lg hover:scale-105 active:scale-95"
+                title="Previous image"
+              >
+                <ChevronLeft size={22} />
+              </button>
+            )}
+
+            {/* Active Image */}
+            <div
+              className={`relative max-w-[90vw] max-h-[70vh] aspect-square transition-transform duration-200 ease-out select-none ${
+                lightboxZoom > 1 ? "cursor-zoom-out" : "cursor-zoom-in"
+              }`}
+              style={{
+                transform: `scale(${lightboxZoom})`,
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightboxZoom((prev) => (prev > 1 ? 1 : 2));
+              }}
+            >
+              <Image
+                src={galleryImages[activeImageIndex]?.src || galleryImages[0]?.src || "/woocommerce-placeholder.webp"}
+                alt={galleryImages[activeImageIndex]?.alt || product.name || "Product"}
+                fill
+                sizes="95vw"
+                className="object-contain pointer-events-none"
+                unoptimized={Boolean((galleryImages[activeImageIndex]?.src || galleryImages[0]?.src)?.startsWith("/"))}
+                priority
+              />
+            </div>
+
+            {/* Next Button */}
+            {galleryImages.length > 1 && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleNextImage();
+                }}
+                className="absolute right-1 sm:right-4 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/60 hover:bg-black/90 border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer shadow-lg hover:scale-105 active:scale-95"
+                title="Next image"
+              >
+                <ChevronRight size={22} />
+              </button>
+            )}
+          </div>
+
+          {/* Bottom Thumbnails */}
+          {galleryImages.length > 1 && (
+            <div
+              className="flex items-center justify-center gap-2 overflow-x-auto py-1 z-20 no-scrollbar max-w-full shrink-0"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {galleryImages.map((img, idx) => (
+                <button
+                  key={img.id || idx}
+                  type="button"
+                  onClick={() => {
+                    setActiveImageIndex(idx);
+                    setLightboxZoom(1);
+                  }}
+                  className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-none overflow-hidden border-2 transition-all cursor-pointer shrink-0 ${
+                    activeImageIndex === idx
+                      ? "border-primary scale-105 shadow-md"
+                      : "border-white/30 opacity-60 hover:opacity-100"
+                  }`}
+                >
+                  <Image
+                    src={img.src}
+                    alt={img.alt || `Thumbnail ${idx + 1}`}
+                    fill
+                    sizes="60px"
+                    className="object-cover"
+                    unoptimized={Boolean(img.src?.startsWith("/"))}
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

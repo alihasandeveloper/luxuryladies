@@ -78,7 +78,7 @@ export default function ProductCard({
   return (
     <div className={`group relative bg-white overflow-hidden md:shadow-lg hover:shadow-xl hover:shadow-gray-200/50 transition-all duration-300 flex flex-col ${isOutOfStock ? "opacity-90" : ""}`}>
       {/* Product Image Frame */}
-      <div className="relative aspect-square w-full overflow-hidden bg-[#f7f7f7]">
+      <div className="relative aspect-square w-full overflow-hidden bg-bg/50">
         <Link href={`/product/${product.slug}`} className="relative block w-full h-full overflow-hidden">
           <Image
             src={imgSrc}
@@ -93,12 +93,12 @@ export default function ProductCard({
 
         {/* Out of Stock Badge */}
         {isOutOfStock ? (
-          <span className="absolute top-2 left-2 z-10 bg-[#1e1e1e]/90 backdrop-blur-xs text-white text-[10px] font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-sm shadow-xs">
+          <span className="absolute top-2 left-2 z-10 bg-dark/90 backdrop-blur-xs text-white text-[10px] font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-md shadow-xs">
             Out of Stock
           </span>
         ) : badgeMeta ? (
           /* Limited Offer Badge (Green badge on top-left) */
-          <span className="absolute top-2 left-2 z-10 bg-[#28a745] text-white text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full shadow-xs">
+          <span className="absolute top-2 left-2 z-10 bg-success text-white text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full shadow-xs">
             {badgeMeta}
           </span>
         ) : null}
@@ -107,7 +107,7 @@ export default function ProductCard({
         {showWishlist && (
           <button
             type="button"
-            className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-gray-700 hover:text-[var(--color-primary)] flex items-center justify-center transition-all duration-200 shadow-xs cursor-pointer"
+            className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-gray-700 hover:text-primary flex items-center justify-center transition-all duration-200 shadow-xs cursor-pointer"
             aria-label="Add to wishlist"
           >
             <Heart size={16} strokeWidth={1.75} />
@@ -130,18 +130,18 @@ export default function ProductCard({
           {/* Price Stack: Current price above, regular + discount below */}
           <div className="flex flex-col">
             {/* Sale / Current Price */}
-            <span className="text-sm md:text-base font-semibold text-[var(--color-primary)] leading-tight">
+            <span className="text-sm md:text-base font-semibold text-primary leading-tight">
               Tk {parseFloat(product.price).toLocaleString()}
             </span>
 
             {/* Regular Price & Discount Percent */}
             {product.on_sale && product.regular_price && (
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="text-[11px] md:text-xs text-[#6F6470] line-through font-normal">
+                <span className="text-[11px] md:text-xs text-description line-through font-normal">
                   Tk {parseFloat(product.regular_price).toLocaleString()}
                 </span>
                 {discountPercent > 0 && (
-                  <span className="text-[11px] md:text-xs font-semibold text-[#FF4081]">
+                  <span className="text-[11px] md:text-xs font-semibold text-accent">
                     -{discountPercent}%
                   </span>
                 )}
@@ -155,10 +155,10 @@ export default function ProductCard({
             disabled={isOutOfStock}
             onClick={handleCartClick}
             className={`w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm flex-shrink-0 ${isOutOfStock
-                ? "bg-[#e2d8dc] text-[#8C7B82] cursor-not-allowed opacity-70"
+                ? "bg-border text-description cursor-not-allowed opacity-70"
                 : justAdded
-                  ? "bg-[#2E7D32] text-white scale-105"
-                  : "bg-[var(--color-primary)] text-white hover:scale-110 active:scale-95 cursor-pointer"
+                  ? "bg-success text-white scale-105"
+                  : "bg-primary text-white hover:scale-110 active:scale-95 cursor-pointer"
               }`}
             aria-label={
               isOutOfStock
