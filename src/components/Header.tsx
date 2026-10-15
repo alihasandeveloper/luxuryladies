@@ -159,7 +159,7 @@ export default function Header() {
                 aria-label="Open menu"
                 onClick={() => setDrawerOpen(true)}
               >
-                <Menu size={22} strokeWidth={1.85} className="text-slate-600 hover:text-[#ff0080] transition-colors" />
+                <Menu size={22} strokeWidth={1.85} className="text-slate-600 hover:text-[#E91E63] transition-colors" />
               </button>
 
               {/* Search icon (mobile only - placed beside menu) */}
@@ -297,7 +297,7 @@ export default function Header() {
 
       {/* Slide-Down Search Panel from Top */}
       <div
-        className={`fixed top-0 left-0 right-0 bg-white z-[130] shadow-xl border-b border-[#F2E6EC] transition-transform duration-300 ease-out md:hidden ${mobileSearchOpen ? "translate-y-0" : "-translate-y-full"
+        className={`fixed top-0 left-0 right-0 bg-white z-[130] shadow-xl border-b border-[#E8E2E5] transition-transform duration-300 ease-out md:hidden ${mobileSearchOpen ? "translate-y-0" : "-translate-y-full"
           }`}
       >
         <div className="px-5 pt-3.5 pb-5 flex flex-col gap-2.5">
@@ -320,15 +320,15 @@ export default function Header() {
 
           {/* Search Input Form (Pink bordered rounded-full pill) */}
           <form onSubmit={handleSearchSubmit} className="relative flex items-center">
-            <div className="w-full flex items-center border-2 border-[#ff0080] rounded-full px-3.5 py-2.5 bg-white transition-all shadow-xs">
-              <Search size={18} className="text-[#ff0080] shrink-0 mr-2.5" strokeWidth={2} />
+            <div className="w-full flex items-center border-2 border-[#E91E63] rounded-full px-3.5 py-2.5 bg-white transition-all shadow-xs">
+              <Search size={18} className="text-[#E91E63] shrink-0 mr-2.5" strokeWidth={2} />
               <input
                 ref={searchInputRef}
                 type="text"
                 placeholder="Search for products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-transparent text-sm text-[#222] placeholder:text-[#888] outline-none"
+                className="w-full bg-transparent text-sm text-[#191426] placeholder:text-[#6F6470] outline-none"
               />
               {searchQuery && (
                 <button
@@ -346,18 +346,18 @@ export default function Header() {
 
         {/* Live Matching Product Suggestions */}
         {matchingSuggestions.length > 0 && (
-          <div className="px-4 pb-4 pt-1 border-t border-[#F7E7EC] flex flex-col gap-2 max-h-[50vh] overflow-y-auto">
-            <span className="text-[11px] font-semibold text-[#8C7B82] uppercase tracking-wider">
+          <div className="px-4 pb-4 pt-1 border-t border-[#E8E2E5] flex flex-col gap-2 max-h-[50vh] overflow-y-auto">
+            <span className="text-[11px] font-semibold text-[#6F6470] uppercase tracking-wider">
               Matching Products ({matchingSuggestions.length})
             </span>
-            <div className="divide-y divide-[#F7E7EC]">
+            <div className="divide-y divide-[#E8E2E5]">
               {matchingSuggestions.map((item) => (
                 <div
                   key={item.id}
                   onClick={() => handleSelectSuggestion(item.slug)}
-                  className="flex items-center gap-3 py-2 cursor-pointer hover:bg-[#FFF5F8] -mx-2 px-2 rounded-md transition-colors"
+                  className="flex items-center gap-3 py-2 cursor-pointer hover:bg-[#FFF5F7] -mx-2 px-2 rounded-md transition-colors"
                 >
-                  <div className="relative w-11 h-11 rounded-md overflow-hidden bg-[#f5f5f5] shrink-0 border border-[#F2E6EC]">
+                  <div className="relative w-11 h-11 rounded-md overflow-hidden bg-[#f5f5f5] shrink-0 border border-[#E8E2E5]">
                     <Image
                       src={item.images?.[0]?.src || "/woocommerce-placeholder.webp"}
                       alt={item.name}
@@ -368,13 +368,13 @@ export default function Header() {
                     />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-[#222] truncate">
+                    <p className="text-xs font-medium text-[#191426] truncate">
                       {item.name}
                     </p>
-                    <p className="text-[11px] font-semibold text-[#ff0080]">
+                    <p className="text-[11px] font-semibold text-[#E91E63]">
                       Tk {parseFloat(item.price).toLocaleString()}
                       {item.sku && (
-                        <span className="ml-1.5 text-[10px] text-[#8C7B82] font-normal">
+                        <span className="ml-1.5 text-[10px] text-[#6F6470] font-normal">
                           SKU: {item.sku}
                         </span>
                       )}
@@ -399,7 +399,7 @@ export default function Header() {
       {/* Drawer Panel */}
       <aside className={`drawer${drawerOpen ? " open" : ""}`} aria-label="Mobile menu">
         {/* Clean Minimal Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#F5EAEF] bg-white">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#E8E2E5] bg-white">
           <Link href="/" onClick={() => setDrawerOpen(false)} className="inline-flex items-center">
             <Image
               src="/luxuryladies-logo.png"
@@ -410,7 +410,7 @@ export default function Header() {
             />
           </Link>
           <button
-            className="w-8 h-8 rounded-full flex items-center justify-center text-[#444] hover:text-[#ff0080] hover:bg-[#FAF2F5] transition-colors"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-[#444] hover:text-[#E91E63] hover:bg-[#FFF5F7] transition-colors"
             onClick={() => setDrawerOpen(false)}
             aria-label="Close menu"
           >
@@ -429,23 +429,23 @@ export default function Header() {
                   href={link.href}
                   onClick={() => setDrawerOpen(false)}
                   className={`flex items-center justify-between px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${active
-                      ? "text-[#ff0080] bg-[#FFF5F8]"
-                      : "text-slate-600 hover:text-[#ff0080] hover:bg-[#FFF5F8]"
+                      ? "text-[#E91E63] bg-[#FFF5F7]"
+                      : "text-slate-600 hover:text-[#E91E63] hover:bg-[#FFF5F7]"
                     }`}
                 >
                   <span>{link.label}</span>
-                  <ChevronRight size={15} className={active ? "text-[#ff0080]" : "text-slate-600"} />
+                  <ChevronRight size={15} className={active ? "text-[#E91E63]" : "text-slate-600"} />
                 </Link>
               );
             })}
           </nav>
 
           {/* Clean Divider */}
-          <div className="h-[1px] bg-[#F5EAEF]" />
+          <div className="h-[1px] bg-[#E8E2E5]" />
 
           {/* Shop Categories Section */}
           <div>
-            <p className="text-[11px] font-semibold tracking-wider uppercase text-[#9C8991] px-3 mb-2">
+            <p className="text-[11px] font-semibold tracking-wider uppercase text-[#6F6470] px-3 mb-2">
               Categories
             </p>
             <nav className="flex flex-col space-y-0.5">
@@ -458,12 +458,12 @@ export default function Header() {
                     href={catHref}
                     onClick={() => setDrawerOpen(false)}
                     className={`flex items-center justify-between px-3 py-2 rounded-md text-[13px] transition-colors ${active
-                        ? "text-[#ff0080] bg-[#FFF5F8]"
-                        : "text-slate-600 hover:text-[#ff0080] hover:bg-[#FFF5F8]"
+                        ? "text-[#E91E63] bg-[#FFF5F7]"
+                        : "text-slate-600 hover:text-[#E91E63] hover:bg-[#FFF5F7]"
                       }`}
                   >
                     <span className="font-normal">{cat.label}</span>
-                    <ChevronRight size={13} className={active ? "text-[#ff0080]" : "text-slate-600"} />
+                    <ChevronRight size={13} className={active ? "text-[#E91E63]" : "text-slate-600"} />
                   </Link>
                 );
               })}
@@ -471,11 +471,11 @@ export default function Header() {
           </div>
 
           {/* Clean Divider */}
-          <div className="h-[1px] bg-[#F5EAEF]" />
+          <div className="h-[1px] bg-[#E8E2E5]" />
 
           {/* Quick Access Icons */}
           <div>
-            <p className="text-[11px] font-semibold tracking-wider uppercase text-[#9C8991] px-3 mb-2">
+            <p className="text-[11px] font-semibold tracking-wider uppercase text-[#6F6470] px-3 mb-2">
               Account & Saved
             </p>
             <div className="grid grid-cols-3 gap-2 px-1">
@@ -483,8 +483,8 @@ export default function Header() {
                 href="/wishlist"
                 onClick={() => setDrawerOpen(false)}
                 className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-md border text-xs font-medium gap-1.5 transition-colors ${pathname === "/wishlist"
-                    ? "border-[#ff0080] text-[#ff0080] bg-[#FFF5F8]"
-                    : "border-[#F2E6EC] hover:border-[#ff0080] hover:text-[#ff0080] text-slate-600"
+                    ? "border-[#E91E63] text-[#E91E63] bg-[#FFF5F7]"
+                    : "border-[#E8E2E5] hover:border-[#E91E63] hover:text-[#E91E63] text-slate-600"
                   }`}
               >
                 <Heart size={16} strokeWidth={1.75} />
@@ -494,8 +494,8 @@ export default function Header() {
                 href="/shop"
                 onClick={() => setDrawerOpen(false)}
                 className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-md border text-xs font-medium gap-1.5 transition-colors ${pathname === "/shop"
-                    ? "border-[#ff0080] text-[#ff0080] bg-[#FFF5F8]"
-                    : "border-[#F2E6EC] hover:border-[#ff0080] hover:text-[#ff0080] text-slate-600"
+                    ? "border-[#E91E63] text-[#E91E63] bg-[#FFF5F7]"
+                    : "border-[#E8E2E5] hover:border-[#E91E63] hover:text-[#E91E63] text-slate-600"
                   }`}
               >
                 <ArrowLeftRight size={16} strokeWidth={1.75} />
@@ -505,8 +505,8 @@ export default function Header() {
                 href="/account"
                 onClick={() => setDrawerOpen(false)}
                 className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-md border text-xs font-medium gap-1.5 transition-colors ${pathname === "/account"
-                    ? "border-[#ff0080] text-[#ff0080] bg-[#FFF5F8]"
-                    : "border-[#F2E6EC] hover:border-[#ff0080] hover:text-[#ff0080] text-slate-600"
+                    ? "border-[#E91E63] text-[#E91E63] bg-[#FFF5F7]"
+                    : "border-[#E8E2E5] hover:border-[#E91E63] hover:text-[#E91E63] text-slate-600"
                   }`}
               >
                 <User size={16} strokeWidth={1.75} />
@@ -517,11 +517,11 @@ export default function Header() {
         </div>
 
         {/* Minimal Clean Drawer Footer */}
-        <div className="p-4 border-t border-[#F5EAEF] bg-white flex flex-col gap-2">
+        <div className="p-4 border-t border-[#E8E2E5] bg-white flex flex-col gap-2">
           <a
             href="/signin"
             onClick={() => setDrawerOpen(false)}
-            className="w-full flex items-center justify-center gap-2 py-2.5 !bg-[#ff0080] hover:!bg-[#d4006a] !text-white rounded-md text-xs font-semibold shadow-xs transition-colors"
+            className="w-full flex items-center justify-center gap-2 py-2.5 !bg-[#E91E63] hover:!bg-[#C2185B] !text-white rounded-md text-xs font-semibold shadow-xs transition-colors"
           >
             <LogIn size={15} className="!text-white shrink-0" />
             <span className="!text-white text-inherit">Sign In</span>
@@ -529,7 +529,7 @@ export default function Header() {
           <a
             href="/signup"
             onClick={() => setDrawerOpen(false)}
-            className="w-full py-2 text-center text-xs font-medium text-[#7A6971] hover:text-[#ff0080] transition-colors"
+            className="w-full py-2 text-center text-xs font-medium text-[#6F6470] hover:text-[#E91E63] transition-colors"
           >
             Create an Account
           </a>

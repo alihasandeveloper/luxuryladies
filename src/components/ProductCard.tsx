@@ -137,11 +137,11 @@ export default function ProductCard({
             {/* Regular Price & Discount Percent */}
             {product.on_sale && product.regular_price && (
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="text-[11px] md:text-xs text-[#6c757d] line-through font-normal">
+                <span className="text-[11px] md:text-xs text-[#6F6470] line-through font-normal">
                   Tk {parseFloat(product.regular_price).toLocaleString()}
                 </span>
                 {discountPercent > 0 && (
-                  <span className="text-[11px] md:text-xs font-medium text-red-600">
+                  <span className="text-[11px] md:text-xs font-semibold text-[#FF4081]">
                     -{discountPercent}%
                   </span>
                 )}
@@ -157,7 +157,7 @@ export default function ProductCard({
             className={`w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm flex-shrink-0 ${isOutOfStock
                 ? "bg-[#e2d8dc] text-[#8C7B82] cursor-not-allowed opacity-70"
                 : justAdded
-                  ? "bg-emerald-600 text-white scale-105"
+                  ? "bg-[#2E7D32] text-white scale-105"
                   : "bg-[var(--color-primary)] text-white hover:scale-110 active:scale-95 cursor-pointer"
               }`}
             aria-label={

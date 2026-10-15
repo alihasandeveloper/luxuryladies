@@ -31,7 +31,7 @@ export default async function Home() {
   return (
     <div className="w-full">
       {/* ── Full Width Hero Section ── */}
-      <section className="w-full relative h-[240px] sm:h-[380px] md:h-[520px] lg:h-[708px] overflow-hidden bg-[#FFF5F8]">
+      <section className="w-full relative h-[240px] sm:h-[380px] md:h-[520px] lg:h-[708px] overflow-hidden bg-[#FFF5F7]">
         <Image
           src="/hero-bg.png"
           alt="Anniversary Luxury Collection - luxuryladies"
@@ -48,13 +48,13 @@ export default async function Home() {
         {categories.length > 0 && (
           <>
             <div className="text-center mb-6">
-              <span className="text-[11px] md:text-xs font-semibold tracking-[0.25em] text-slate-600 uppercase block mb-2">
+              <span className="text-[11px] md:text-xs font-semibold tracking-[0.25em] text-[#6F6470] uppercase block mb-2">
                 CURATED COLLECTIONS
               </span>
-              <h2 className="text-2xl md:text-3xl font-medium tracking-tight text-[#251A1F]">
+              <h2 className="text-2xl md:text-3xl font-medium tracking-tight text-[#191426]">
                 Shop by Category
               </h2>
-              <div className="w-12 h-[1px] bg-[#EDE0E5] mx-auto mt-3" />
+              <div className="w-12 h-[1px] bg-[#E8E2E5] mx-auto mt-3" />
             </div>
 
             {/* ── Category Grid ── */}
@@ -96,14 +96,14 @@ export default async function Home() {
           return (
             <section key={cat.id} className="mt-14 md:mt-20">
               <div className="flex items-center justify-between mb-4 md:mb-5">
-                <h2 className="text-xl md:text-2xl font-medium tracking-tight text-[#251A1F]">
+                <h2 className="text-xl md:text-2xl font-medium tracking-tight text-[#191426]">
                   {cat.name}
                 </h2>
                 <Link
                   href={`/category/${cat.slug}`}
-                  className="text-xs md:text-sm font-medium text-[#555] hover:!text-[#ff0080] inline-flex items-center gap-0.5 transition-colors group cursor-pointer"
+                  className="text-xs md:text-sm font-medium text-[#6F6470] hover:!text-[#E91E63] inline-flex items-center gap-0.5 transition-colors group cursor-pointer"
                 >
-                  <span className="hover:!text-[#ff0080]">See More</span>
+                  <span className="hover:!text-[#E91E63]">See More</span>
                   <ChevronNext
                     size={15}
                     strokeWidth={2}
