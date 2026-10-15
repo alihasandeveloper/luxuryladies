@@ -33,7 +33,7 @@ export default async function Home() {
       {/* ── Full Width Hero Section ── */}
       <section className="w-full relative h-[240px] sm:h-[380px] md:h-[520px] lg:h-[708px] overflow-hidden bg-[#FFF5F8]">
         <Image
-          src="/anniversary-banner.jpeg"
+          src="/hero-bg.png"
           alt="Anniversary Luxury Collection - luxuryladies"
           fill
           priority

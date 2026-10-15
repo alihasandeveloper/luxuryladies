@@ -438,14 +438,13 @@ a.action-btn {
 }
 
 .mobile-only {
-  display: none;
+  display: none !important;
 }
 
 /* ─────────────────────────────────────────────────────────── */
 /*  HAMBURGER                                                  */
 /* ─────────────────────────────────────────────────────────── */
-.hamburger-btn,
-button.hamburger-btn {
+.hamburger-btn {
   display: none;
   align-items: center;
   justify-content: center;
@@ -732,7 +731,7 @@ button.hamburger-btn {
   justify-content: center;
   width: 30px;
   height: 30px;
-  border-radius: var(--radius-md);
+  border-radius: 6px !important;
   background-color: #ffe6ef;
   color: var(--color-primary);
   flex-shrink: 0;
@@ -849,8 +848,9 @@ button.hamburger-btn {
     display: flex !important;
   }
 
-  .hamburger-btn {
-    display: flex;
+  .hamburger-btn,
+  button.hamburger-btn {
+    display: flex !important;
   }
 
   .header-top {

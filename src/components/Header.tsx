@@ -151,11 +151,11 @@ export default function Header() {
         <div className="header-top">
           <div className="container header-top-inner">
 
-            {/* Left section on mobile: Hamburger Menu + Mobile Search Icon */}
-            <div className="flex items-center gap-1 md:contents">
+            {/* Left section on mobile: Hamburger Menu + Mobile Search Icon (hidden on desktop) */}
+            <div className="flex items-center gap-1 md:hidden">
               {/* Hamburger / Menu (mobile only) */}
               <button
-                className="hamburger-btn"
+                className="hamburger-btn flex md:hidden items-center justify-center"
                 aria-label="Open menu"
                 onClick={() => setDrawerOpen(true)}
               >
@@ -164,7 +164,7 @@ export default function Header() {
 
               {/* Search icon (mobile only - placed beside menu) */}
               <button
-                className="action-btn mobile-search-btn mobile-only"
+                className="action-btn mobile-search-btn md:hidden"
                 aria-label="Toggle search"
                 onClick={() => setMobileSearchOpen((prev) => !prev)}
               >
