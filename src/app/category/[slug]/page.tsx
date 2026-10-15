@@ -33,7 +33,7 @@ export default async function CategoryPage({ params }: PageProps) {
   ]);
 
   return (
-    <div className="w-full bg-bg/40">
+    <div className="w-full">
       <ShopArchive initialProducts={products} categories={categories} categorySlug={slug} />
     </div>
   );

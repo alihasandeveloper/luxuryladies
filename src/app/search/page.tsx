@@ -25,7 +25,7 @@ async function SearchArchiveContent({ searchParams }: SearchPageProps) {
   ]);
 
   return (
-    <div className="w-full bg-bg/40">
+    <div className="w-full">
       <ShopArchive initialProducts={products} categories={categories} initialSearchQuery={query} />
     </div>
   );

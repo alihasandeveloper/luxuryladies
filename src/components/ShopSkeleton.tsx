@@ -2,7 +2,7 @@ import React from "react";
 
 export default function ShopSkeleton() {
   return (
-    <div className="w-full bg-bg/40 min-h-screen py-6 md:py-10">
+    <div className="w-full min-h-screen py-6 md:py-10">
       <div className="container mx-auto">
         {/* ── Top Bar Skeleton ── */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-gray-200 animate-pulse">
