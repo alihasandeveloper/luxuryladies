@@ -82,7 +82,7 @@ export default function CartView() {
                   return (
                     <div
                       key={item.id}
-                      className="bg-white rounded-none p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow"
+                      className="bg-white rounded-none border border-border p-4 sm:p-5 shadow-sm hover:border-primary/40 hover:shadow-md transition-all"
                     >
                       {/* Top Row: Thumbnail + Info + Trash/Quantity */}
                       <div className="flex items-start gap-4">
@@ -197,7 +197,7 @@ export default function CartView() {
 
             {/* ── Right Column: Order Summary (4 cols on lg) ── */}
             <div className="lg:col-span-4 lg:sticky lg:top-[150px] flex flex-col">
-              <div className="bg-white rounded-none p-5 sm:p-6 shadow-sm">
+              <div className="bg-white rounded-none border border-border p-5 sm:p-6 shadow-sm">
                 {/* Header */}
                 <div className="flex items-center gap-2 text-base font-bold text-dark mb-4">
                   <Package size={18} className="text-description" />

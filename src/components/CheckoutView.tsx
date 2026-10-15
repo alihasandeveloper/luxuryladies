@@ -485,7 +485,7 @@ export default function CheckoutView({
         {/* Screen View (Hidden when Printing) */}
         <div className="w-full py-10 md:py-16 bg-bg/30 min-h-[80vh] print:hidden">
           <div className="container max-w-[920px] mx-auto px-4 sm:px-6">
-            <div className="bg-white rounded-none p-6 sm:p-10 shadow-sm text-center mb-8 relative overflow-hidden">
+            <div className="bg-white rounded-none border border-border p-6 sm:p-10 shadow-sm text-center mb-8 relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-primary via-accent to-primary" />
 
               <div className="w-20 h-20 rounded-full bg-success-bg text-success border border-success/30 flex items-center justify-center mx-auto mb-5 shadow-xs">
@@ -512,7 +512,7 @@ export default function CheckoutView({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <div className="bg-white rounded-none p-6 shadow-sm">
+              <div className="bg-white rounded-none border border-border p-6 shadow-sm">
                 <h2 className="text-sm font-bold uppercase tracking-wider text-description mb-4 flex items-center gap-2">
                   <MapPin size={16} className="text-primary" />
                   <span>Delivery Address</span>
@@ -548,7 +548,7 @@ export default function CheckoutView({
                 </div>
               </div>
 
-              <div className="bg-white rounded-none p-6 shadow-sm">
+              <div className="bg-white rounded-none border border-border p-6 shadow-sm">
                 <h2 className="text-sm font-bold uppercase tracking-wider text-description mb-4 flex items-center gap-2">
                   <CreditCard size={16} className="text-primary" />
                   <span>Payment & Shipping</span>
@@ -582,7 +582,7 @@ export default function CheckoutView({
               </div>
             </div>
 
-            <div className="bg-white rounded-none p-6 shadow-sm mb-8">
+            <div className="bg-white rounded-none border border-border p-6 shadow-sm mb-8">
               <h2 className="text-sm font-bold uppercase tracking-wider text-description mb-4 flex items-center gap-2">
                 <Package size={16} className="text-primary" />
                 <span>Items in this Order ({placedOrder.items.length})</span>
@@ -851,7 +851,7 @@ export default function CheckoutView({
             {/* ── LEFT COLUMN: Billing, Shipping & Payment (7 cols) ── */}
             <div className="lg:col-span-7 space-y-6">
               {/* Card 1: Customer Billing & Shipping Address Fields */}
-              <div className="bg-white rounded-none p-5 sm:p-7 shadow-sm">
+              <div className="bg-white rounded-none border border-border p-5 sm:p-7 shadow-sm">
                 <div className="flex items-center gap-2.5 pb-4 mb-5 border-b border-border">
                   <div className="w-8 h-8 rounded-none bg-bg text-primary flex items-center justify-center font-bold text-sm">
                     <MapPin size={16} />
@@ -1169,7 +1169,7 @@ export default function CheckoutView({
 
             {/* ── RIGHT COLUMN: Order Summary Sticky Card (5 cols) ── */}
             <div className="lg:col-span-5 lg:sticky lg:top-[150px] space-y-4">
-              <div className="bg-white rounded-none p-5 sm:p-6 shadow-sm">
+              <div className="bg-white rounded-none border border-border p-5 sm:p-6 shadow-sm">
                 {/* Header */}
                 <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-border">
                   <h2 className="text-base font-bold text-dark flex items-center gap-2">
