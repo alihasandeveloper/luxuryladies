@@ -76,7 +76,7 @@ export default function ProductCard({
   }, [product.images]);
 
   return (
-    <div className={`group relative bg-white overflow-hidden md:shadow-lg hover:shadow-xl hover:shadow-gray-200/50 transition-all duration-300 flex flex-col ${isOutOfStock ? "opacity-90" : ""}`}>
+    <div className={`group relative bg-white overflow-hidden shadow-md md:shadow-lg hover:shadow-xl hover:shadow-gray-200/50 transition-all duration-300 flex flex-col ${isOutOfStock ? "opacity-90" : ""}`}>
       {/* Product Image Frame */}
       <div className="relative aspect-square w-full overflow-hidden bg-bg/50">
         <Link href={`/product/${product.slug}`} className="relative block w-full h-full overflow-hidden">

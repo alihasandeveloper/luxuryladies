@@ -18,6 +18,7 @@ const collections = [
 ];
 
 const support = [
+  { label: "Track Your Order", href: "/track-order" },
   { label: "Pre-Order Policy", href: "/pre-order-policy" },
   { label: "Custom Orders", href: "/custom-orders" },
   { label: "Shipping Info", href: "/shipping-info" },

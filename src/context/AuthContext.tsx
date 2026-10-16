@@ -77,7 +77,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (!res.ok || !data.success) {
         const errorMsg = data.message || "Invalid username or password.";
-        toast.error(errorMsg);
         return { success: false, message: errorMsg };
       }
 
@@ -86,12 +85,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
       localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
 
-      toast.success(data.message || `Welcome back, ${data.user.first_name || data.user.display_name}!`);
       return { success: true, message: data.message };
     } catch (err: any) {
       console.error("Login error:", err);
       const msg = "Unable to connect to authentication server.";
-      toast.error(msg);
       return { success: false, message: msg };
     } finally {
       setIsLoading(false);
@@ -112,7 +109,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (!res.ok || !result.success) {
         const errorMsg = result.message || "Registration failed.";
-        toast.error(errorMsg);
         return { success: false, message: errorMsg };
       }
 
@@ -121,12 +117,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(result.user));
       localStorage.setItem(TOKEN_STORAGE_KEY, result.token);
 
-      toast.success(result.message || "Your account has been created successfully!");
       return { success: true, message: result.message };
     } catch (err: any) {
       console.error("Registration error:", err);
       const msg = "Unable to complete registration. Please try again.";
-      toast.error(msg);
       return { success: false, message: msg };
     } finally {
       setIsLoading(false);

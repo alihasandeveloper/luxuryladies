@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { Search, Heart, ArrowLeftRight, ShoppingBag, User, X, LogIn, ChevronRight, Menu, Sparkles } from "lucide-react";
+import { Search, Heart, Truck, ShoppingBag, User, X, LogIn, ChevronRight, Menu, Sparkles } from "lucide-react";
 import { WooCommerceProduct } from "@/types/woocommerce";
 
 const navLinks = [
@@ -276,10 +276,15 @@ export default function Header() {
                 <Heart size={19} strokeWidth={1.75} />
               </button>
 
-              {/* Compare (desktop only) */}
-              <button className="action-btn desktop-only" aria-label="Compare">
-                <ArrowLeftRight size={19} strokeWidth={1.75} />
-              </button>
+              {/* Track Order (desktop only) */}
+              <Link
+                href="/track-order"
+                className="action-btn desktop-only"
+                aria-label="Track Order"
+                title="Track Order"
+              >
+                <Truck size={19} strokeWidth={1.75} />
+              </Link>
 
               {/* Cart */}
               <Link
@@ -538,15 +543,16 @@ export default function Header() {
                 <span>Wishlist</span>
               </Link>
               <Link
-                href="/shop"
+                href="/track-order"
                 onClick={() => setDrawerOpen(false)}
-                className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-md border text-xs font-medium gap-1.5 transition-colors ${pathname === "/shop"
+                className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-md border text-xs font-medium gap-1.5 transition-colors ${
+                  pathname === "/track-order"
                     ? "border-primary text-primary bg-bg"
                     : "border-border hover:border-primary hover:text-primary text-slate-600"
-                  }`}
+                }`}
               >
-                <ArrowLeftRight size={16} strokeWidth={1.75} />
-                <span>Compare</span>
+                <Truck size={16} strokeWidth={1.75} />
+                <span>Track Order</span>
               </Link>
               <Link
                 href={isAuthenticated ? "/account" : "/login"}

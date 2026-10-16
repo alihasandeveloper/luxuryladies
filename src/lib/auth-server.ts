@@ -14,6 +14,25 @@ export function getWpBaseUrl(): string {
   return url;
 }
 
+export function getWpAuthUrl(endpoint: string, extraParams?: Record<string, string>): string {
+  const base = getWpBaseUrl();
+  const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+  const url = new URL(`${base}${cleanEndpoint}`);
+  
+  if (WP_CK) {
+    url.searchParams.set("consumer_key", WP_CK);
+  }
+  if (WP_CS) {
+    url.searchParams.set("consumer_secret", WP_CS);
+  }
+  if (extraParams) {
+    Object.entries(extraParams).forEach(([k, v]) => {
+      if (v) url.searchParams.set(k, v);
+    });
+  }
+  return url.toString();
+}
+
 export function getWpAuthHeaders(): Record<string, string> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",

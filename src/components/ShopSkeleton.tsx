@@ -103,7 +103,7 @@ export default function ShopSkeleton() {
               {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                 <div
                   key={i}
-                  className="bg-white overflow-hidden md:shadow-lg flex flex-col"
+                  className="bg-white overflow-hidden shadow-md md:shadow-lg flex flex-col"
                 >
                   <div className="animate-pulse flex flex-col w-full">
                     {/* Product Image Frame (square, sharp, no border) */}

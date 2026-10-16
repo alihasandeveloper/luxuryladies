@@ -44,6 +44,18 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "**.woocommerce.com",
       },
+      {
+        protocol: "https",
+        hostname: "secure.gravatar.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.gravatar.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.wordpress.org",
+      },
     ],
   },
   // Allow mobile devices on local network to access the dev server

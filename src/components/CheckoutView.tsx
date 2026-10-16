@@ -15,7 +15,6 @@ import {
   Mail,
   FileText,
   Tag,
-  Printer,
   ShoppingBag,
   ChevronRight,
   Clock,
@@ -649,7 +648,7 @@ export default function CheckoutView({
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="flex items-center justify-center">
               <Button
                 variant="primary"
                 href="/shop"
@@ -658,16 +657,6 @@ export default function CheckoutView({
                 icon={<ShoppingBag size={16} />}
               >
                 Continue Shopping
-              </Button>
-
-              <Button
-                variant="secondary"
-                size="lg"
-                onClick={() => window.print()}
-                className="w-full sm:w-auto px-6"
-                icon={<Printer size={16} />}
-              >
-                Print Receipt
               </Button>
             </div>
           </div>

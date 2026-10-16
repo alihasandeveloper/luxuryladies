@@ -27,6 +27,63 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+/**
+ * Format order prices cleanly without leaking raw WooCommerce HTML tags
+ */
+function formatOrderPrice(
+  rawFormatted?: string,
+  total?: string | number,
+  currency: string = "BDT"
+): string {
+  // 1. If clean numeric total is available, format with currency symbol
+  if (total !== undefined && total !== null && total !== "") {
+    const num = typeof total === "number" ? total : parseFloat(String(total));
+    if (!isNaN(num)) {
+      const sym = currency === "BDT" ? "৳" : currency ? `${currency} ` : "৳";
+      return `${sym}${num.toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`;
+    }
+  }
+
+  // 2. Fallback: strip raw WooCommerce HTML tags and decode entities
+  if (rawFormatted) {
+    return rawFormatted
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&#2547;/g, "৳")
+      .replace(/&amp;/g, "&")
+      .trim();
+  }
+
+  return "৳0.00";
+}
+
+function OrderItemThumbnail({ src, alt }: { src?: string | null; alt: string }) {
+  const [imgSrc, setImgSrc] = useState(
+    src && typeof src === "string" && src.trim().length > 0
+      ? src.trim()
+      : "/woocommerce-placeholder.webp"
+  );
+
+  return (
+    <Image
+      src={imgSrc}
+      alt={alt || "Product"}
+      fill
+      sizes="48px"
+      unoptimized={Boolean(typeof imgSrc === "string" && (imgSrc.startsWith("/") || imgSrc.includes("localhost") || imgSrc.includes("headless.local")))}
+      className="object-cover"
+      onError={() => {
+        if (imgSrc !== "/woocommerce-placeholder.webp") {
+          setImgSrc("/woocommerce-placeholder.webp");
+        }
+      }}
+    />
+  );
+}
+
 export default function AccountView() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -183,9 +240,10 @@ export default function AccountView() {
               {user.avatar_url ? (
                 <Image
                   src={user.avatar_url}
-                  alt={user.display_name}
+                  alt={user.display_name || "User Avatar"}
                   width={64}
                   height={64}
+                  unoptimized
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -404,7 +462,9 @@ export default function AccountView() {
                             <p className="text-xs text-description">{order.date_created}</p>
                           </div>
                           <div>{renderStatusBadge(order.status)}</div>
-                          <p className="text-sm font-semibold text-primary">{order.formatted_total}</p>
+                          <p className="text-sm font-semibold text-primary">
+                            {formatOrderPrice(order.formatted_total, order.total, order.currency)}
+                          </p>
                         </div>
                       ))}
                     </div>
@@ -469,7 +529,7 @@ export default function AccountView() {
                               Total
                             </span>
                             <span className="text-sm font-bold text-primary">
-                              {order.formatted_total}
+                              {formatOrderPrice(order.formatted_total, order.total, order.currency)}
                             </span>
                           </div>
                           <div>{renderStatusBadge(order.status)}</div>
@@ -480,22 +540,23 @@ export default function AccountView() {
                           {order.items.map((item) => (
                             <div key={item.id} className="flex items-center gap-3.5">
                               <div className="w-12 h-14 bg-slate-100 relative shrink-0 overflow-hidden border border-border">
-                                <Image
-                                  src={item.image || "/woocommerce-placeholder.webp"}
-                                  alt={item.name}
-                                  fill
-                                  sizes="48px"
-                                  className="object-cover"
-                                />
+                                <OrderItemThumbnail src={item.image} alt={item.name} />
                               </div>
                               <div className="grow min-w-0">
                                 <p className="text-xs font-medium text-dark truncate">{item.name}</p>
                                 <p className="text-[11px] text-description">
-                                  Qty: {item.quantity} &times; {item.subtotal || item.total}
+                                  Qty: {item.quantity} &times;{" "}
+                                  {formatOrderPrice(
+                                    item.subtotal,
+                                    item.total
+                                      ? (parseFloat(item.total) / (item.quantity || 1)).toFixed(2)
+                                      : undefined,
+                                    order.currency
+                                  )}
                                 </p>
                               </div>
                               <div className="text-xs font-semibold text-dark text-right">
-                                {order.currency} {item.total}
+                                {formatOrderPrice(undefined, item.total, order.currency)}
                               </div>
                             </div>
                           ))}

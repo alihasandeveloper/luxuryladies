@@ -4,8 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { Eye, EyeOff, Lock, Mail, ArrowRight, CheckCircle2 } from "lucide-react";
-import { toast } from "sonner";
+import { Eye, EyeOff, Lock, Mail, ArrowRight, CheckCircle2, AlertCircle } from "lucide-react";
 
 export default function LoginView() {
   const router = useRouter();
@@ -19,6 +18,7 @@ export default function LoginView() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   // If already logged in, redirect
   useEffect(() => {
@@ -29,8 +29,10 @@ export default function LoginView() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
+
     if (!identifier.trim() || !password) {
-      toast.error("Please enter both username/email and password.");
+      setFormError("Please enter both username/email and password.");
       return;
     }
 
@@ -40,6 +42,8 @@ export default function LoginView() {
 
     if (result.success) {
       router.push(redirectUrl);
+    } else {
+      setFormError(result.message || "Invalid username or password.");
     }
   };
 
@@ -74,11 +78,26 @@ export default function LoginView() {
   }
 
   return (
-    <div className="w-full py-12 md:py-20 bg-bg/40 px-4">
-      <div className="w-full max-w-[500px] mx-auto bg-white border border-border shadow-xs p-6 sm:p-8" style={{ maxWidth: "500px" }}>
+    <div className="w-full py-12 md:py-20 px-4">
+      <div className="w-full max-w-[500px] mx-auto bg-white border border-border shadow-sm p-6 sm:p-8" style={{ maxWidth: "500px" }}>
         <h1 className="text-xl md:text-2xl font-semibold text-center text-dark mb-6">
           Sign In
         </h1>
+
+        {formError && (
+          <div className="mb-5 p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm flex items-start gap-2.5">
+            <AlertCircle size={16} className="shrink-0 mt-0.5 text-red-500" />
+            <p className="grow leading-snug">{formError}</p>
+            <button
+              type="button"
+              onClick={() => setFormError(null)}
+              className="text-red-400 hover:text-red-700 cursor-pointer ml-1 text-sm font-bold leading-none"
+              aria-label="Dismiss error"
+            >
+              &times;
+            </button>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Username / Email */}
