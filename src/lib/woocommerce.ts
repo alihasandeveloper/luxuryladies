@@ -596,13 +596,6 @@ function getDefaultPaymentGateways(): WooCommercePaymentGateway[] {
       enabled: true,
       order: 1,
     },
-    {
-      id: "bacs",
-      title: "Direct bank transfer",
-      description: "Make your payment directly into our bank account. Please use your Order ID as the payment reference.",
-      enabled: true,
-      order: 2,
-    },
   ];
 }
 

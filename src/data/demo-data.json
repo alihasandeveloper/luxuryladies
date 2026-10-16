@@ -1,12 +1,42 @@
 {
   "generalSettings": {
     "header_categories": [
-      { "id": 1, "name": "3 Pcs PJ sets", "slug": "3-pcs-pj-sets", "count": 6 },
-      { "id": 2, "name": "Heeled Sandals", "slug": "heeled-sandals", "count": 6 },
-      { "id": 3, "name": "Luxury Handbags", "slug": "luxury-handbags", "count": 5 },
-      { "id": 4, "name": "Party Clutches", "slug": "party-clutches", "count": 4 },
-      { "id": 5, "name": "Silk Robes", "slug": "silk-robes", "count": 4 },
-      { "id": 6, "name": "Bridal Collection", "slug": "bridal-collection", "count": 5 }
+      {
+        "id": 1,
+        "name": "3 Pcs PJ sets",
+        "slug": "3-pcs-pj-sets",
+        "count": 6
+      },
+      {
+        "id": 2,
+        "name": "Heeled Sandals",
+        "slug": "heeled-sandals",
+        "count": 6
+      },
+      {
+        "id": 3,
+        "name": "Luxury Handbags",
+        "slug": "luxury-handbags",
+        "count": 5
+      },
+      {
+        "id": 4,
+        "name": "Party Clutches",
+        "slug": "party-clutches",
+        "count": 4
+      },
+      {
+        "id": 5,
+        "name": "Silk Robes",
+        "slug": "silk-robes",
+        "count": 4
+      },
+      {
+        "id": 6,
+        "name": "Bridal Collection",
+        "slug": "bridal-collection",
+        "count": 5
+      }
     ],
     "shop_by_categories": [
       {
@@ -53,49 +83,104 @@
       }
     ],
     "featured_categories": [
-      { "id": 1, "name": "3 Pcs PJ sets", "slug": "3-pcs-pj-sets", "count": 6 },
-      { "id": 2, "name": "Heeled Sandals", "slug": "heeled-sandals", "count": 6 },
-      { "id": 3, "name": "Luxury Handbags", "slug": "luxury-handbags", "count": 5 }
+      {
+        "id": 1,
+        "name": "3 Pcs PJ sets",
+        "slug": "3-pcs-pj-sets",
+        "count": 6
+      },
+      {
+        "id": 2,
+        "name": "Heeled Sandals",
+        "slug": "heeled-sandals",
+        "count": 6
+      },
+      {
+        "id": 3,
+        "name": "Luxury Handbags",
+        "slug": "luxury-handbags",
+        "count": 5
+      }
     ],
     "landing_page_offers": [
-      { "id": 101, "name": "Anniversary Sale", "slug": "anniversary-sale", "count": 8 },
-      { "id": 102, "name": "Flash Deals", "slug": "flash-deals", "count": 6 },
-      { "id": 103, "name": "Best Price", "slug": "best-price", "count": 5 }
+      {
+        "id": 101,
+        "name": "Anniversary Sale",
+        "slug": "anniversary-sale",
+        "count": 8
+      },
+      {
+        "id": 102,
+        "name": "Flash Deals",
+        "slug": "flash-deals",
+        "count": 6
+      },
+      {
+        "id": 103,
+        "name": "Best Price",
+        "slug": "best-price",
+        "count": 5
+      }
     ],
     "landing_page_categories": [
-      { "id": 1, "name": "3 Pcs PJ sets", "slug": "3-pcs-pj-sets", "count": 6 },
-      { "id": 2, "name": "Heeled Sandals", "slug": "heeled-sandals", "count": 6 },
-      { "id": 3, "name": "Luxury Handbags", "slug": "luxury-handbags", "count": 5 }
+      {
+        "id": 1,
+        "name": "3 Pcs PJ sets",
+        "slug": "3-pcs-pj-sets",
+        "count": 6
+      },
+      {
+        "id": 2,
+        "name": "Heeled Sandals",
+        "slug": "heeled-sandals",
+        "count": 6
+      },
+      {
+        "id": 3,
+        "name": "Luxury Handbags",
+        "slug": "luxury-handbags",
+        "count": 5
+      }
     ],
     "landing_page_category_groups": {
       "offers": [
-        { "id": 101, "name": "Anniversary Sale", "slug": "anniversary-sale", "count": 8 },
-        { "id": 102, "name": "Flash Deals", "slug": "flash-deals", "count": 6 }
+        {
+          "id": 101,
+          "name": "Anniversary Sale",
+          "slug": "anniversary-sale",
+          "count": 8
+        },
+        {
+          "id": 102,
+          "name": "Flash Deals",
+          "slug": "flash-deals",
+          "count": 6
+        }
       ],
       "categories": [
-        { "id": 1, "name": "3 Pcs PJ sets", "slug": "3-pcs-pj-sets", "count": 6 },
-        { "id": 2, "name": "Heeled Sandals", "slug": "heeled-sandals", "count": 6 }
+        {
+          "id": 1,
+          "name": "3 Pcs PJ sets",
+          "slug": "3-pcs-pj-sets",
+          "count": 6
+        },
+        {
+          "id": 2,
+          "name": "Heeled Sandals",
+          "slug": "heeled-sandals",
+          "count": 6
+        }
       ]
     },
     "hero_gallery": [
       {
         "id": 1,
-        "url": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1600&auto=format&fit=crop&q=85",
+        "url": "/hero-bg.png",
         "alt": "Anniversary Luxury Collection - Luxury Ladies"
-      },
-      {
-        "id": 2,
-        "url": "https://images.unsplash.com/photo-1445205170230-053b83016050?w=1600&auto=format&fit=crop&q=85",
-        "alt": "Spring / Summer Exclusive Nightwear & Robes"
-      },
-      {
-        "id": 3,
-        "url": "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1600&auto=format&fit=crop&q=85",
-        "alt": "Luxury Handcrafted Heels & Designer Bags"
       }
     ],
     "information": {
-      "phone": "+880 1700-123456",
+      "phone": "+880 1700-XXXXXX",
       "email": "support@luxuryladies.com",
       "address": "House 42, Road 11, Block D, Banani, Dhaka 1213, Bangladesh"
     },
@@ -193,10 +278,30 @@
     }
   ],
   "offers": [
-    { "id": 101, "name": "Anniversary Sale", "slug": "anniversary-sale", "count": 8 },
-    { "id": 102, "name": "Flash Deals", "slug": "flash-deals", "count": 6 },
-    { "id": 103, "name": "Best Price", "slug": "best-price", "count": 5 },
-    { "id": 104, "name": "New Season Special", "slug": "new-season-special", "count": 7 }
+    {
+      "id": 101,
+      "name": "Anniversary Sale",
+      "slug": "anniversary-sale",
+      "count": 8
+    },
+    {
+      "id": 102,
+      "name": "Flash Deals",
+      "slug": "flash-deals",
+      "count": 6
+    },
+    {
+      "id": 103,
+      "name": "Best Price",
+      "slug": "best-price",
+      "count": 5
+    },
+    {
+      "id": 104,
+      "name": "New Season Special",
+      "slug": "new-season-special",
+      "count": 7
+    }
   ],
   "products": [
     {
@@ -215,30 +320,267 @@
       "on_sale": true,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 1, "name": "3 Pcs PJ sets", "slug": "3-pcs-pj-sets" }],
-      "offers": [{ "id": 101, "name": "Anniversary Sale", "slug": "anniversary-sale" }],
+      "categories": [
+        {
+          "id": 1,
+          "name": "3 Pcs PJ sets",
+          "slug": "3-pcs-pj-sets"
+        }
+      ],
+      "offers": [
+        {
+          "id": 101,
+          "name": "Anniversary Sale",
+          "slug": "anniversary-sale"
+        }
+      ],
       "images": [
-        { "id": 1001, "src": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&auto=format&fit=crop&q=80", "name": "Satin PJ Wine", "alt": "Satin PJ Wine" },
-        { "id": 1002, "src": "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&auto=format&fit=crop&q=80", "name": "Satin PJ Robe Detail", "alt": "Satin PJ Robe Detail" }
+        {
+          "id": 1001,
+          "src": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&auto=format&fit=crop&q=80",
+          "name": "Satin PJ Wine",
+          "alt": "Satin PJ Wine"
+        },
+        {
+          "id": 1002,
+          "src": "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&auto=format&fit=crop&q=80",
+          "name": "Satin PJ Robe Detail",
+          "alt": "Satin PJ Robe Detail"
+        }
       ],
       "attributes": [
-        { "id": 1, "name": "Size", "slug": "pa_size", "visible": true, "variation": true, "options": ["S", "M", "L", "XL"] },
-        { "id": 2, "name": "Color", "slug": "pa_color", "visible": true, "variation": true, "options": ["Wine", "Black"] }
+        {
+          "id": 1,
+          "name": "Size",
+          "slug": "pa_size",
+          "visible": true,
+          "variation": true,
+          "options": [
+            "S",
+            "M",
+            "L",
+            "XL"
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Color",
+          "slug": "pa_color",
+          "visible": true,
+          "variation": true,
+          "options": [
+            "Wine",
+            "Black"
+          ]
+        }
       ],
       "default_attributes": [
-        { "id": 1, "name": "Size", "option": "M" },
-        { "id": 2, "name": "Color", "option": "Wine" }
+        {
+          "id": 1,
+          "name": "Size",
+          "option": "M"
+        },
+        {
+          "id": 2,
+          "name": "Color",
+          "option": "Wine"
+        }
       ],
-      "variations": [2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018],
+      "variations": [
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016,
+        2017,
+        2018
+      ],
       "variations_data": [
-        { "id": 2011, "sku": "PJ3-001-S-WINE", "price": "2600", "regular_price": "2900", "sale_price": "2600", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 5, "attributes": [{ "id": 1, "name": "Size", "option": "S" }, { "id": 2, "name": "Color", "option": "Wine" }] },
-        { "id": 2012, "sku": "PJ3-001-M-WINE", "price": "2600", "regular_price": "2900", "sale_price": "2600", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 10, "attributes": [{ "id": 1, "name": "Size", "option": "M" }, { "id": 2, "name": "Color", "option": "Wine" }] },
-        { "id": 2013, "sku": "PJ3-001-L-WINE", "price": "2600", "regular_price": "2900", "sale_price": "2600", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 4, "attributes": [{ "id": 1, "name": "Size", "option": "L" }, { "id": 2, "name": "Color", "option": "Wine" }] },
-        { "id": 2014, "sku": "PJ3-001-XL-WINE", "price": "2600", "regular_price": "2900", "sale_price": "2600", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 3, "attributes": [{ "id": 1, "name": "Size", "option": "XL" }, { "id": 2, "name": "Color", "option": "Wine" }] },
-        { "id": 2015, "sku": "PJ3-001-S-BLK", "price": "2600", "regular_price": "2900", "sale_price": "2600", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 6, "attributes": [{ "id": 1, "name": "Size", "option": "S" }, { "id": 2, "name": "Color", "option": "Black" }] },
-        { "id": 2016, "sku": "PJ3-001-M-BLK", "price": "2600", "regular_price": "2900", "sale_price": "2600", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 8, "attributes": [{ "id": 1, "name": "Size", "option": "M" }, { "id": 2, "name": "Color", "option": "Black" }] },
-        { "id": 2017, "sku": "PJ3-001-L-BLK", "price": "2600", "regular_price": "2900", "sale_price": "2600", "on_sale": true, "purchasable": false, "stock_status": "outofstock", "stock_quantity": 0, "attributes": [{ "id": 1, "name": "Size", "option": "L" }, { "id": 2, "name": "Color", "option": "Black" }] },
-        { "id": 2018, "sku": "PJ3-001-XL-BLK", "price": "2600", "regular_price": "2900", "sale_price": "2600", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 2, "attributes": [{ "id": 1, "name": "Size", "option": "XL" }, { "id": 2, "name": "Color", "option": "Black" }] }
+        {
+          "id": 2011,
+          "sku": "PJ3-001-S-WINE",
+          "price": "2600",
+          "regular_price": "2900",
+          "sale_price": "2600",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 5,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "S"
+            },
+            {
+              "id": 2,
+              "name": "Color",
+              "option": "Wine"
+            }
+          ]
+        },
+        {
+          "id": 2012,
+          "sku": "PJ3-001-M-WINE",
+          "price": "2600",
+          "regular_price": "2900",
+          "sale_price": "2600",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 10,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "M"
+            },
+            {
+              "id": 2,
+              "name": "Color",
+              "option": "Wine"
+            }
+          ]
+        },
+        {
+          "id": 2013,
+          "sku": "PJ3-001-L-WINE",
+          "price": "2600",
+          "regular_price": "2900",
+          "sale_price": "2600",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 4,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "L"
+            },
+            {
+              "id": 2,
+              "name": "Color",
+              "option": "Wine"
+            }
+          ]
+        },
+        {
+          "id": 2014,
+          "sku": "PJ3-001-XL-WINE",
+          "price": "2600",
+          "regular_price": "2900",
+          "sale_price": "2600",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 3,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "XL"
+            },
+            {
+              "id": 2,
+              "name": "Color",
+              "option": "Wine"
+            }
+          ]
+        },
+        {
+          "id": 2015,
+          "sku": "PJ3-001-S-BLK",
+          "price": "2600",
+          "regular_price": "2900",
+          "sale_price": "2600",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 6,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "S"
+            },
+            {
+              "id": 2,
+              "name": "Color",
+              "option": "Black"
+            }
+          ]
+        },
+        {
+          "id": 2016,
+          "sku": "PJ3-001-M-BLK",
+          "price": "2600",
+          "regular_price": "2900",
+          "sale_price": "2600",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 8,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "M"
+            },
+            {
+              "id": 2,
+              "name": "Color",
+              "option": "Black"
+            }
+          ]
+        },
+        {
+          "id": 2017,
+          "sku": "PJ3-001-L-BLK",
+          "price": "2600",
+          "regular_price": "2900",
+          "sale_price": "2600",
+          "on_sale": true,
+          "purchasable": false,
+          "stock_status": "outofstock",
+          "stock_quantity": 0,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "L"
+            },
+            {
+              "id": 2,
+              "name": "Color",
+              "option": "Black"
+            }
+          ]
+        },
+        {
+          "id": 2018,
+          "sku": "PJ3-001-XL-BLK",
+          "price": "2600",
+          "regular_price": "2900",
+          "sale_price": "2600",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 2,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "XL"
+            },
+            {
+              "id": 2,
+              "name": "Color",
+              "option": "Black"
+            }
+          ]
+        }
       ]
     },
     {
@@ -257,25 +599,166 @@
       "on_sale": true,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 2, "name": "Heeled Sandals", "slug": "heeled-sandals" }],
-      "offers": [{ "id": 102, "name": "Flash Deals", "slug": "flash-deals" }],
+      "categories": [
+        {
+          "id": 2,
+          "name": "Heeled Sandals",
+          "slug": "heeled-sandals"
+        }
+      ],
+      "offers": [
+        {
+          "id": 102,
+          "name": "Flash Deals",
+          "slug": "flash-deals"
+        }
+      ],
       "images": [
-        { "id": 1003, "src": "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=800&auto=format&fit=crop&q=80", "name": "Crystal Stilettos", "alt": "Crystal Stilettos" }
+        {
+          "id": 1003,
+          "src": "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=800&auto=format&fit=crop&q=80",
+          "name": "Crystal Stilettos",
+          "alt": "Crystal Stilettos"
+        }
       ],
       "attributes": [
-        { "id": 1, "name": "Size", "slug": "pa_size", "visible": true, "variation": true, "options": ["36", "37", "38", "39", "40"] },
-        { "id": 2, "name": "Color", "slug": "pa_color", "visible": true, "variation": true, "options": ["Silver", "Rose Gold"] }
+        {
+          "id": 1,
+          "name": "Size",
+          "slug": "pa_size",
+          "visible": true,
+          "variation": true,
+          "options": [
+            "36",
+            "37",
+            "38",
+            "39",
+            "40"
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Color",
+          "slug": "pa_color",
+          "visible": true,
+          "variation": true,
+          "options": [
+            "Silver",
+            "Rose Gold"
+          ]
+        }
       ],
       "default_attributes": [
-        { "id": 1, "name": "Size", "option": "38" },
-        { "id": 2, "name": "Color", "option": "Silver" }
+        {
+          "id": 1,
+          "name": "Size",
+          "option": "38"
+        },
+        {
+          "id": 2,
+          "name": "Color",
+          "option": "Silver"
+        }
       ],
-      "variations": [2021, 2022, 2023, 2024],
+      "variations": [
+        2021,
+        2022,
+        2023,
+        2024
+      ],
       "variations_data": [
-        { "id": 2021, "sku": "HL-002-37-SLV", "price": "3850", "regular_price": "4200", "sale_price": "3850", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 4, "attributes": [{ "id": 1, "name": "Size", "option": "37" }, { "id": 2, "name": "Color", "option": "Silver" }] },
-        { "id": 2022, "sku": "HL-002-38-SLV", "price": "3850", "regular_price": "4200", "sale_price": "3850", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 6, "attributes": [{ "id": 1, "name": "Size", "option": "38" }, { "id": 2, "name": "Color", "option": "Silver" }] },
-        { "id": 2023, "sku": "HL-002-39-SLV", "price": "3850", "regular_price": "4200", "sale_price": "3850", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 3, "attributes": [{ "id": 1, "name": "Size", "option": "39" }, { "id": 2, "name": "Color", "option": "Silver" }] },
-        { "id": 2024, "sku": "HL-002-38-RSG", "price": "3850", "regular_price": "4200", "sale_price": "3850", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 5, "attributes": [{ "id": 1, "name": "Size", "option": "38" }, { "id": 2, "name": "Color", "option": "Rose Gold" }] }
+        {
+          "id": 2021,
+          "sku": "HL-002-37-SLV",
+          "price": "3850",
+          "regular_price": "4200",
+          "sale_price": "3850",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 4,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "37"
+            },
+            {
+              "id": 2,
+              "name": "Color",
+              "option": "Silver"
+            }
+          ]
+        },
+        {
+          "id": 2022,
+          "sku": "HL-002-38-SLV",
+          "price": "3850",
+          "regular_price": "4200",
+          "sale_price": "3850",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 6,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "38"
+            },
+            {
+              "id": 2,
+              "name": "Color",
+              "option": "Silver"
+            }
+          ]
+        },
+        {
+          "id": 2023,
+          "sku": "HL-002-39-SLV",
+          "price": "3850",
+          "regular_price": "4200",
+          "sale_price": "3850",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 3,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "39"
+            },
+            {
+              "id": 2,
+              "name": "Color",
+              "option": "Silver"
+            }
+          ]
+        },
+        {
+          "id": 2024,
+          "sku": "HL-002-38-RSG",
+          "price": "3850",
+          "regular_price": "4200",
+          "sale_price": "3850",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 5,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "38"
+            },
+            {
+              "id": 2,
+              "name": "Color",
+              "option": "Rose Gold"
+            }
+          ]
+        }
       ]
     },
     {
@@ -294,10 +777,27 @@
       "on_sale": true,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 3, "name": "Luxury Handbags", "slug": "luxury-handbags" }],
-      "offers": [{ "id": 101, "name": "Anniversary Sale", "slug": "anniversary-sale" }],
+      "categories": [
+        {
+          "id": 3,
+          "name": "Luxury Handbags",
+          "slug": "luxury-handbags"
+        }
+      ],
+      "offers": [
+        {
+          "id": 101,
+          "name": "Anniversary Sale",
+          "slug": "anniversary-sale"
+        }
+      ],
       "images": [
-        { "id": 1004, "src": "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=800&auto=format&fit=crop&q=80", "name": "Quilted Flap Bag", "alt": "Quilted Flap Bag" }
+        {
+          "id": 1004,
+          "src": "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=800&auto=format&fit=crop&q=80",
+          "name": "Quilted Flap Bag",
+          "alt": "Quilted Flap Bag"
+        }
       ]
     },
     {
@@ -316,10 +816,27 @@
       "on_sale": false,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 4, "name": "Party Clutches", "slug": "party-clutches" }],
-      "offers": [{ "id": 103, "name": "Best Price", "slug": "best-price" }],
+      "categories": [
+        {
+          "id": 4,
+          "name": "Party Clutches",
+          "slug": "party-clutches"
+        }
+      ],
+      "offers": [
+        {
+          "id": 103,
+          "name": "Best Price",
+          "slug": "best-price"
+        }
+      ],
       "images": [
-        { "id": 1005, "src": "https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=800&auto=format&fit=crop&q=80", "name": "Emerald Clutch", "alt": "Emerald Clutch" }
+        {
+          "id": 1005,
+          "src": "https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=800&auto=format&fit=crop&q=80",
+          "name": "Emerald Clutch",
+          "alt": "Emerald Clutch"
+        }
       ]
     },
     {
@@ -338,24 +855,140 @@
       "on_sale": true,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 5, "name": "Silk Robes", "slug": "silk-robes" }],
-      "offers": [{ "id": 104, "name": "New Season Special", "slug": "new-season-special" }],
+      "categories": [
+        {
+          "id": 5,
+          "name": "Silk Robes",
+          "slug": "silk-robes"
+        }
+      ],
+      "offers": [
+        {
+          "id": 104,
+          "name": "New Season Special",
+          "slug": "new-season-special"
+        }
+      ],
       "images": [
-        { "id": 1006, "src": "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&auto=format&fit=crop&q=80", "name": "Mulberry Silk Robe", "alt": "Mulberry Silk Robe" }
+        {
+          "id": 1006,
+          "src": "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&auto=format&fit=crop&q=80",
+          "name": "Mulberry Silk Robe",
+          "alt": "Mulberry Silk Robe"
+        }
       ],
       "attributes": [
-        { "id": 1, "name": "Size", "slug": "pa_size", "visible": true, "variation": true, "options": ["Free Size", "Plus Size"] },
-        { "id": 2, "name": "Color", "slug": "pa_color", "visible": true, "variation": true, "options": ["Champagne", "Blush Pink", "Midnight Blue"] }
+        {
+          "id": 1,
+          "name": "Size",
+          "slug": "pa_size",
+          "visible": true,
+          "variation": true,
+          "options": [
+            "Free Size",
+            "Plus Size"
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Color",
+          "slug": "pa_color",
+          "visible": true,
+          "variation": true,
+          "options": [
+            "Champagne",
+            "Blush Pink",
+            "Midnight Blue"
+          ]
+        }
       ],
       "default_attributes": [
-        { "id": 1, "name": "Size", "option": "Free Size" },
-        { "id": 2, "name": "Color", "option": "Champagne" }
+        {
+          "id": 1,
+          "name": "Size",
+          "option": "Free Size"
+        },
+        {
+          "id": 2,
+          "name": "Color",
+          "option": "Champagne"
+        }
       ],
-      "variations": [2051, 2052, 2053],
+      "variations": [
+        2051,
+        2052,
+        2053
+      ],
       "variations_data": [
-        { "id": 2051, "sku": "RB-005-FS-CHP", "price": "4200", "regular_price": "4600", "sale_price": "4200", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 8, "attributes": [{ "id": 1, "name": "Size", "option": "Free Size" }, { "id": 2, "name": "Color", "option": "Champagne" }] },
-        { "id": 2052, "sku": "RB-005-FS-BLS", "price": "4200", "regular_price": "4600", "sale_price": "4200", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 5, "attributes": [{ "id": 1, "name": "Size", "option": "Free Size" }, { "id": 2, "name": "Color", "option": "Blush Pink" }] },
-        { "id": 2053, "sku": "RB-005-FS-MID", "price": "4200", "regular_price": "4600", "sale_price": "4200", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 4, "attributes": [{ "id": 1, "name": "Size", "option": "Free Size" }, { "id": 2, "name": "Color", "option": "Midnight Blue" }] }
+        {
+          "id": 2051,
+          "sku": "RB-005-FS-CHP",
+          "price": "4200",
+          "regular_price": "4600",
+          "sale_price": "4200",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 8,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "Free Size"
+            },
+            {
+              "id": 2,
+              "name": "Color",
+              "option": "Champagne"
+            }
+          ]
+        },
+        {
+          "id": 2052,
+          "sku": "RB-005-FS-BLS",
+          "price": "4200",
+          "regular_price": "4600",
+          "sale_price": "4200",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 5,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "Free Size"
+            },
+            {
+              "id": 2,
+              "name": "Color",
+              "option": "Blush Pink"
+            }
+          ]
+        },
+        {
+          "id": 2053,
+          "sku": "RB-005-FS-MID",
+          "price": "4200",
+          "regular_price": "4600",
+          "sale_price": "4200",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 4,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "Free Size"
+            },
+            {
+              "id": 2,
+              "name": "Color",
+              "option": "Midnight Blue"
+            }
+          ]
+        }
       ]
     },
     {
@@ -374,10 +1007,27 @@
       "on_sale": false,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 6, "name": "Bridal Collection", "slug": "bridal-collection" }],
-      "offers": [{ "id": 104, "name": "New Season Special", "slug": "new-season-special" }],
+      "categories": [
+        {
+          "id": 6,
+          "name": "Bridal Collection",
+          "slug": "bridal-collection"
+        }
+      ],
+      "offers": [
+        {
+          "id": 104,
+          "name": "New Season Special",
+          "slug": "new-season-special"
+        }
+      ],
       "images": [
-        { "id": 1007, "src": "https://images.unsplash.com/photo-1519741497674-611481863552?w=800&auto=format&fit=crop&q=80", "name": "Pearl Bridal Robe", "alt": "Pearl Bridal Robe" }
+        {
+          "id": 1007,
+          "src": "https://images.unsplash.com/photo-1519741497674-611481863552?w=800&auto=format&fit=crop&q=80",
+          "name": "Pearl Bridal Robe",
+          "alt": "Pearl Bridal Robe"
+        }
       ]
     },
     {
@@ -396,10 +1046,27 @@
       "on_sale": true,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 7, "name": "Jewelry & Accessories", "slug": "jewelry-accessories" }],
-      "offers": [{ "id": 103, "name": "Best Price", "slug": "best-price" }],
+      "categories": [
+        {
+          "id": 7,
+          "name": "Jewelry & Accessories",
+          "slug": "jewelry-accessories"
+        }
+      ],
+      "offers": [
+        {
+          "id": 103,
+          "name": "Best Price",
+          "slug": "best-price"
+        }
+      ],
       "images": [
-        { "id": 1008, "src": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&auto=format&fit=crop&q=80", "name": "Flora Earrings", "alt": "Flora Earrings" }
+        {
+          "id": 1008,
+          "src": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&auto=format&fit=crop&q=80",
+          "name": "Flora Earrings",
+          "alt": "Flora Earrings"
+        }
       ]
     },
     {
@@ -418,23 +1085,117 @@
       "on_sale": true,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 2, "name": "Heeled Sandals", "slug": "heeled-sandals" }],
-      "offers": [{ "id": 102, "name": "Flash Deals", "slug": "flash-deals" }],
+      "categories": [
+        {
+          "id": 2,
+          "name": "Heeled Sandals",
+          "slug": "heeled-sandals"
+        }
+      ],
+      "offers": [
+        {
+          "id": 102,
+          "name": "Flash Deals",
+          "slug": "flash-deals"
+        }
+      ],
       "images": [
-        { "id": 1009, "src": "https://images.unsplash.com/photo-1535043934128-cf0b28d52f95?w=800&auto=format&fit=crop&q=80", "name": "Block Heel Sandals", "alt": "Block Heel Sandals" }
+        {
+          "id": 1009,
+          "src": "https://images.unsplash.com/photo-1535043934128-cf0b28d52f95?w=800&auto=format&fit=crop&q=80",
+          "name": "Block Heel Sandals",
+          "alt": "Block Heel Sandals"
+        }
       ],
       "attributes": [
-        { "id": 1, "name": "Size", "slug": "pa_size", "visible": true, "variation": true, "options": ["36", "37", "38", "39"] },
-        { "id": 2, "name": "Color", "slug": "pa_color", "visible": true, "variation": true, "options": ["Gold", "Silver"] }
+        {
+          "id": 1,
+          "name": "Size",
+          "slug": "pa_size",
+          "visible": true,
+          "variation": true,
+          "options": [
+            "36",
+            "37",
+            "38",
+            "39"
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Color",
+          "slug": "pa_color",
+          "visible": true,
+          "variation": true,
+          "options": [
+            "Gold",
+            "Silver"
+          ]
+        }
       ],
       "default_attributes": [
-        { "id": 1, "name": "Size", "option": "37" },
-        { "id": 2, "name": "Color", "option": "Gold" }
+        {
+          "id": 1,
+          "name": "Size",
+          "option": "37"
+        },
+        {
+          "id": 2,
+          "name": "Color",
+          "option": "Gold"
+        }
       ],
-      "variations": [2081, 2082],
+      "variations": [
+        2081,
+        2082
+      ],
       "variations_data": [
-        { "id": 2081, "sku": "HL-008-37-GLD", "price": "2950", "regular_price": "3300", "sale_price": "2950", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 4, "attributes": [{ "id": 1, "name": "Size", "option": "37" }, { "id": 2, "name": "Color", "option": "Gold" }] },
-        { "id": 2082, "sku": "HL-008-38-GLD", "price": "2950", "regular_price": "3300", "sale_price": "2950", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 6, "attributes": [{ "id": 1, "name": "Size", "option": "38" }, { "id": 2, "name": "Color", "option": "Gold" }] }
+        {
+          "id": 2081,
+          "sku": "HL-008-37-GLD",
+          "price": "2950",
+          "regular_price": "3300",
+          "sale_price": "2950",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 4,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "37"
+            },
+            {
+              "id": 2,
+              "name": "Color",
+              "option": "Gold"
+            }
+          ]
+        },
+        {
+          "id": 2082,
+          "sku": "HL-008-38-GLD",
+          "price": "2950",
+          "regular_price": "3300",
+          "sale_price": "2950",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 6,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "38"
+            },
+            {
+              "id": 2,
+              "name": "Color",
+              "option": "Gold"
+            }
+          ]
+        }
       ]
     },
     {
@@ -453,10 +1214,27 @@
       "on_sale": true,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 3, "name": "Luxury Handbags", "slug": "luxury-handbags" }],
-      "offers": [{ "id": 101, "name": "Anniversary Sale", "slug": "anniversary-sale" }],
+      "categories": [
+        {
+          "id": 3,
+          "name": "Luxury Handbags",
+          "slug": "luxury-handbags"
+        }
+      ],
+      "offers": [
+        {
+          "id": 101,
+          "name": "Anniversary Sale",
+          "slug": "anniversary-sale"
+        }
+      ],
       "images": [
-        { "id": 1010, "src": "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=800&auto=format&fit=crop&q=80", "name": "Croc Tote Bag", "alt": "Croc Tote Bag" }
+        {
+          "id": 1010,
+          "src": "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=800&auto=format&fit=crop&q=80",
+          "name": "Croc Tote Bag",
+          "alt": "Croc Tote Bag"
+        }
       ]
     },
     {
@@ -475,20 +1253,109 @@
       "on_sale": true,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 1, "name": "3 Pcs PJ sets", "slug": "3-pcs-pj-sets" }],
-      "offers": [{ "id": 101, "name": "Anniversary Sale", "slug": "anniversary-sale" }],
+      "categories": [
+        {
+          "id": 1,
+          "name": "3 Pcs PJ sets",
+          "slug": "3-pcs-pj-sets"
+        }
+      ],
+      "offers": [
+        {
+          "id": 101,
+          "name": "Anniversary Sale",
+          "slug": "anniversary-sale"
+        }
+      ],
       "images": [
-        { "id": 1011, "src": "https://images.unsplash.com/photo-1518049362265-d5b2a6467637?w=800&auto=format&fit=crop&q=80", "name": "Emerald PJ Set", "alt": "Emerald PJ Set" }
+        {
+          "id": 1011,
+          "src": "https://images.unsplash.com/photo-1518049362265-d5b2a6467637?w=800&auto=format&fit=crop&q=80",
+          "name": "Emerald PJ Set",
+          "alt": "Emerald PJ Set"
+        }
       ],
       "attributes": [
-        { "id": 1, "name": "Size", "slug": "pa_size", "visible": true, "variation": true, "options": ["S", "M", "L"] }
+        {
+          "id": 1,
+          "name": "Size",
+          "slug": "pa_size",
+          "visible": true,
+          "variation": true,
+          "options": [
+            "S",
+            "M",
+            "L"
+          ]
+        }
       ],
-      "default_attributes": [{ "id": 1, "name": "Size", "option": "M" }],
-      "variations": [2101, 2102, 2103],
+      "default_attributes": [
+        {
+          "id": 1,
+          "name": "Size",
+          "option": "M"
+        }
+      ],
+      "variations": [
+        2101,
+        2102,
+        2103
+      ],
       "variations_data": [
-        { "id": 2101, "sku": "PJ3-010-S", "price": "2750", "regular_price": "3100", "sale_price": "2750", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 4, "attributes": [{ "id": 1, "name": "Size", "option": "S" }] },
-        { "id": 2102, "sku": "PJ3-010-M", "price": "2750", "regular_price": "3100", "sale_price": "2750", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 6, "attributes": [{ "id": 1, "name": "Size", "option": "M" }] },
-        { "id": 2103, "sku": "PJ3-010-L", "price": "2750", "regular_price": "3100", "sale_price": "2750", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 3, "attributes": [{ "id": 1, "name": "Size", "option": "L" }] }
+        {
+          "id": 2101,
+          "sku": "PJ3-010-S",
+          "price": "2750",
+          "regular_price": "3100",
+          "sale_price": "2750",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 4,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "S"
+            }
+          ]
+        },
+        {
+          "id": 2102,
+          "sku": "PJ3-010-M",
+          "price": "2750",
+          "regular_price": "3100",
+          "sale_price": "2750",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 6,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "M"
+            }
+          ]
+        },
+        {
+          "id": 2103,
+          "sku": "PJ3-010-L",
+          "price": "2750",
+          "regular_price": "3100",
+          "sale_price": "2750",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 3,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "L"
+            }
+          ]
+        }
       ]
     },
     {
@@ -507,10 +1374,27 @@
       "on_sale": true,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 2, "name": "Heeeled Sandals", "slug": "heeled-sandals" }],
-      "offers": [{ "id": 103, "name": "Best Price", "slug": "best-price" }],
+      "categories": [
+        {
+          "id": 2,
+          "name": "Heeeled Sandals",
+          "slug": "heeled-sandals"
+        }
+      ],
+      "offers": [
+        {
+          "id": 103,
+          "name": "Best Price",
+          "slug": "best-price"
+        }
+      ],
       "images": [
-        { "id": 1012, "src": "https://images.unsplash.com/photo-1596704017254-9b121068fb31?w=800&auto=format&fit=crop&q=80", "name": "Nude Pumps", "alt": "Nude Pumps" }
+        {
+          "id": 1012,
+          "src": "https://images.unsplash.com/photo-1596704017254-9b121068fb31?w=800&auto=format&fit=crop&q=80",
+          "name": "Nude Pumps",
+          "alt": "Nude Pumps"
+        }
       ]
     },
     {
@@ -529,10 +1413,27 @@
       "on_sale": true,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 4, "name": "Party Clutches", "slug": "party-clutches" }],
-      "offers": [{ "id": 102, "name": "Flash Deals", "slug": "flash-deals" }],
+      "categories": [
+        {
+          "id": 4,
+          "name": "Party Clutches",
+          "slug": "party-clutches"
+        }
+      ],
+      "offers": [
+        {
+          "id": 102,
+          "name": "Flash Deals",
+          "slug": "flash-deals"
+        }
+      ],
       "images": [
-        { "id": 1013, "src": "https://images.unsplash.com/photo-1544816155-12df9643f363?w=800&auto=format&fit=crop&q=80", "name": "Crystal Minaudiere", "alt": "Crystal Minaudiere" }
+        {
+          "id": 1013,
+          "src": "https://images.unsplash.com/photo-1544816155-12df9643f363?w=800&auto=format&fit=crop&q=80",
+          "name": "Crystal Minaudiere",
+          "alt": "Crystal Minaudiere"
+        }
       ]
     },
     {
@@ -551,10 +1452,27 @@
       "on_sale": false,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 1, "name": "3 Pcs PJ sets", "slug": "3-pcs-pj-sets" }],
-      "offers": [{ "id": 104, "name": "New Season Special", "slug": "new-season-special" }],
+      "categories": [
+        {
+          "id": 1,
+          "name": "3 Pcs PJ sets",
+          "slug": "3-pcs-pj-sets"
+        }
+      ],
+      "offers": [
+        {
+          "id": 104,
+          "name": "New Season Special",
+          "slug": "new-season-special"
+        }
+      ],
       "images": [
-        { "id": 1014, "src": "https://images.unsplash.com/photo-1582533561751-ef6f6ab93a2e?w=800&auto=format&fit=crop&q=80", "name": "Blush Pink PJ", "alt": "Blush Pink PJ" }
+        {
+          "id": 1014,
+          "src": "https://images.unsplash.com/photo-1582533561751-ef6f6ab93a2e?w=800&auto=format&fit=crop&q=80",
+          "name": "Blush Pink PJ",
+          "alt": "Blush Pink PJ"
+        }
       ]
     },
     {
@@ -573,20 +1491,109 @@
       "on_sale": true,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 3, "name": "Luxury Handbags", "slug": "luxury-handbags" }],
-      "offers": [{ "id": 101, "name": "Anniversary Sale", "slug": "anniversary-sale" }],
+      "categories": [
+        {
+          "id": 3,
+          "name": "Luxury Handbags",
+          "slug": "luxury-handbags"
+        }
+      ],
+      "offers": [
+        {
+          "id": 101,
+          "name": "Anniversary Sale",
+          "slug": "anniversary-sale"
+        }
+      ],
       "images": [
-        { "id": 1015, "src": "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=800&auto=format&fit=crop&q=80", "name": "Mini Top Handle", "alt": "Mini Top Handle" }
+        {
+          "id": 1015,
+          "src": "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=800&auto=format&fit=crop&q=80",
+          "name": "Mini Top Handle",
+          "alt": "Mini Top Handle"
+        }
       ],
       "attributes": [
-        { "id": 1, "name": "Color", "slug": "pa_color", "visible": true, "variation": true, "options": ["Caramel", "Black", "Ivory"] }
+        {
+          "id": 1,
+          "name": "Color",
+          "slug": "pa_color",
+          "visible": true,
+          "variation": true,
+          "options": [
+            "Caramel",
+            "Black",
+            "Ivory"
+          ]
+        }
       ],
-      "default_attributes": [{ "id": 1, "name": "Color", "option": "Caramel" }],
-      "variations": [2141, 2142, 2143],
+      "default_attributes": [
+        {
+          "id": 1,
+          "name": "Color",
+          "option": "Caramel"
+        }
+      ],
+      "variations": [
+        2141,
+        2142,
+        2143
+      ],
       "variations_data": [
-        { "id": 2141, "sku": "BG-014-CRM", "price": "2850", "regular_price": "3200", "sale_price": "2850", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 4, "attributes": [{ "id": 1, "name": "Color", "option": "Caramel" }] },
-        { "id": 2142, "sku": "BG-014-BLK", "price": "2850", "regular_price": "3200", "sale_price": "2850", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 7, "attributes": [{ "id": 1, "name": "Color", "option": "Black" }] },
-        { "id": 2143, "sku": "BG-014-IVR", "price": "2850", "regular_price": "3200", "sale_price": "2850", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 3, "attributes": [{ "id": 1, "name": "Color", "option": "Ivory" }] }
+        {
+          "id": 2141,
+          "sku": "BG-014-CRM",
+          "price": "2850",
+          "regular_price": "3200",
+          "sale_price": "2850",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 4,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Color",
+              "option": "Caramel"
+            }
+          ]
+        },
+        {
+          "id": 2142,
+          "sku": "BG-014-BLK",
+          "price": "2850",
+          "regular_price": "3200",
+          "sale_price": "2850",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 7,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Color",
+              "option": "Black"
+            }
+          ]
+        },
+        {
+          "id": 2143,
+          "sku": "BG-014-IVR",
+          "price": "2850",
+          "regular_price": "3200",
+          "sale_price": "2850",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 3,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Color",
+              "option": "Ivory"
+            }
+          ]
+        }
       ]
     },
     {
@@ -605,10 +1612,27 @@
       "on_sale": true,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 5, "name": "Silk Robes", "slug": "silk-robes" }],
-      "offers": [{ "id": 104, "name": "New Season Special", "slug": "new-season-special" }],
+      "categories": [
+        {
+          "id": 5,
+          "name": "Silk Robes",
+          "slug": "silk-robes"
+        }
+      ],
+      "offers": [
+        {
+          "id": 104,
+          "name": "New Season Special",
+          "slug": "new-season-special"
+        }
+      ],
       "images": [
-        { "id": 1016, "src": "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=800&auto=format&fit=crop&q=80", "name": "Feather Velvet Robe", "alt": "Feather Velvet Robe" }
+        {
+          "id": 1016,
+          "src": "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=800&auto=format&fit=crop&q=80",
+          "name": "Feather Velvet Robe",
+          "alt": "Feather Velvet Robe"
+        }
       ]
     },
     {
@@ -628,22 +1652,114 @@
       "purchasable": true,
       "stock_status": "instock",
       "categories": [
-        { "id": 2, "name": "Heeled Sandals", "slug": "heeled-sandals" },
-        { "id": 6, "name": "Bridal Collection", "slug": "bridal-collection" }
+        {
+          "id": 2,
+          "name": "Heeled Sandals",
+          "slug": "heeled-sandals"
+        },
+        {
+          "id": 6,
+          "name": "Bridal Collection",
+          "slug": "bridal-collection"
+        }
       ],
-      "offers": [{ "id": 104, "name": "New Season Special", "slug": "new-season-special" }],
+      "offers": [
+        {
+          "id": 104,
+          "name": "New Season Special",
+          "slug": "new-season-special"
+        }
+      ],
       "images": [
-        { "id": 1017, "src": "https://images.unsplash.com/photo-1535043934128-cf0b28d52f95?w=800&auto=format&fit=crop&q=80", "name": "Bridal Court Shoes", "alt": "Bridal Court Shoes" }
+        {
+          "id": 1017,
+          "src": "https://images.unsplash.com/photo-1535043934128-cf0b28d52f95?w=800&auto=format&fit=crop&q=80",
+          "name": "Bridal Court Shoes",
+          "alt": "Bridal Court Shoes"
+        }
       ],
       "attributes": [
-        { "id": 1, "name": "Size", "slug": "pa_size", "visible": true, "variation": true, "options": ["36", "37", "38", "39"] }
+        {
+          "id": 1,
+          "name": "Size",
+          "slug": "pa_size",
+          "visible": true,
+          "variation": true,
+          "options": [
+            "36",
+            "37",
+            "38",
+            "39"
+          ]
+        }
       ],
-      "default_attributes": [{ "id": 1, "name": "Size", "option": "37" }],
-      "variations": [2161, 2162, 2163],
+      "default_attributes": [
+        {
+          "id": 1,
+          "name": "Size",
+          "option": "37"
+        }
+      ],
+      "variations": [
+        2161,
+        2162,
+        2163
+      ],
       "variations_data": [
-        { "id": 2161, "sku": "BD-016-36", "price": "3900", "regular_price": "3900", "sale_price": "", "on_sale": false, "purchasable": true, "stock_status": "instock", "stock_quantity": 2, "attributes": [{ "id": 1, "name": "Size", "option": "36" }] },
-        { "id": 2162, "sku": "BD-016-37", "price": "3900", "regular_price": "3900", "sale_price": "", "on_sale": false, "purchasable": true, "stock_status": "instock", "stock_quantity": 5, "attributes": [{ "id": 1, "name": "Size", "option": "37" }] },
-        { "id": 2163, "sku": "BD-016-38", "price": "3900", "regular_price": "3900", "sale_price": "", "on_sale": false, "purchasable": true, "stock_status": "instock", "stock_quantity": 4, "attributes": [{ "id": 1, "name": "Size", "option": "38" }] }
+        {
+          "id": 2161,
+          "sku": "BD-016-36",
+          "price": "3900",
+          "regular_price": "3900",
+          "sale_price": "",
+          "on_sale": false,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 2,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "36"
+            }
+          ]
+        },
+        {
+          "id": 2162,
+          "sku": "BD-016-37",
+          "price": "3900",
+          "regular_price": "3900",
+          "sale_price": "",
+          "on_sale": false,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 5,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "37"
+            }
+          ]
+        },
+        {
+          "id": 2163,
+          "sku": "BD-016-38",
+          "price": "3900",
+          "regular_price": "3900",
+          "sale_price": "",
+          "on_sale": false,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 4,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "38"
+            }
+          ]
+        }
       ]
     },
     {
@@ -662,10 +1778,27 @@
       "on_sale": true,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 7, "name": "Jewelry & Accessories", "slug": "jewelry-accessories" }],
-      "offers": [{ "id": 103, "name": "Best Price", "slug": "best-price" }],
+      "categories": [
+        {
+          "id": 7,
+          "name": "Jewelry & Accessories",
+          "slug": "jewelry-accessories"
+        }
+      ],
+      "offers": [
+        {
+          "id": 103,
+          "name": "Best Price",
+          "slug": "best-price"
+        }
+      ],
       "images": [
-        { "id": 1018, "src": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&auto=format&fit=crop&q=80", "name": "Baroque Pearl Necklace", "alt": "Baroque Pearl Necklace" }
+        {
+          "id": 1018,
+          "src": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&auto=format&fit=crop&q=80",
+          "name": "Baroque Pearl Necklace",
+          "alt": "Baroque Pearl Necklace"
+        }
       ]
     },
     {
@@ -684,20 +1817,117 @@
       "on_sale": true,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 2, "name": "Heeled Sandals", "slug": "heeled-sandals" }],
-      "offers": [{ "id": 102, "name": "Flash Deals", "slug": "flash-deals" }],
+      "categories": [
+        {
+          "id": 2,
+          "name": "Heeled Sandals",
+          "slug": "heeled-sandals"
+        }
+      ],
+      "offers": [
+        {
+          "id": 102,
+          "name": "Flash Deals",
+          "slug": "flash-deals"
+        }
+      ],
       "images": [
-        { "id": 1019, "src": "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=800&auto=format&fit=crop&q=80", "name": "Platform Heels", "alt": "Platform Heels" }
+        {
+          "id": 1019,
+          "src": "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=800&auto=format&fit=crop&q=80",
+          "name": "Platform Heels",
+          "alt": "Platform Heels"
+        }
       ],
       "attributes": [
-        { "id": 1, "name": "Size", "slug": "pa_size", "visible": true, "variation": true, "options": ["36", "37", "38", "39"] },
-        { "id": 2, "name": "Color", "slug": "pa_color", "visible": true, "variation": true, "options": ["Black", "Nude"] }
+        {
+          "id": 1,
+          "name": "Size",
+          "slug": "pa_size",
+          "visible": true,
+          "variation": true,
+          "options": [
+            "36",
+            "37",
+            "38",
+            "39"
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Color",
+          "slug": "pa_color",
+          "visible": true,
+          "variation": true,
+          "options": [
+            "Black",
+            "Nude"
+          ]
+        }
       ],
-      "default_attributes": [{ "id": 1, "name": "Size", "option": "38" }, { "id": 2, "name": "Color", "option": "Black" }],
-      "variations": [2181, 2182],
+      "default_attributes": [
+        {
+          "id": 1,
+          "name": "Size",
+          "option": "38"
+        },
+        {
+          "id": 2,
+          "name": "Color",
+          "option": "Black"
+        }
+      ],
+      "variations": [
+        2181,
+        2182
+      ],
       "variations_data": [
-        { "id": 2181, "sku": "HL-018-38-BLK", "price": "3450", "regular_price": "3800", "sale_price": "3450", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 5, "attributes": [{ "id": 1, "name": "Size", "option": "38" }, { "id": 2, "name": "Color", "option": "Black" }] },
-        { "id": 2182, "sku": "HL-018-38-NUD", "price": "3450", "regular_price": "3800", "sale_price": "3450", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 4, "attributes": [{ "id": 1, "name": "Size", "option": "38" }, { "id": 2, "name": "Color", "option": "Nude" }] }
+        {
+          "id": 2181,
+          "sku": "HL-018-38-BLK",
+          "price": "3450",
+          "regular_price": "3800",
+          "sale_price": "3450",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 5,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "38"
+            },
+            {
+              "id": 2,
+              "name": "Color",
+              "option": "Black"
+            }
+          ]
+        },
+        {
+          "id": 2182,
+          "sku": "HL-018-38-NUD",
+          "price": "3450",
+          "regular_price": "3800",
+          "sale_price": "3450",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 4,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "38"
+            },
+            {
+              "id": 2,
+              "name": "Color",
+              "option": "Nude"
+            }
+          ]
+        }
       ]
     },
     {
@@ -716,10 +1946,27 @@
       "on_sale": true,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 4, "name": "Party Clutches", "slug": "party-clutches" }],
-      "offers": [{ "id": 103, "name": "Best Price", "slug": "best-price" }],
+      "categories": [
+        {
+          "id": 4,
+          "name": "Party Clutches",
+          "slug": "party-clutches"
+        }
+      ],
+      "offers": [
+        {
+          "id": 103,
+          "name": "Best Price",
+          "slug": "best-price"
+        }
+      ],
       "images": [
-        { "id": 1020, "src": "https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=800&auto=format&fit=crop&q=80", "name": "Envelope Clutch", "alt": "Envelope Clutch" }
+        {
+          "id": 1020,
+          "src": "https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=800&auto=format&fit=crop&q=80",
+          "name": "Envelope Clutch",
+          "alt": "Envelope Clutch"
+        }
       ]
     },
     {
@@ -738,10 +1985,27 @@
       "on_sale": true,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 3, "name": "Luxury Handbags", "slug": "luxury-handbags" }],
-      "offers": [{ "id": 101, "name": "Anniversary Sale", "slug": "anniversary-sale" }],
+      "categories": [
+        {
+          "id": 3,
+          "name": "Luxury Handbags",
+          "slug": "luxury-handbags"
+        }
+      ],
+      "offers": [
+        {
+          "id": 101,
+          "name": "Anniversary Sale",
+          "slug": "anniversary-sale"
+        }
+      ],
       "images": [
-        { "id": 1021, "src": "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=800&auto=format&fit=crop&q=80", "name": "Crossbody Bag", "alt": "Crossbody Bag" }
+        {
+          "id": 1021,
+          "src": "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=800&auto=format&fit=crop&q=80",
+          "name": "Crossbody Bag",
+          "alt": "Crossbody Bag"
+        }
       ]
     },
     {
@@ -760,10 +2024,27 @@
       "on_sale": false,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 1, "name": "3 Pcs PJ sets", "slug": "3-pcs-pj-sets" }],
-      "offers": [{ "id": 104, "name": "New Season Special", "slug": "new-season-special" }],
+      "categories": [
+        {
+          "id": 1,
+          "name": "3 Pcs PJ sets",
+          "slug": "3-pcs-pj-sets"
+        }
+      ],
+      "offers": [
+        {
+          "id": 104,
+          "name": "New Season Special",
+          "slug": "new-season-special"
+        }
+      ],
       "images": [
-        { "id": 1022, "src": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&auto=format&fit=crop&q=80", "name": "Navy Floral PJ", "alt": "Navy Floral PJ" }
+        {
+          "id": 1022,
+          "src": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&auto=format&fit=crop&q=80",
+          "name": "Navy Floral PJ",
+          "alt": "Navy Floral PJ"
+        }
       ]
     },
     {
@@ -783,21 +2064,94 @@
       "purchasable": true,
       "stock_status": "instock",
       "categories": [
-        { "id": 5, "name": "Silk Robes", "slug": "silk-robes" },
-        { "id": 6, "name": "Bridal Collection", "slug": "bridal-collection" }
+        {
+          "id": 5,
+          "name": "Silk Robes",
+          "slug": "silk-robes"
+        },
+        {
+          "id": 6,
+          "name": "Bridal Collection",
+          "slug": "bridal-collection"
+        }
       ],
-      "offers": [{ "id": 104, "name": "New Season Special", "slug": "new-season-special" }],
+      "offers": [
+        {
+          "id": 104,
+          "name": "New Season Special",
+          "slug": "new-season-special"
+        }
+      ],
       "images": [
-        { "id": 1023, "src": "https://images.unsplash.com/photo-1519741497674-611481863552?w=800&auto=format&fit=crop&q=80", "name": "Feather Silk Robe", "alt": "Feather Silk Robe" }
+        {
+          "id": 1023,
+          "src": "https://images.unsplash.com/photo-1519741497674-611481863552?w=800&auto=format&fit=crop&q=80",
+          "name": "Feather Silk Robe",
+          "alt": "Feather Silk Robe"
+        }
       ],
       "attributes": [
-        { "id": 1, "name": "Size", "slug": "pa_size", "visible": true, "variation": true, "options": ["S", "M", "L"] }
+        {
+          "id": 1,
+          "name": "Size",
+          "slug": "pa_size",
+          "visible": true,
+          "variation": true,
+          "options": [
+            "S",
+            "M",
+            "L"
+          ]
+        }
       ],
-      "default_attributes": [{ "id": 1, "name": "Size", "option": "M" }],
-      "variations": [2221, 2222],
+      "default_attributes": [
+        {
+          "id": 1,
+          "name": "Size",
+          "option": "M"
+        }
+      ],
+      "variations": [
+        2221,
+        2222
+      ],
       "variations_data": [
-        { "id": 2221, "sku": "BD-022-M", "price": "6200", "regular_price": "6900", "sale_price": "6200", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 4, "attributes": [{ "id": 1, "name": "Size", "option": "M" }] },
-        { "id": 2222, "sku": "BD-022-L", "price": "6200", "regular_price": "6900", "sale_price": "6200", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 3, "attributes": [{ "id": 1, "name": "Size", "option": "L" }] }
+        {
+          "id": 2221,
+          "sku": "BD-022-M",
+          "price": "6200",
+          "regular_price": "6900",
+          "sale_price": "6200",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 4,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "M"
+            }
+          ]
+        },
+        {
+          "id": 2222,
+          "sku": "BD-022-L",
+          "price": "6200",
+          "regular_price": "6900",
+          "sale_price": "6200",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 3,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "L"
+            }
+          ]
+        }
       ]
     },
     {
@@ -816,10 +2170,27 @@
       "on_sale": true,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 7, "name": "Jewelry & Accessories", "slug": "jewelry-accessories" }],
-      "offers": [{ "id": 102, "name": "Flash Deals", "slug": "flash-deals" }],
+      "categories": [
+        {
+          "id": 7,
+          "name": "Jewelry & Accessories",
+          "slug": "jewelry-accessories"
+        }
+      ],
+      "offers": [
+        {
+          "id": 102,
+          "name": "Flash Deals",
+          "slug": "flash-deals"
+        }
+      ],
       "images": [
-        { "id": 1024, "src": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&auto=format&fit=crop&q=80", "name": "Tennis Bracelet", "alt": "Tennis Bracelet" }
+        {
+          "id": 1024,
+          "src": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&auto=format&fit=crop&q=80",
+          "name": "Tennis Bracelet",
+          "alt": "Tennis Bracelet"
+        }
       ]
     },
     {
@@ -838,10 +2209,27 @@
       "on_sale": true,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 2, "name": "Heeled Sandals", "slug": "heeled-sandals" }],
-      "offers": [{ "id": 103, "name": "Best Price", "slug": "best-price" }],
+      "categories": [
+        {
+          "id": 2,
+          "name": "Heeled Sandals",
+          "slug": "heeled-sandals"
+        }
+      ],
+      "offers": [
+        {
+          "id": 103,
+          "name": "Best Price",
+          "slug": "best-price"
+        }
+      ],
       "images": [
-        { "id": 1025, "src": "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=800&auto=format&fit=crop&q=80", "name": "Kitten Heel Mules", "alt": "Kitten Heel Mules" }
+        {
+          "id": 1025,
+          "src": "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=800&auto=format&fit=crop&q=80",
+          "name": "Kitten Heel Mules",
+          "alt": "Kitten Heel Mules"
+        }
       ]
     },
     {
@@ -860,10 +2248,27 @@
       "on_sale": false,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 4, "name": "Party Clutches", "slug": "party-clutches" }],
-      "offers": [{ "id": 101, "name": "Anniversary Sale", "slug": "anniversary-sale" }],
+      "categories": [
+        {
+          "id": 4,
+          "name": "Party Clutches",
+          "slug": "party-clutches"
+        }
+      ],
+      "offers": [
+        {
+          "id": 101,
+          "name": "Anniversary Sale",
+          "slug": "anniversary-sale"
+        }
+      ],
       "images": [
-        { "id": 1026, "src": "https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=800&auto=format&fit=crop&q=80", "name": "Bow Satin Clutch", "alt": "Bow Satin Clutch" }
+        {
+          "id": 1026,
+          "src": "https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=800&auto=format&fit=crop&q=80",
+          "name": "Bow Satin Clutch",
+          "alt": "Bow Satin Clutch"
+        }
       ]
     },
     {
@@ -882,20 +2287,110 @@
       "on_sale": true,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 1, "name": "3 Pcs PJ sets", "slug": "3-pcs-pj-sets" }],
-      "offers": [{ "id": 101, "name": "Anniversary Sale", "slug": "anniversary-sale" }],
+      "categories": [
+        {
+          "id": 1,
+          "name": "3 Pcs PJ sets",
+          "slug": "3-pcs-pj-sets"
+        }
+      ],
+      "offers": [
+        {
+          "id": 101,
+          "name": "Anniversary Sale",
+          "slug": "anniversary-sale"
+        }
+      ],
       "images": [
-        { "id": 1027, "src": "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&auto=format&fit=crop&q=80", "name": "Champagne PJ Set", "alt": "Champagne PJ Set" }
+        {
+          "id": 1027,
+          "src": "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&auto=format&fit=crop&q=80",
+          "name": "Champagne PJ Set",
+          "alt": "Champagne PJ Set"
+        }
       ],
       "attributes": [
-        { "id": 1, "name": "Size", "slug": "pa_size", "visible": true, "variation": true, "options": ["S", "M", "L", "XL"] }
+        {
+          "id": 1,
+          "name": "Size",
+          "slug": "pa_size",
+          "visible": true,
+          "variation": true,
+          "options": [
+            "S",
+            "M",
+            "L",
+            "XL"
+          ]
+        }
       ],
-      "default_attributes": [{ "id": 1, "name": "Size", "option": "M" }],
-      "variations": [2261, 2262, 2263],
+      "default_attributes": [
+        {
+          "id": 1,
+          "name": "Size",
+          "option": "M"
+        }
+      ],
+      "variations": [
+        2261,
+        2262,
+        2263
+      ],
       "variations_data": [
-        { "id": 2261, "sku": "PJ3-026-S", "price": "2700", "regular_price": "3000", "sale_price": "2700", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 4, "attributes": [{ "id": 1, "name": "Size", "option": "S" }] },
-        { "id": 2262, "sku": "PJ3-026-M", "price": "2700", "regular_price": "3000", "sale_price": "2700", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 7, "attributes": [{ "id": 1, "name": "Size", "option": "M" }] },
-        { "id": 2263, "sku": "PJ3-026-L", "price": "2700", "regular_price": "3000", "sale_price": "2700", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 5, "attributes": [{ "id": 1, "name": "Size", "option": "L" }] }
+        {
+          "id": 2261,
+          "sku": "PJ3-026-S",
+          "price": "2700",
+          "regular_price": "3000",
+          "sale_price": "2700",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 4,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "S"
+            }
+          ]
+        },
+        {
+          "id": 2262,
+          "sku": "PJ3-026-M",
+          "price": "2700",
+          "regular_price": "3000",
+          "sale_price": "2700",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 7,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "M"
+            }
+          ]
+        },
+        {
+          "id": 2263,
+          "sku": "PJ3-026-L",
+          "price": "2700",
+          "regular_price": "3000",
+          "sale_price": "2700",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 5,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "L"
+            }
+          ]
+        }
       ]
     },
     {
@@ -914,10 +2409,27 @@
       "on_sale": true,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 3, "name": "Luxury Handbags", "slug": "luxury-handbags" }],
-      "offers": [{ "id": 102, "name": "Flash Deals", "slug": "flash-deals" }],
+      "categories": [
+        {
+          "id": 3,
+          "name": "Luxury Handbags",
+          "slug": "luxury-handbags"
+        }
+      ],
+      "offers": [
+        {
+          "id": 102,
+          "name": "Flash Deals",
+          "slug": "flash-deals"
+        }
+      ],
       "images": [
-        { "id": 1028, "src": "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=800&auto=format&fit=crop&q=80", "name": "Saddle Bag", "alt": "Saddle Bag" }
+        {
+          "id": 1028,
+          "src": "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=800&auto=format&fit=crop&q=80",
+          "name": "Saddle Bag",
+          "alt": "Saddle Bag"
+        }
       ]
     },
     {
@@ -936,19 +2448,91 @@
       "on_sale": true,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 2, "name": "Heeled Sandals", "slug": "heeled-sandals" }],
-      "offers": [{ "id": 102, "name": "Flash Deals", "slug": "flash-deals" }],
+      "categories": [
+        {
+          "id": 2,
+          "name": "Heeled Sandals",
+          "slug": "heeled-sandals"
+        }
+      ],
+      "offers": [
+        {
+          "id": 102,
+          "name": "Flash Deals",
+          "slug": "flash-deals"
+        }
+      ],
       "images": [
-        { "id": 1029, "src": "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=800&auto=format&fit=crop&q=80", "name": "Rhinestone Slingbacks", "alt": "Rhinestone Slingbacks" }
+        {
+          "id": 1029,
+          "src": "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=800&auto=format&fit=crop&q=80",
+          "name": "Rhinestone Slingbacks",
+          "alt": "Rhinestone Slingbacks"
+        }
       ],
       "attributes": [
-        { "id": 1, "name": "Size", "slug": "pa_size", "visible": true, "variation": true, "options": ["36", "37", "38", "39"] }
+        {
+          "id": 1,
+          "name": "Size",
+          "slug": "pa_size",
+          "visible": true,
+          "variation": true,
+          "options": [
+            "36",
+            "37",
+            "38",
+            "39"
+          ]
+        }
       ],
-      "default_attributes": [{ "id": 1, "name": "Size", "option": "37" }],
-      "variations": [2281, 2282],
+      "default_attributes": [
+        {
+          "id": 1,
+          "name": "Size",
+          "option": "37"
+        }
+      ],
+      "variations": [
+        2281,
+        2282
+      ],
       "variations_data": [
-        { "id": 2281, "sku": "HL-028-37", "price": "3550", "regular_price": "3900", "sale_price": "3550", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 4, "attributes": [{ "id": 1, "name": "Size", "option": "37" }] },
-        { "id": 2282, "sku": "HL-028-38", "price": "3550", "regular_price": "3900", "sale_price": "3550", "on_sale": true, "purchasable": true, "stock_status": "instock", "stock_quantity": 6, "attributes": [{ "id": 1, "name": "Size", "option": "38" }] }
+        {
+          "id": 2281,
+          "sku": "HL-028-37",
+          "price": "3550",
+          "regular_price": "3900",
+          "sale_price": "3550",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 4,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "37"
+            }
+          ]
+        },
+        {
+          "id": 2282,
+          "sku": "HL-028-38",
+          "price": "3550",
+          "regular_price": "3900",
+          "sale_price": "3550",
+          "on_sale": true,
+          "purchasable": true,
+          "stock_status": "instock",
+          "stock_quantity": 6,
+          "attributes": [
+            {
+              "id": 1,
+              "name": "Size",
+              "option": "38"
+            }
+          ]
+        }
       ]
     },
     {
@@ -967,10 +2551,27 @@
       "on_sale": false,
       "purchasable": true,
       "stock_status": "instock",
-      "categories": [{ "id": 1, "name": "3 Pcs PJ sets", "slug": "3-pcs-pj-sets" }],
-      "offers": [{ "id": 101, "name": "Anniversary Sale", "slug": "anniversary-sale" }],
+      "categories": [
+        {
+          "id": 1,
+          "name": "3 Pcs PJ sets",
+          "slug": "3-pcs-pj-sets"
+        }
+      ],
+      "offers": [
+        {
+          "id": 101,
+          "name": "Anniversary Sale",
+          "slug": "anniversary-sale"
+        }
+      ],
       "images": [
-        { "id": 1030, "src": "https://images.unsplash.com/photo-1518049362265-d5b2a6467637?w=800&auto=format&fit=crop&q=80", "name": "Royal Blue PJ", "alt": "Royal Blue PJ" }
+        {
+          "id": 1030,
+          "src": "https://images.unsplash.com/photo-1518049362265-d5b2a6467637?w=800&auto=format&fit=crop&q=80",
+          "name": "Royal Blue PJ",
+          "alt": "Royal Blue PJ"
+        }
       ]
     },
     {
@@ -990,12 +2591,31 @@
       "purchasable": true,
       "stock_status": "instock",
       "categories": [
-        { "id": 6, "name": "Bridal Collection", "slug": "bridal-collection" },
-        { "id": 7, "name": "Jewelry & Accessories", "slug": "jewelry-accessories" }
+        {
+          "id": 6,
+          "name": "Bridal Collection",
+          "slug": "bridal-collection"
+        },
+        {
+          "id": 7,
+          "name": "Jewelry & Accessories",
+          "slug": "jewelry-accessories"
+        }
       ],
-      "offers": [{ "id": 103, "name": "Best Price", "slug": "best-price" }],
+      "offers": [
+        {
+          "id": 103,
+          "name": "Best Price",
+          "slug": "best-price"
+        }
+      ],
       "images": [
-        { "id": 1031, "src": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&auto=format&fit=crop&q=80", "name": "Crystal Headband", "alt": "Crystal Headband" }
+        {
+          "id": 1031,
+          "src": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&auto=format&fit=crop&q=80",
+          "name": "Crystal Headband",
+          "alt": "Crystal Headband"
+        }
       ]
     }
   ],
@@ -1009,16 +2629,6 @@
       "method_title": "Cash on Delivery",
       "method_description": "Pay with cash upon delivery.",
       "instructions": "Please keep the exact amount ready at the time of delivery."
-    },
-    {
-      "id": "bkash",
-      "title": "bKash / Mobile Banking",
-      "description": "Send payment to our merchant bKash number and provide the transaction ID.",
-      "order": 2,
-      "enabled": true,
-      "method_title": "bKash Payment",
-      "method_description": "Pay using bKash personal or merchant number.",
-      "instructions": "Send money to 01700123456 and enter your bKash wallet number & TrxID."
     }
   ],
   "shippingMethods": [
@@ -1048,70 +2658,262 @@
     }
   ],
   "countryStates": [
-    { "code": "BD-05", "name": "Bagerhat" },
-    { "code": "BD-01", "name": "Bandarban" },
-    { "code": "BD-02", "name": "Barguna" },
-    { "code": "BD-06", "name": "Barishal" },
-    { "code": "BD-07", "name": "Bhola" },
-    { "code": "BD-03", "name": "Bogura" },
-    { "code": "BD-04", "name": "Brahmanbaria" },
-    { "code": "BD-09", "name": "Chandpur" },
-    { "code": "BD-10", "name": "Chattogram" },
-    { "code": "BD-12", "name": "Chuadanga" },
-    { "code": "BD-11", "name": "Cox's Bazar" },
-    { "code": "BD-08", "name": "Cumilla" },
-    { "code": "BD-13", "name": "Dhaka" },
-    { "code": "BD-14", "name": "Dinajpur" },
-    { "code": "BD-15", "name": "Faridpur" },
-    { "code": "BD-16", "name": "Feni" },
-    { "code": "BD-19", "name": "Gaibandha" },
-    { "code": "BD-18", "name": "Gazipur" },
-    { "code": "BD-17", "name": "Gopalganj" },
-    { "code": "BD-20", "name": "Habiganj" },
-    { "code": "BD-24", "name": "Joypurhat" },
-    { "code": "BD-21", "name": "Jamalpur" },
-    { "code": "BD-22", "name": "Jashore" },
-    { "code": "BD-25", "name": "Jhalokati" },
-    { "code": "BD-23", "name": "Jhenaidah" },
-    { "code": "BD-29", "name": "Khagrachhari" },
-    { "code": "BD-27", "name": "Khulna" },
-    { "code": "BD-26", "name": "Kishoreganj" },
-    { "code": "BD-28", "name": "Kurigram" },
-    { "code": "BD-30", "name": "Kushtia" },
-    { "code": "BD-31", "name": "Lakshmipur" },
-    { "code": "BD-32", "name": "Lalmonirhat" },
-    { "code": "BD-36", "name": "Madaripur" },
-    { "code": "BD-37", "name": "Magura" },
-    { "code": "BD-33", "name": "Manikganj" },
-    { "code": "BD-39", "name": "Meherpur" },
-    { "code": "BD-38", "name": "Moulvibazar" },
-    { "code": "BD-35", "name": "Munshiganj" },
-    { "code": "BD-34", "name": "Mymensingh" },
-    { "code": "BD-48", "name": "Naogaon" },
-    { "code": "BD-43", "name": "Narail" },
-    { "code": "BD-40", "name": "Narayanganj" },
-    { "code": "BD-42", "name": "Narsingdi" },
-    { "code": "BD-44", "name": "Natore" },
-    { "code": "BD-45", "name": "Nawabganj" },
-    { "code": "BD-41", "name": "Netrokona" },
-    { "code": "BD-46", "name": "Nilphamari" },
-    { "code": "BD-47", "name": "Noakhali" },
-    { "code": "BD-49", "name": "Pabna" },
-    { "code": "BD-52", "name": "Panchagarh" },
-    { "code": "BD-51", "name": "Patuakhali" },
-    { "code": "BD-50", "name": "Pirojpur" },
-    { "code": "BD-53", "name": "Rajbari" },
-    { "code": "BD-54", "name": "Rajshahi" },
-    { "code": "BD-56", "name": "Rangamati" },
-    { "code": "BD-55", "name": "Rangpur" },
-    { "code": "BD-58", "name": "Satkhira" },
-    { "code": "BD-62", "name": "Shariatpur" },
-    { "code": "BD-57", "name": "Sherpur" },
-    { "code": "BD-59", "name": "Sirajganj" },
-    { "code": "BD-61", "name": "Sunamganj" },
-    { "code": "BD-60", "name": "Sylhet" },
-    { "code": "BD-63", "name": "Tangail" },
-    { "code": "BD-64", "name": "Thakurgaon" }
+    {
+      "code": "BD-05",
+      "name": "Bagerhat"
+    },
+    {
+      "code": "BD-01",
+      "name": "Bandarban"
+    },
+    {
+      "code": "BD-02",
+      "name": "Barguna"
+    },
+    {
+      "code": "BD-06",
+      "name": "Barishal"
+    },
+    {
+      "code": "BD-07",
+      "name": "Bhola"
+    },
+    {
+      "code": "BD-03",
+      "name": "Bogura"
+    },
+    {
+      "code": "BD-04",
+      "name": "Brahmanbaria"
+    },
+    {
+      "code": "BD-09",
+      "name": "Chandpur"
+    },
+    {
+      "code": "BD-10",
+      "name": "Chattogram"
+    },
+    {
+      "code": "BD-12",
+      "name": "Chuadanga"
+    },
+    {
+      "code": "BD-11",
+      "name": "Cox's Bazar"
+    },
+    {
+      "code": "BD-08",
+      "name": "Cumilla"
+    },
+    {
+      "code": "BD-13",
+      "name": "Dhaka"
+    },
+    {
+      "code": "BD-14",
+      "name": "Dinajpur"
+    },
+    {
+      "code": "BD-15",
+      "name": "Faridpur"
+    },
+    {
+      "code": "BD-16",
+      "name": "Feni"
+    },
+    {
+      "code": "BD-19",
+      "name": "Gaibandha"
+    },
+    {
+      "code": "BD-18",
+      "name": "Gazipur"
+    },
+    {
+      "code": "BD-17",
+      "name": "Gopalganj"
+    },
+    {
+      "code": "BD-20",
+      "name": "Habiganj"
+    },
+    {
+      "code": "BD-24",
+      "name": "Joypurhat"
+    },
+    {
+      "code": "BD-21",
+      "name": "Jamalpur"
+    },
+    {
+      "code": "BD-22",
+      "name": "Jashore"
+    },
+    {
+      "code": "BD-25",
+      "name": "Jhalokati"
+    },
+    {
+      "code": "BD-23",
+      "name": "Jhenaidah"
+    },
+    {
+      "code": "BD-29",
+      "name": "Khagrachhari"
+    },
+    {
+      "code": "BD-27",
+      "name": "Khulna"
+    },
+    {
+      "code": "BD-26",
+      "name": "Kishoreganj"
+    },
+    {
+      "code": "BD-28",
+      "name": "Kurigram"
+    },
+    {
+      "code": "BD-30",
+      "name": "Kushtia"
+    },
+    {
+      "code": "BD-31",
+      "name": "Lakshmipur"
+    },
+    {
+      "code": "BD-32",
+      "name": "Lalmonirhat"
+    },
+    {
+      "code": "BD-36",
+      "name": "Madaripur"
+    },
+    {
+      "code": "BD-37",
+      "name": "Magura"
+    },
+    {
+      "code": "BD-33",
+      "name": "Manikganj"
+    },
+    {
+      "code": "BD-39",
+      "name": "Meherpur"
+    },
+    {
+      "code": "BD-38",
+      "name": "Moulvibazar"
+    },
+    {
+      "code": "BD-35",
+      "name": "Munshiganj"
+    },
+    {
+      "code": "BD-34",
+      "name": "Mymensingh"
+    },
+    {
+      "code": "BD-48",
+      "name": "Naogaon"
+    },
+    {
+      "code": "BD-43",
+      "name": "Narail"
+    },
+    {
+      "code": "BD-40",
+      "name": "Narayanganj"
+    },
+    {
+      "code": "BD-42",
+      "name": "Narsingdi"
+    },
+    {
+      "code": "BD-44",
+      "name": "Natore"
+    },
+    {
+      "code": "BD-45",
+      "name": "Nawabganj"
+    },
+    {
+      "code": "BD-41",
+      "name": "Netrokona"
+    },
+    {
+      "code": "BD-46",
+      "name": "Nilphamari"
+    },
+    {
+      "code": "BD-47",
+      "name": "Noakhali"
+    },
+    {
+      "code": "BD-49",
+      "name": "Pabna"
+    },
+    {
+      "code": "BD-52",
+      "name": "Panchagarh"
+    },
+    {
+      "code": "BD-51",
+      "name": "Patuakhali"
+    },
+    {
+      "code": "BD-50",
+      "name": "Pirojpur"
+    },
+    {
+      "code": "BD-53",
+      "name": "Rajbari"
+    },
+    {
+      "code": "BD-54",
+      "name": "Rajshahi"
+    },
+    {
+      "code": "BD-56",
+      "name": "Rangamati"
+    },
+    {
+      "code": "BD-55",
+      "name": "Rangpur"
+    },
+    {
+      "code": "BD-58",
+      "name": "Satkhira"
+    },
+    {
+      "code": "BD-62",
+      "name": "Shariatpur"
+    },
+    {
+      "code": "BD-57",
+      "name": "Sherpur"
+    },
+    {
+      "code": "BD-59",
+      "name": "Sirajganj"
+    },
+    {
+      "code": "BD-61",
+      "name": "Sunamganj"
+    },
+    {
+      "code": "BD-60",
+      "name": "Sylhet"
+    },
+    {
+      "code": "BD-63",
+      "name": "Tangail"
+    },
+    {
+      "code": "BD-64",
+      "name": "Thakurgaon"
+    }
   ],
   "coupons": [
     {
