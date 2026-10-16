@@ -68,7 +68,14 @@ export async function POST(req: Request) {
     const resolvedCity = customer.city?.trim() || customer.district?.trim() || customer.state?.trim() || "Dhaka";
     const resolvedState = customer.state?.trim() || customer.district?.trim() || "Dhaka";
 
+    // Link order to logged-in customer if available
+    const cookieHeader = req.headers.get("cookie") || "";
+    const cookieMatch = cookieHeader.match(/ll_user_id=([^;]+)/);
+    const cookieUserId = cookieMatch ? Number(cookieMatch[1]) : 0;
+    const resolvedCustomerId = Number(body.customerId || customer?.customerId || cookieUserId || 0);
+
     const payload: CreateOrderPayload = {
+      customer_id: resolvedCustomerId > 0 ? resolvedCustomerId : undefined,
       status: "processing",
       payment_method: paymentMethod || "cod",
       payment_method_title: finalPaymentTitle,

@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import Button from "@/components/Button";
 import {
   WooCommercePaymentGateway,
@@ -91,6 +92,7 @@ export default function CheckoutView({
     removeFromCart,
     clearCart,
   } = useCart();
+  const { user } = useAuth();
 
   // Dynamic backend data
   const [gateways, setGateways] = useState<WooCommercePaymentGateway[]>(initialGateways);
@@ -125,6 +127,24 @@ export default function CheckoutView({
     postalCode: "",
     notes: "",
   });
+
+  // Pre-fill user data if available and fields are empty
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        fullName: prev.fullName || `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.display_name || "",
+        firstName: prev.firstName || user.first_name || "",
+        lastName: prev.lastName || user.last_name || "",
+        email: prev.email || user.email || "",
+        phone: prev.phone || user.billing?.phone || "",
+        address: prev.address || user.shipping?.address_1 || user.billing?.address_1 || "",
+        city: prev.city || user.shipping?.city || user.billing?.city || "",
+        district: prev.district || user.shipping?.city || user.billing?.city || "",
+        postalCode: prev.postalCode || user.shipping?.postcode || user.billing?.postcode || "",
+      }));
+    }
+  }, [user]);
 
   const [couponInput, setCouponInput] = useState("");
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
@@ -407,6 +427,7 @@ export default function CheckoutView({
       }
 
       const orderPayload = {
+        customerId: user?.id,
         customer: {
           ...formData,
           phone: formattedPhone,

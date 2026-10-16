@@ -14,6 +14,7 @@ const navLinks = [
 ];
 
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 
 interface HeaderCategory {
   label: string;
@@ -35,6 +36,7 @@ export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const { cartCount } = useCart();
+  const { user, isAuthenticated, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -292,9 +294,14 @@ export default function Header() {
               </Link>
 
               {/* Account */}
-              <button className="action-btn" aria-label="Account">
+              <Link
+                href={isAuthenticated ? "/account" : "/login"}
+                className="action-btn"
+                aria-label={isAuthenticated ? "My Account" : "Sign In"}
+                title={isAuthenticated ? `Signed in as ${user?.first_name || user?.display_name || user?.username}` : "Sign In"}
+              >
                 <User size={19} strokeWidth={1.75} />
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -542,15 +549,16 @@ export default function Header() {
                 <span>Compare</span>
               </Link>
               <Link
-                href="/account"
+                href={isAuthenticated ? "/account" : "/login"}
                 onClick={() => setDrawerOpen(false)}
-                className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-md border text-xs font-medium gap-1.5 transition-colors ${pathname === "/account"
+                className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-md border text-xs font-medium gap-1.5 transition-colors ${
+                  pathname === "/account" || pathname === "/login"
                     ? "border-primary text-primary bg-bg"
                     : "border-border hover:border-primary hover:text-primary text-slate-600"
-                  }`}
+                }`}
               >
                 <User size={16} strokeWidth={1.75} />
-                <span>Account</span>
+                <span>{isAuthenticated ? "Account" : "Sign In"}</span>
               </Link>
             </div>
           </div>
@@ -558,21 +566,46 @@ export default function Header() {
 
         {/* Minimal Clean Drawer Footer */}
         <div className="p-4 border-t border-border bg-white flex flex-col gap-2">
-          <a
-            href="/signin"
-            onClick={() => setDrawerOpen(false)}
-            className="w-full flex items-center justify-center gap-2 py-2.5 !bg-primary hover:!bg-primary-hover !text-white rounded-md text-xs font-semibold shadow-xs transition-colors"
-          >
-            <LogIn size={15} className="!text-white shrink-0" />
-            <span className="!text-white text-inherit">Sign In</span>
-          </a>
-          <a
-            href="/signup"
-            onClick={() => setDrawerOpen(false)}
-            className="w-full py-2 text-center text-xs font-medium text-description hover:text-primary transition-colors"
-          >
-            Create an Account
-          </a>
+          {isAuthenticated ? (
+            <>
+              <Link
+                href="/account"
+                onClick={() => setDrawerOpen(false)}
+                className="w-full flex items-center justify-center gap-2 py-2.5 !bg-primary hover:!bg-primary-hover !text-white rounded-md text-xs font-semibold shadow-xs transition-colors"
+              >
+                <User size={15} className="!text-white shrink-0" />
+                <span className="!text-white text-inherit">My Account ({user?.first_name || user?.username})</span>
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  setDrawerOpen(false);
+                  logout();
+                }}
+                className="w-full py-2 text-center text-xs font-medium text-rose-600 hover:underline cursor-pointer"
+              >
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                onClick={() => setDrawerOpen(false)}
+                className="w-full flex items-center justify-center gap-2 py-2.5 !bg-primary hover:!bg-primary-hover !text-white rounded-md text-xs font-semibold shadow-xs transition-colors"
+              >
+                <LogIn size={15} className="!text-white shrink-0" />
+                <span className="!text-white text-inherit">Sign In</span>
+              </Link>
+              <Link
+                href="/register"
+                onClick={() => setDrawerOpen(false)}
+                className="w-full py-2 text-center text-xs font-medium text-description hover:text-primary transition-colors"
+              >
+                Create an Account
+              </Link>
+            </>
+          )}
         </div>
       </aside>
 

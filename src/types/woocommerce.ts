@@ -120,6 +120,7 @@ export interface WooCommerceOrderLineItem {
 }
 
 export interface CreateOrderPayload {
+  customer_id?: number;
   status?: string;
   payment_method: string;
   payment_method_title: string;

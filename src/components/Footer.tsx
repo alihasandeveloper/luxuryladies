@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Phone, Mail, MapPin, Home, ShoppingBag, Heart, User, SlidersHorizontal } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import { GeneralSettingsData } from "@/types/woocommerce";
 
 const collections = [
@@ -32,6 +33,7 @@ const bottomLinks = [
 export default function Footer() {
   const pathname = usePathname();
   const { cartCount } = useCart();
+  const { isAuthenticated } = useAuth();
   const [settings, setSettings] = useState<GeneralSettingsData | null>(null);
 
   useEffect(() => {
@@ -276,13 +278,15 @@ export default function Footer() {
         </Link>
 
         <Link
-          href="/checkout"
+          href={isAuthenticated ? "/account" : "/login"}
           className={`flex flex-col items-center justify-center gap-1 py-1 px-3 text-[11px] font-medium transition-colors ${
-            pathname === "/checkout" ? "text-primary font-semibold" : "text-description hover:text-dark"
+            pathname === "/account" || pathname === "/login"
+              ? "text-primary font-semibold"
+              : "text-description hover:text-dark"
           }`}
         >
-          <User size={20} strokeWidth={pathname === "/checkout" ? 2.3 : 1.8} />
-          <span>Profile</span>
+          <User size={20} strokeWidth={pathname === "/account" || pathname === "/login" ? 2.3 : 1.8} />
+          <span>{isAuthenticated ? "Account" : "Profile"}</span>
         </Link>
       </nav>
     </footer>

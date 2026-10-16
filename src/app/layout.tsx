@@ -3,6 +3,7 @@ import { Montserrat } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { CartProvider } from "@/context/CartContext";
+import { AuthProvider } from "@/context/AuthContext";
 import ThemeToaster from "@/components/ThemeToaster";
 import "./globals.css";
 
@@ -26,14 +27,16 @@ export default function RootLayout({
   return (
     <html lang="en" className={montserrat.variable}>
       <body suppressHydrationWarning>
-        <CartProvider>
-          <Header />
-          <main className="site-main">
-            {children}
-          </main>
-          <Footer />
-          <ThemeToaster />
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <Header />
+            <main className="site-main">
+              {children}
+            </main>
+            <Footer />
+            <ThemeToaster />
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );
