@@ -938,7 +938,7 @@ export default function ProductDetails({
                           </span>
                         )}
                         {discountPercent > 0 && (
-                          <span className="px-2 py-0.5 bg-bg text-accent border border-secondary rounded-none text-xs font-bold">
+                          <span className="px-2 py-0.5 bg-bg text-accent border border-secondary rounded-full text-xs font-bold">
                             {discountPercent}% OFF
                           </span>
                         )}

@@ -1,4 +1,4 @@
-const WP_URL = process.env.WP_BACKEND_URL || "https://headless.local";
+const WP_URL = (process.env.WP_BACKEND_URL || "").trim().replace(/\/+$/, "");
 const WP_CK = process.env.WP_CK || "";
 const WP_CS = process.env.WP_CS || "";
 
@@ -7,11 +7,7 @@ if (process.env.NODE_ENV !== "production" || WP_URL.includes(".local") || WP_URL
 }
 
 export function getWpBaseUrl(): string {
-  let url = WP_URL.trim().replace(/\/+$/, "");
-  if (url.startsWith("http://headless.local")) {
-    url = url.replace("http://", "https://");
-  }
-  return url;
+  return (process.env.WP_BACKEND_URL || "").trim().replace(/\/+$/, "");
 }
 
 export function getWpAuthUrl(endpoint: string, extraParams?: Record<string, string>): string {

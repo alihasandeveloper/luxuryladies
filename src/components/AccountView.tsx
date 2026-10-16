@@ -73,7 +73,7 @@ function OrderItemThumbnail({ src, alt }: { src?: string | null; alt: string }) 
       alt={alt || "Product"}
       fill
       sizes="48px"
-      unoptimized={Boolean(typeof imgSrc === "string" && (imgSrc.startsWith("/") || imgSrc.includes("localhost") || imgSrc.includes("headless.local")))}
+      unoptimized={Boolean(typeof imgSrc === "string" && (imgSrc.startsWith("/") || imgSrc.includes("localhost") || imgSrc.includes(".local")))}
       className="object-cover"
       onError={() => {
         if (imgSrc !== "/woocommerce-placeholder.webp") {

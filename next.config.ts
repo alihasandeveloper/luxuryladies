@@ -1,45 +1,41 @@
 import type { NextConfig } from "next";
 
-// Disable SSL certificate verification for local WordPress (e.g. self-signed certs on headless.local)
+// Disable SSL certificate verification for local development WordPress (e.g. self-signed certs)
 if (process.env.NODE_ENV !== "production" || (process.env.WP_BACKEND_URL && process.env.WP_BACKEND_URL.includes(".local"))) {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 }
 
 const wpUrl = process.env.WP_BACKEND_URL;
-let wpHostname = "headless.local";
+let wpHostname = "";
 if (wpUrl) {
   try {
     wpHostname = new URL(wpUrl).hostname;
   } catch {
-    // fallback
+    // ignore invalid URL
   }
 }
 
 const nextConfig: NextConfig = {
   images: {
-    // Required in Next.js 16+ for local dev domains (headless.local, localhost) resolving to private IP 127.0.0.1
+    // Required in Next.js 16+ for local dev domains resolving to private IP 127.0.0.1
     dangerouslyAllowLocalIP: true,
     remotePatterns: [
       {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
-      {
-        protocol: "https",
-        hostname: "headless.local",
-      },
-      {
-        protocol: "http",
-        hostname: "headless.local",
-      },
-      {
-        protocol: "https",
-        hostname: wpHostname,
-      },
-      {
-        protocol: "http",
-        hostname: wpHostname,
-      },
+      ...(wpHostname
+        ? [
+            {
+              protocol: "https" as const,
+              hostname: wpHostname,
+            },
+            {
+              protocol: "http" as const,
+              hostname: wpHostname,
+            },
+          ]
+        : []),
       {
         protocol: "https",
         hostname: "**.woocommerce.com",

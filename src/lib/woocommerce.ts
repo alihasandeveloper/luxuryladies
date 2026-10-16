@@ -12,11 +12,11 @@ import {
   GeneralSettingsData,
 } from "@/types/woocommerce";
 
-const WP_URL = process.env.WP_BACKEND_URL || "https://headless.local";
+const WP_URL = (process.env.WP_BACKEND_URL || "").trim().replace(/\/+$/, "");
 const WP_CK = process.env.WP_CK || "";
 const WP_CS = process.env.WP_CS || "";
 
-// Allow self-signed certificates for local WordPress installations (e.g. headless.local or localhost)
+// Allow self-signed certificates for local WordPress installations
 if (process.env.NODE_ENV !== "production" || WP_URL.includes(".local") || WP_URL.includes("localhost")) {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 }
@@ -27,12 +27,7 @@ function getAuthHeader(): string {
 }
 
 function getBaseUrl(): string {
-  let url = WP_URL.trim().replace(/\/+$/, "");
-  // If it's headless.local on http, upgrade to https because WooCommerce REST API requires SSL for Basic Auth
-  if (url.startsWith("http://headless.local")) {
-    url = url.replace("http://", "https://");
-  }
-  return url;
+  return (process.env.WP_BACKEND_URL || "").trim().replace(/\/+$/, "");
 }
 
 export const DEFAULT_PRODUCT_PLACEHOLDER = "/woocommerce-placeholder.webp";
@@ -118,6 +113,25 @@ function normalizeProduct(raw: any): WooCommerceProduct {
     total_sales: raw.total_sales || 0,
     stock_status: (raw.stock_status as any) || "instock",
     categories,
+    offers: (() => {
+      if (Array.isArray(raw.offers) && raw.offers.length > 0) {
+        return raw.offers.map((o: any) =>
+          typeof o === "object"
+            ? { id: o.id, name: decodeHtml(o.name || ""), slug: o.slug || "", count: o.count }
+            : { id: Number(o), name: String(o), slug: String(o) }
+        );
+      }
+      const metaOffers = raw.meta_data?.find((m: any) => m && (m.key === "offers" || m.key === "_offers"));
+      if (metaOffers && metaOffers.value) {
+        const val = Array.isArray(metaOffers.value) ? metaOffers.value : [metaOffers.value];
+        return val.map((o: any) =>
+          typeof o === "object"
+            ? { id: o.id, name: decodeHtml(o.name || ""), slug: o.slug || "" }
+            : { id: Number(o), name: String(o), slug: String(o) }
+        );
+      }
+      return [];
+    })(),
     images,
     attributes: (raw.attributes || []).map((attr: any) => ({
       id: attr.id,
@@ -1104,6 +1118,11 @@ export async function getGeneralSettings(): Promise<GeneralSettingsData | null> 
         shop_by_categories: (data.data.shop_by_categories || []).map(formatCat),
         featured_categories: (data.data.featured_categories || []).map(formatCat),
         landing_page_categories: (data.data.landing_page_categories || []).map(formatCat),
+        landing_page_offers: (data.data.landing_page_offers || []).map(formatCat),
+        landing_page_category_groups: {
+          categories: (data.data.landing_page_category_groups?.categories || data.data.landing_page_categories || []).map(formatCat),
+          offers: (data.data.landing_page_category_groups?.offers || data.data.landing_page_offers || []).map(formatCat),
+        },
       } as GeneralSettingsData;
     }
     return null;
@@ -1111,4 +1130,54 @@ export async function getGeneralSettings(): Promise<GeneralSettingsData | null> 
     console.error("Failed to fetch general settings from WordPress:", err);
     return null;
   }
+}
+
+/**
+ * Fetch offers taxonomy terms from WordPress / WooCommerce
+ */
+export async function getOffers(): Promise<WooCommerceCategory[]> {
+  try {
+    const authHeader = getAuthHeader();
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (authHeader) {
+      headers["Authorization"] = authHeader;
+    }
+
+    // 1. Try WP REST API endpoint for custom taxonomy 'offers'
+    const res = await fetch(`${getBaseUrl()}/wp-json/wp/v2/offers?per_page=100&hide_empty=false`, {
+      headers,
+      next: { revalidate: 60 },
+    });
+
+    if (res.ok) {
+      const raw = await res.json();
+      if (Array.isArray(raw) && raw.length > 0) {
+        return raw.map((o: any) => ({
+          id: o.id,
+          name: decodeHtml(o.name || ""),
+          slug: o.slug || "",
+          count: o.count || 0,
+        }));
+      }
+    }
+  } catch (err) {
+    console.warn("Failed to fetch offers from /wp/v2/offers:", err);
+  }
+
+  // 2. Fallback to general settings landing_page_offers if available
+  try {
+    const settings = await getGeneralSettings();
+    if (settings?.landing_page_offers && settings.landing_page_offers.length > 0) {
+      return settings.landing_page_offers.map((o: any) => ({
+        id: o.id,
+        name: decodeHtml(o.name || ""),
+        slug: o.slug || "",
+        count: o.count || 0,
+      }));
+    }
+  } catch (err) { }
+
+  return [];
 }

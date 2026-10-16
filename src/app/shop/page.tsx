@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { Metadata } from "next";
 import ShopArchive from "@/components/ShopArchive";
 import ShopSkeleton from "@/components/ShopSkeleton";
-import { getProducts, getCategories } from "@/lib/woocommerce";
+import { getProducts, getCategories, getOffers } from "@/lib/woocommerce";
 
 export const metadata: Metadata = {
   title: "Shop All Products | luxuryladies",
@@ -12,21 +12,30 @@ export const metadata: Metadata = {
 interface ShopPageProps {
   searchParams?: Promise<{
     q?: string;
+    offer?: string;
   }>;
 }
 
 async function ShopContent({ searchParams }: ShopPageProps) {
   const resolvedParams = searchParams ? await searchParams : {};
   const query = resolvedParams?.q || "";
+  const offer = resolvedParams?.offer || "";
 
-  const [products, categories] = await Promise.all([
+  const [products, categories, offers] = await Promise.all([
     getProducts({ search: query, per_page: 12, page: 1 }),
     getCategories(),
+    getOffers(),
   ]);
 
   return (
     <div className="w-full">
-      <ShopArchive initialProducts={products} categories={categories} initialSearchQuery={query} />
+      <ShopArchive
+        initialProducts={products}
+        categories={categories}
+        offers={offers}
+        initialSearchQuery={query}
+        initialOfferSlug={offer}
+      />
     </div>
   );
 }

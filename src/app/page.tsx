@@ -3,13 +3,14 @@ import Link from "next/link";
 import { ChevronRight as ChevronNext } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import HeroBanner from "@/components/HeroBanner";
-import { getProducts, getCategories, getGeneralSettings, decodeHtml } from "@/lib/woocommerce";
+import { getProducts, getCategories, getOffers, getGeneralSettings, decodeHtml } from "@/lib/woocommerce";
 
 export default async function Home() {
-  const [allProducts, generalSettings, fetchedCategories] = await Promise.all([
+  const [allProducts, generalSettings, fetchedCategories, fetchedOffers] = await Promise.all([
     getProducts({ per_page: 100 }),
     getGeneralSettings(),
     getCategories(),
+    getOffers(),
   ]);
 
   // 1. Hero Gallery Images from WordPress plugin general-settings
@@ -47,7 +48,12 @@ export default async function Home() {
     };
   });
 
-  // 3. Landing Page Category Product Groups from WordPress plugin general-settings
+  // 3. Landing Page Offers Product Groups from WordPress plugin general-settings (High Priority)
+  const landingOffers = generalSettings?.landing_page_offers && generalSettings.landing_page_offers.length > 0
+    ? generalSettings.landing_page_offers
+    : fetchedOffers.slice(0, 4);
+
+  // 4. Landing Page Category Product Groups from WordPress plugin general-settings
   const landingCategories = generalSettings?.landing_page_categories && generalSettings.landing_page_categories.length > 0
     ? generalSettings.landing_page_categories
     : fetchedCategories.slice(0, 4);
@@ -99,6 +105,44 @@ export default async function Home() {
             </div>
           </>
         )}
+
+        {/* ── Product Grids for configured Landing Page Offers (High Priority) ── */}
+        {landingOffers.map((offer: any) => {
+          const offerProducts = allProducts.filter((p) =>
+            p.offers?.some((o) => o.slug === offer.slug || o.id === offer.id) ||
+            p.categories?.some((c) => c.slug === offer.slug || c.id === offer.id)
+          );
+
+          if (offerProducts.length === 0) return null;
+
+          return (
+            <section key={offer.id || offer.slug} className="mt-14 md:mt-20">
+              <div className="flex items-center justify-between mb-4 md:mb-5">
+                <h2 className="text-xl md:text-2xl font-medium tracking-tight text-dark">
+                  {decodeHtml(offer.name || "")}
+                </h2>
+                <Link
+                  href={`/shop?offer=${offer.slug}`}
+                  className="text-xs md:text-sm font-medium text-description hover:!text-primary inline-flex items-center gap-0.5 transition-colors group cursor-pointer"
+                >
+                  <span className="hover:!text-primary">See More</span>
+                  <ChevronNext
+                    size={15}
+                    strokeWidth={2}
+                    className="transition-transform group-hover:translate-x-0.5"
+                  />
+                </Link>
+              </div>
+
+              {/* Product Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 md:gap-4">
+                {offerProducts.slice(0, 5).map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            </section>
+          );
+        })}
 
         {/* ── Product Grids for configured Landing Page Categories ── */}
         {landingCategories.map((cat: any) => {

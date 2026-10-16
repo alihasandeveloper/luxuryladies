@@ -11,12 +11,7 @@ export interface FilterState {
   maxPrice: number;
   selectedCategories: string[];
   inStockOnly: boolean;
-  offers: {
-    bestPrice: boolean;
-    hotDeals: boolean;
-    newArrival: boolean;
-    trending: boolean;
-  };
+  offers: string[];
 }
 
 interface ShopArchiveProps {
@@ -24,6 +19,8 @@ interface ShopArchiveProps {
   categorySlug?: string;
   initialSearchQuery?: string;
   categories?: WooCommerceCategory[];
+  offers?: WooCommerceCategory[];
+  initialOfferSlug?: string;
 }
 
 export default function ShopArchive({
@@ -31,6 +28,8 @@ export default function ShopArchive({
   categorySlug,
   initialSearchQuery = "",
   categories,
+  offers,
+  initialOfferSlug,
 }: ShopArchiveProps) {
   // Infinite scroll product states
   const [allProducts, setAllProducts] = useState<WooCommerceProduct[]>(initialProducts);
@@ -133,6 +132,17 @@ export default function ShopArchive({
     return Array.from(map.values());
   }, [categories, allProducts]);
 
+  const activeOffers = useMemo(() => {
+    if (offers && offers.length > 0) return offers;
+    const map = new Map<string, WooCommerceCategory>();
+    allProducts.forEach((p) => {
+      p.offers?.forEach((o) => {
+        if (!map.has(o.slug)) map.set(o.slug, o);
+      });
+    });
+    return Array.from(map.values());
+  }, [offers, allProducts]);
+
   // Search query state
   const [searchQuery, setSearchQuery] = useState<string>(initialSearchQuery);
 
@@ -169,17 +179,17 @@ export default function ShopArchive({
   const [visibleCategoryCount, setVisibleCategoryCount] = useState<number>(5);
   const [inStock, setInStock] = useState<boolean>(false);
   const [outOfStock, setOutOfStock] = useState<boolean>(false);
-  const [selectedOffers, setSelectedOffers] = useState<{
-    bestPrice: boolean;
-    hotDeals: boolean;
-    newArrival: boolean;
-    trending: boolean;
-  }>({
-    bestPrice: false,
-    hotDeals: false,
-    newArrival: false,
-    trending: false,
-  });
+  const [selectedOffers, setSelectedOffers] = useState<string[]>(() =>
+    initialOfferSlug ? [initialOfferSlug] : []
+  );
+  const [visibleOfferCount, setVisibleOfferCount] = useState<number>(5);
+
+  // Sync initialOfferSlug if provided
+  useEffect(() => {
+    if (initialOfferSlug) {
+      setSelectedOffers([initialOfferSlug]);
+    }
+  }, [initialOfferSlug]);
 
   // Sort state
   const [sortBy, setSortBy] = useState<string>("newest");
@@ -220,8 +230,10 @@ export default function ShopArchive({
   };
 
   // Toggle Offers
-  const toggleOffer = (key: keyof typeof selectedOffers) => {
-    setSelectedOffers((prev) => ({ ...prev, [key]: !prev[key] }));
+  const toggleOffer = (slug: string) => {
+    setSelectedOffers((prev) =>
+      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]
+    );
   };
 
   // Clear all filters
@@ -232,12 +244,7 @@ export default function ShopArchive({
     setSelectedCategories([]);
     setInStock(false);
     setOutOfStock(false);
-    setSelectedOffers({
-      bestPrice: false,
-      hotDeals: false,
-      newArrival: false,
-      trending: false,
-    });
+    setSelectedOffers([]);
   };
 
   const isFilterActive = useMemo(() => {
@@ -248,7 +255,7 @@ export default function ShopArchive({
       selectedCategories.length > 0 ||
       inStock ||
       outOfStock ||
-      Object.values(selectedOffers).some(Boolean)
+      selectedOffers.length > 0
     );
   }, [
     searchQuery,
@@ -305,8 +312,13 @@ export default function ShopArchive({
         }
 
         // Offers filter
-        if (selectedOffers.hotDeals && !product.on_sale) {
-          return false;
+        if (selectedOffers.length > 0) {
+          const matchesOffer =
+            product.offers?.some((o) => selectedOffers.includes(o.slug) || (o.id && selectedOffers.includes(String(o.id)))) ||
+            product.categories?.some((c) => selectedOffers.includes(c.slug) || (c.id && selectedOffers.includes(String(c.id)))) ||
+            (selectedOffers.some((slug) => slug.includes("sale") || slug.includes("deal")) && product.on_sale);
+
+          if (!matchesOffer) return false;
         }
 
         return true;
@@ -360,6 +372,18 @@ export default function ShopArchive({
       return { ...cat, count };
     }).sort((a, b) => b.count - a.count);
   }, [allProducts, activeCategories]);
+
+  // Offers sorted by product count descending
+  const offersWithCount = useMemo(() => {
+    return activeOffers.map((offer) => {
+      const matchingCount = allProducts.filter((p) =>
+        p.offers?.some((o) => o.slug === offer.slug || o.id === offer.id) ||
+        p.categories?.some((c) => c.slug === offer.slug || c.id === offer.id)
+      ).length;
+      const count = matchingCount > 0 ? matchingCount : (offer.count || 0);
+      return { ...offer, count };
+    }).sort((a, b) => b.count - a.count);
+  }, [allProducts, activeOffers]);
 
   const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Math.min(Number(e.target.value), maxPrice - priceGap);
@@ -443,40 +467,57 @@ export default function ShopArchive({
         </div>
       </div>
 
-      {/* ── Offers Filter ── */}
-      <div className="pt-2">
-        <h3 className="text-sm font-semibold text-dark mb-3">Offers</h3>
-        <div className="space-y-2.5">
-          {[
-            { key: "bestPrice" as const, label: "BEST PRICE" },
-            { key: "hotDeals" as const, label: "HOT DEALS" },
-            { key: "newArrival" as const, label: "NEW ARRIVAL" },
-            { key: "trending" as const, label: "TRENDING PRODUCTS" },
-          ].map(({ key, label }) => {
-            const isChecked = selectedOffers[key];
-            return (
-              <label
-                key={key}
-                className="flex items-center gap-3 cursor-pointer group select-none text-xs md:text-sm text-dark hover:text-primary transition-colors uppercase tracking-wide font-normal"
-              >
-                <div
-                  className={`w-4 h-4 rounded-none border flex items-center justify-center transition-all ${isChecked
-                    ? "bg-primary border-primary text-white"
-                    : "border-border bg-white group-hover:border-primary"
-                    }`}
-                  onClick={() => toggleOffer(key)}
-                >
-                  {isChecked && <Check size={12} strokeWidth={3} />}
-                </div>
-                <span onClick={() => toggleOffer(key)}>{label}</span>
-              </label>
-            );
-          })}
-        </div>
-      </div>
+      {/* ── Offers Filter (Only if offers exist in taxonomy; 5 initially with + Show More) ── */}
+      {offersWithCount.length > 0 && (
+        <>
+          <div className="pt-2">
+            <h3 className="text-sm font-semibold text-dark mb-3">Offers</h3>
+            <div className="space-y-2.5">
+              {offersWithCount.slice(0, visibleOfferCount).map((offer) => {
+                const isChecked = selectedOffers.includes(offer.slug);
+                return (
+                  <label
+                    key={offer.slug}
+                    className="flex items-center justify-between cursor-pointer group select-none text-xs md:text-sm text-dark hover:text-primary transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-4 h-4 rounded-none border flex items-center justify-center transition-all ${
+                          isChecked
+                            ? "bg-primary border-primary text-white"
+                            : "border-border bg-white group-hover:border-primary"
+                        }`}
+                        onClick={() => toggleOffer(offer.slug)}
+                      >
+                        {isChecked && <Check size={12} strokeWidth={3} />}
+                      </div>
+                      <span onClick={() => toggleOffer(offer.slug)}>{offer.name}</span>
+                    </div>
+                    {/* Offer Count */}
+                    <span className="text-[11px] text-description group-hover:text-primary transition-colors font-medium">
+                      ({offer.count})
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
 
-      {/* Subtle Divider */}
-      <div className="w-full h-[1px] bg-border" />
+            {/* Link-style Show More Button */}
+            {visibleOfferCount < offersWithCount.length && (
+              <button
+                type="button"
+                onClick={() => setVisibleOfferCount((prev) => prev + 5)}
+                className="mt-3 text-xs font-semibold text-primary hover:underline cursor-pointer inline-flex items-center gap-1 transition-colors"
+              >
+                + Show More
+              </button>
+            )}
+          </div>
+
+          {/* Subtle Divider */}
+          <div className="w-full h-[1px] bg-border" />
+        </>
+      )}
 
       {/* ── Category Filter (Ordered by count, showing 5 initially with Show More) ── */}
       <div className="pt-2">
@@ -578,6 +619,14 @@ export default function ShopArchive({
                 </span>
               </>
             )}
+            {initialOfferSlug && !categorySlug && (
+              <>
+                <span>/</span>
+                <span className="text-primary capitalize">
+                  {initialOfferSlug.replace(/-/g, " ")}
+                </span>
+              </>
+            )}
             {searchQuery.trim() && (
               <>
                 <span>/</span>
@@ -595,6 +644,8 @@ export default function ShopArchive({
               </span>
             ) : categorySlug ? (
               activeCategories.find((c) => c.slug === categorySlug)?.name || "Shop Archive"
+            ) : initialOfferSlug ? (
+              activeOffers.find((o) => o.slug === initialOfferSlug)?.name || "Special Offers"
             ) : (
               "All Products"
             )}

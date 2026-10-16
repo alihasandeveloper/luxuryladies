@@ -27,7 +27,7 @@ function WishlistItemImage({ src, alt }: { src?: string | null; alt: string }) {
         typeof imgSrc === "string" &&
           (imgSrc.startsWith("/") ||
             imgSrc.includes("localhost") ||
-            imgSrc.includes("headless.local"))
+            imgSrc.includes(".local"))
       )}
       className="object-cover"
       onError={() => {

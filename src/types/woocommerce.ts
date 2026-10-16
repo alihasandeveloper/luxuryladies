@@ -76,6 +76,7 @@ export interface WooCommerceProduct {
   total_sales?: number;
   stock_status?: "instock" | "outofstock" | "onbackorder";
   categories: WooCommerceCategory[];
+  offers?: WooCommerceCategory[];
   images: WooCommerceImage[];
   attributes?: WooCommerceAttribute[];
   default_attributes?: WooCommerceDefaultAttribute[];
@@ -225,6 +226,11 @@ export interface GeneralSettingsData {
   shop_by_categories: PluginCategoryItem[];
   featured_categories: PluginCategoryItem[];
   landing_page_categories: PluginCategoryItem[];
+  landing_page_offers?: PluginCategoryItem[];
+  landing_page_category_groups?: {
+    categories: PluginCategoryItem[];
+    offers: PluginCategoryItem[];
+  };
   hero_gallery: HeroGalleryItem[];
   information: ContactInformation;
   social_links: SocialLinks;
