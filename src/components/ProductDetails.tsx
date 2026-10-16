@@ -34,106 +34,118 @@ interface ProductDetailsProps {
   relatedProducts: WooCommerceProduct[];
 }
 
-function matchAttributeKey(key1: string, key2: string, slug?: string): boolean {
-  if (!key1 || !key2) return false;
-  const normalize = (str: string) => {
-    try {
-      str = decodeURIComponent(String(str));
-    } catch { }
-    return String(str)
-      .toLowerCase()
-      .trim()
-      .replace(/^attribute_/, "")
-      .replace(/^pa_/, "")
-      .replace(/[^\p{L}\p{N}]+/gu, "");
-  };
-  const k1 = normalize(key1);
-  const k2 = normalize(key2);
-  const s = slug ? normalize(slug) : "";
-  return k1 === k2 || (s !== "" && (k1 === s || k2 === s));
-}
-
-function normalizeOptionString(str: string): string {
-  if (str === null || str === undefined) return "";
-  let s = String(str);
+/**
+ * Normalizes attribute name for robust WooCommerce matching
+ * Handles "Size", "pa_size", "attribute_pa_size", "Color", etc.
+ */
+function normAttrName(name: string): string {
+  if (!name) return "";
+  let str = String(name);
   try {
-    s = decodeURIComponent(s);
+    str = decodeURIComponent(str);
   } catch { }
-  return s
+  return str
     .toLowerCase()
     .trim()
-    .replace(/[-_\s]+/g, "-")
-    .replace(/[^\p{L}\p{N}-]/gu, "");
-}
-
-function findMatchingOption(
-  options: (string | any)[],
-  targetOption: string
-): string | null {
-  if (!targetOption || !options || options.length === 0) return null;
-  const targetClean = String(targetOption).toLowerCase().trim();
-  const targetNorm = normalizeOptionString(targetOption);
-
-  // Extract string from option in case option is an object { name, slug, option }
-  const extractStr = (opt: any): string => {
-    if (typeof opt === "string") return opt;
-    if (opt && typeof opt === "object") {
-      return opt.option || opt.value || opt.name || opt.slug || "";
-    }
-    return String(opt || "");
-  };
-
-  // 1. Direct case-insensitive match
-  for (const rawOpt of options) {
-    const opt = extractStr(rawOpt);
-    if (opt && opt.toLowerCase().trim() === targetClean) {
-      return opt;
-    }
-  }
-
-  // 2. Normalized exact match
-  if (targetNorm.length > 0) {
-    for (const rawOpt of options) {
-      const opt = extractStr(rawOpt);
-      if (opt && normalizeOptionString(opt) === targetNorm) {
-        return opt;
-      }
-    }
-  }
-
-  return null;
+    .replace(/^attribute_/, "")
+    .replace(/^pa_/, "")
+    .replace(/[^a-z0-9]/g, "");
 }
 
 /**
- * Normalizes variation attributes regardless of whether WooCommerce returns:
- * - Array of objects: [{ id, name, slug, option, value }]
- * - Key-value object: { "attribute_pa_size": "xl", "pa_color": "black" }
+ * Normalizes attribute option value for robust matching
+ * Handles "Wine", "wine", "XL", "xl", "Off-White", "off white", etc.
  */
-function getNormalizedVariationAttributes(
-  v: WooCommerceVariation
-): Array<{ id?: number; name: string; slug?: string; option: string }> {
-  const rawAttrs = (v as any).attributes;
-  if (!rawAttrs) return [];
-
-  if (Array.isArray(rawAttrs)) {
-    return rawAttrs.map((a: any) => ({
-      id: a?.id ? Number(a.id) : undefined,
-      name: String(a?.name || a?.attribute || a?.slug || ""),
-      slug: a?.slug ? String(a.slug) : undefined,
-      option: String(a?.option ?? a?.value ?? a?.term ?? ""),
-    }));
-  }
-
-  if (typeof rawAttrs === "object") {
-    return Object.entries(rawAttrs).map(([key, val]) => ({
-      name: key,
-      slug: key,
-      option: String(val ?? ""),
-    }));
-  }
-
-  return [];
+function normOptionVal(val: string): string {
+  if (!val) return "";
+  let str = String(val);
+  try {
+    str = decodeURIComponent(str);
+  } catch { }
+  return str
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]/g, "");
 }
+
+/**
+ * Checks whether a variation is in stock and available for purchase
+ */
+function isVariationInStock(v: WooCommerceVariation): boolean {
+  if (!v) return false;
+  if ((v as any).status && (v as any).status !== "publish") return false;
+  if (v.stock_status === "outofstock") return false;
+  if (v.purchasable === false && v.stock_status !== "instock") return false;
+
+  if (
+    v.manage_stock === true &&
+    v.stock_quantity !== null &&
+    v.stock_quantity !== undefined
+  ) {
+    const qty = Number(v.stock_quantity);
+    if (!isNaN(qty) && qty <= 0 && v.stock_status !== "onbackorder") {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Checks if a single variation matches a target attribute name & option value
+ */
+function isVariationMatchingAttr(
+  v: WooCommerceVariation,
+  attrName: string,
+  selectedOption: string
+): boolean {
+  if (!selectedOption) return true;
+  const targetAttr = normAttrName(attrName);
+  const targetOption = normOptionVal(selectedOption);
+
+  const rawAttrs = v.attributes;
+  if (!rawAttrs) return true;
+
+  const vAttrs: Array<{ name: string; option: string }> = Array.isArray(rawAttrs)
+    ? rawAttrs.map((a: any) => ({
+      name: String(a?.name || a?.attribute || a?.slug || ""),
+      option: String(a?.option ?? a?.value ?? ""),
+    }))
+    : typeof rawAttrs === "object"
+      ? Object.entries(rawAttrs).map(([k, val]) => ({
+        name: String(k),
+        option: String(val ?? ""),
+      }))
+      : [];
+
+  const matched = vAttrs.find((a) => normAttrName(a.name) === targetAttr);
+
+  // If variation does not specify this attribute or option is empty,
+  // in WooCommerce that means "Any <Attribute>" (wildcard)!
+  if (!matched || !matched.option || matched.option.trim() === "") {
+    return true;
+  }
+
+  return normOptionVal(matched.option) === targetOption;
+}
+
+/**
+ * Checks if a variation matches all currently selected attributes
+ */
+function variationMatchesAllSelections(
+  v: WooCommerceVariation,
+  selections: Record<string, string>
+): boolean {
+  for (const [attrName, optVal] of Object.entries(selections)) {
+    if (optVal) {
+      if (!isVariationMatchingAttr(v, attrName, optVal)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 
 export default function ProductDetails({
   product,
@@ -142,14 +154,21 @@ export default function ProductDetails({
   const router = useRouter();
   const { addToCart } = useCart();
 
-  // DEBUG: Log full product data to browser console
+  // DEBUG: Log full product data in a single object to browser console
   useEffect(() => {
-    console.log("=== PRODUCT DEBUG ===");
-    console.log("Product:", product);
-    console.log("Attributes:", product.attributes);
-    console.log("Variations (IDs):", product.variations);
-    console.log("Variations Data:", product.variations_data);
-    console.log("=====================");
+    console.log("PRODUCT_DEBUG_DATA", {
+      product,
+      type: product.type,
+      purchasable: product.purchasable,
+      price: product.price,
+      regular_price: product.regular_price,
+      sale_price: product.sale_price,
+      stock_status: product.stock_status,
+      attributes: product.attributes,
+      default_attributes: product.default_attributes,
+      variations: product.variations,
+      variations_data: product.variations_data,
+    });
   }, [product]);
 
   // Dynamic gallery images
@@ -277,24 +296,27 @@ export default function ProductDetails({
     if (!product.attributes || product.attributes.length === 0) return [];
     if (!hasConfiguredVariations) return [];
 
+    const varAttrs = product.attributes.filter((a) => Boolean(a.variation));
+    if (varAttrs.length > 0) return varAttrs;
+
     if (product.variations_data && product.variations_data.length > 0) {
-      const attrsInVariations = product.attributes.filter((attr) => {
-        if (attr.variation) return true;
+      return product.attributes.filter((attr) => {
+        const normA = normAttrName(attr.name);
         return product.variations_data!.some((v) => {
-          const normAttrs = getNormalizedVariationAttributes(v);
-          return normAttrs.some(
-            (va) =>
-              (va.id && attr.id && Number(va.id) > 0 && Number(va.id) === Number(attr.id)) ||
-              matchAttributeKey(va.name, attr.name, attr.slug)
-          );
+          const rawAttrs = v.attributes;
+          if (!rawAttrs) return false;
+          if (Array.isArray(rawAttrs)) {
+            return rawAttrs.some((va: any) => normAttrName(va.name || va.attribute || va.slug || "") === normA);
+          }
+          if (typeof rawAttrs === "object") {
+            return Object.keys(rawAttrs).some((k) => normAttrName(k) === normA);
+          }
+          return false;
         });
       });
-      if (attrsInVariations.length > 0) {
-        return attrsInVariations;
-      }
     }
 
-    return (product.attributes || []).filter((a) => a.variation);
+    return [];
   }, [product.attributes, product.variations_data, hasConfiguredVariations]);
 
   const isVariableProduct = hasConfiguredVariations && variationAttributes.length > 0;
@@ -302,37 +324,33 @@ export default function ProductDetails({
   // Helper to extract default selections ONLY if explicitly set in WooCommerce backend
   const computeInitialSelections = (): Record<string, string> => {
     const initial: Record<string, string> = {};
-    if (variationAttributes.length === 0) return initial;
+    if (!variationAttributes || variationAttributes.length === 0) return initial;
 
-    const defaultAttrs = product.default_attributes || [];
+    const defaultAttrs = product.default_attributes;
     // If NO default attributes are set in WooCommerce, return empty {} (no attribute is selected!)
-    if (!Array.isArray(defaultAttrs) || defaultAttrs.length === 0) {
+    if (!defaultAttrs || !Array.isArray(defaultAttrs) || defaultAttrs.length === 0) {
       return {};
     }
 
     variationAttributes.forEach((attr) => {
-      const def = defaultAttrs.find(
-        (d) =>
-          (d.id && attr.id && Number(d.id) > 0 && Number(d.id) === Number(attr.id)) ||
-          matchAttributeKey(d.name, attr.name, attr.slug) ||
-          d.name.toLowerCase().trim() === attr.name.toLowerCase().trim() ||
-          (attr.slug && d.name.toLowerCase().trim() === attr.slug.toLowerCase().trim())
-      );
+      const normA = normAttrName(attr.name);
+      const def = defaultAttrs.find((d: any) => {
+        const dName = normAttrName(d.name || d.attribute || d.slug || "");
+        return dName === normA;
+      });
 
-      const defOpt = (def as any)?.option ?? (def as any)?.value ?? "";
-      if (def && String(defOpt).trim() !== "") {
-        const matched = findMatchingOption(attr.options, String(defOpt));
-        if (matched) {
-          initial[attr.name] = matched;
-        } else {
-          // Fallback direct match in options
-          const fallback = attr.options.find(
-            (opt) =>
-              String(opt).toLowerCase().trim() === String(defOpt).toLowerCase().trim() ||
-              normalizeOptionString(String(opt)) === normalizeOptionString(String(defOpt))
-          );
-          if (fallback) {
-            initial[attr.name] = String(fallback);
+      if (def) {
+        const defOption = String((def as any).option ?? (def as any).value ?? "").trim();
+        if (defOption) {
+          const normDef = normOptionVal(defOption);
+          const matched = attr.options.find((opt: any) => {
+            const optStr = typeof opt === "string" ? opt : opt.name || opt.option || String(opt);
+            return normOptionVal(optStr) === normDef;
+          });
+          if (matched) {
+            initial[attr.name] = typeof matched === "string" ? matched : (matched as any).name || (matched as any).option;
+          } else {
+            initial[attr.name] = defOption;
           }
         }
       }
@@ -362,124 +380,21 @@ export default function ProductDetails({
     return variationAttributes.every((attr) => Boolean(selectedAttributes[attr.name]));
   }, [isVariableProduct, variationAttributes, selectedAttributes]);
 
-  // Check if a variation is in stock
-  const isVariationInStock = (v: WooCommerceVariation): boolean => {
-    if (!v) return false;
-    if ((v as any).status && (v as any).status !== "publish") return false;
-    if (v.stock_status === "outofstock") return false;
-
-    if (
-      v.manage_stock === true &&
-      v.stock_quantity !== null &&
-      v.stock_quantity !== undefined
-    ) {
-      const qty = Number(v.stock_quantity);
-      if (!isNaN(qty) && qty <= 0 && v.stock_status !== "onbackorder") {
-        return false;
-      }
-    }
-
-    return true;
-  };
-
-  // Helper to determine if a variation attribute matches a target attribute name and option value
-  const isVariationMatchingAttr = (
-    v: WooCommerceVariation,
-    attrName: string,
-    targetOptionValue: string
-  ): boolean => {
-    const normAttrs = getNormalizedVariationAttributes(v);
-    if (normAttrs.length === 0) return true;
-
-    const targetAttr = variationAttributes.find(
-      (a) =>
-        a.name.toLowerCase().trim() === attrName.toLowerCase().trim() ||
-        matchAttributeKey(a.name, attrName, a.slug)
-    );
-
-    const vAttr = normAttrs.find((a) => {
-      if (
-        a.id &&
-        targetAttr?.id &&
-        Number(a.id) > 0 &&
-        Number(a.id) === Number(targetAttr.id)
-      ) {
-        return true;
-      }
-      if (a.name && a.name.toLowerCase().trim() === attrName.toLowerCase().trim()) {
-        return true;
-      }
-      if (
-        targetAttr?.slug &&
-        a.name &&
-        a.name.toLowerCase().trim() === targetAttr.slug.toLowerCase().trim()
-      ) {
-        return true;
-      }
-      return matchAttributeKey(a.name, attrName, targetAttr?.slug);
-    });
-
-    // If variation doesn't specify this attribute or has empty option, it's a wildcard "Any" in WooCommerce
-    if (!vAttr || !vAttr.option || vAttr.option.trim() === "") {
-      return true;
-    }
-
-    const optionsToCompare = [vAttr.option];
-    if (vAttr.slug && vAttr.slug !== vAttr.option) {
-      optionsToCompare.push(vAttr.slug);
-    }
-
-    return Boolean(findMatchingOption(optionsToCompare, targetOptionValue));
-  };
-
   // Find currently matching variation from variations_data
   const matchingVariation = useMemo(() => {
     if (
       !isVariableProduct ||
       !product.variations_data ||
-      product.variations_data.length === 0
+      product.variations_data.length === 0 ||
+      !isAllAttributesSelected
     ) {
       return null;
     }
 
-    if (!isAllAttributesSelected) {
-      return null;
-    }
-
-    // 1. Exact match pass
-    const exactMatch = product.variations_data.find((v) => {
-      const normAttrs = getNormalizedVariationAttributes(v);
-      if (normAttrs.length === 0) return false;
-      return variationAttributes.every((attr) => {
-        const selectedVal = selectedAttributes[attr.name];
-        if (!selectedVal) return false;
-        const vAttr = normAttrs.find((a) => {
-          if (
-            a.id &&
-            attr.id &&
-            Number(a.id) > 0 &&
-            Number(a.id) === Number(attr.id)
-          ) {
-            return true;
-          }
-          return matchAttributeKey(a.name, attr.name, attr.slug);
-        });
-        if (!vAttr || !vAttr.option || vAttr.option.trim() === "") return false;
-        return isVariationMatchingAttr(v, attr.name, selectedVal);
-      });
-    });
-
-    if (exactMatch) return exactMatch;
-
-    // 2. Wildcard match pass ("Any" attribute in WooCommerce)
     return (
-      product.variations_data.find((v) => {
-        return variationAttributes.every((attr) => {
-          const selectedVal = selectedAttributes[attr.name];
-          if (!selectedVal) return false;
-          return isVariationMatchingAttr(v, attr.name, selectedVal);
-        });
-      }) || null
+      product.variations_data.find((v) =>
+        variationMatchesAllSelections(v, selectedAttributes)
+      ) || null
     );
   }, [
     isVariableProduct,
@@ -594,12 +509,11 @@ export default function ProductDetails({
   }, [matchingVariation, product, isVariableProduct, priceRange]);
 
   // Accurate stock status for current selection
-  // Note: If variations_data is incomplete (e.g. due to API pagination), don't falsely mark as out of stock unless explicitly outofstock
   const isCurrentOutOfStock = isVariableProduct
     ? isAllAttributesSelected
       ? matchingVariation
         ? !isVariationInStock(matchingVariation)
-        : product.stock_status === "outofstock"
+        : true
       : false
     : product.stock_status === "outofstock" || product.purchasable === false;
 
@@ -609,43 +523,20 @@ export default function ProductDetails({
 
   /**
    * Safe Option Status Checker:
-   * Only marks an option as out of stock if we explicitly found matching variation records
-   * in `variations_data` AND every single one of those matching records is out of stock.
-   * If `variations_data` is missing records (e.g. per_page limit or custom format), it defaults to enabled!
+   * Checks whether selecting this option (with other currently selected attributes)
+   * corresponds to an in-stock variation in WooCommerce.
    */
   const getOptionStatus = (
     attrName: string,
     optionVal: string
   ): {
-    isExplicitlyOutOfStockEverywhere: boolean;
-    isExplicitlyOutOfStockForSelection: boolean;
+    isOutOfStock: boolean;
   } => {
     if (!product.variations_data || product.variations_data.length === 0) {
-      return {
-        isExplicitlyOutOfStockEverywhere: false,
-        isExplicitlyOutOfStockForSelection: false,
-      };
+      return { isOutOfStock: false };
     }
 
-    // Find all loaded variations that match this option
-    const varsWithThisOption = product.variations_data.filter((v) =>
-      isVariationMatchingAttr(v, attrName, optionVal)
-    );
-
-    // If no variation record in variations_data matched (e.g., pagination cut off XL variations),
-    // do NOT disable the button!
-    if (varsWithThisOption.length === 0) {
-      return {
-        isExplicitlyOutOfStockEverywhere: false,
-        isExplicitlyOutOfStockForSelection: false,
-      };
-    }
-
-    const isExplicitlyOutOfStockEverywhere = varsWithThisOption.every(
-      (v) => !isVariationInStock(v)
-    );
-
-    // Now check with other currently selected attributes
+    // Other currently selected attributes (excluding attrName being evaluated)
     const otherSelections: Record<string, string> = {};
     for (const [key, val] of Object.entries(selectedAttributes)) {
       if (key !== attrName && val) {
@@ -653,42 +544,42 @@ export default function ProductDetails({
       }
     }
 
-    if (Object.keys(otherSelections).length === 0) {
-      return {
-        isExplicitlyOutOfStockEverywhere,
-        isExplicitlyOutOfStockForSelection: isExplicitlyOutOfStockEverywhere,
-      };
+    // 1. If other attributes are already selected, test combination
+    if (Object.keys(otherSelections).length > 0) {
+      const combo = { ...otherSelections, [attrName]: optionVal };
+      const matchingVars = product.variations_data.filter((v) =>
+        variationMatchesAllSelections(v, combo)
+      );
+
+      if (matchingVars.length === 0) {
+        // Combination does not exist at all in WooCommerce
+        return { isOutOfStock: true };
+      }
+
+      // In stock if ANY matching variation is in stock
+      const hasInStock = matchingVars.some((v) => isVariationInStock(v));
+      return { isOutOfStock: !hasInStock };
     }
 
-    const matchingComboVars = varsWithThisOption.filter((v) => {
-      for (const [otherName, otherVal] of Object.entries(otherSelections)) {
-        if (!isVariationMatchingAttr(v, otherName, otherVal)) {
-          return false;
-        }
-      }
-      return true;
-    });
+    // 2. If no other attributes are selected, check if ANY variation with this option is in stock
+    const varsWithOption = product.variations_data.filter((v) =>
+      isVariationMatchingAttr(v, attrName, optionVal)
+    );
 
-    // Again, only mark combination out of stock if combo records exist and ALL are out of stock
-    const isExplicitlyOutOfStockForSelection =
-      matchingComboVars.length > 0 &&
-      matchingComboVars.every((v) => !isVariationInStock(v));
+    if (varsWithOption.length === 0) {
+      return { isOutOfStock: true };
+    }
 
-    return {
-      isExplicitlyOutOfStockEverywhere,
-      isExplicitlyOutOfStockForSelection,
-    };
+    const hasInStock = varsWithOption.some((v) => isVariationInStock(v));
+    return { isOutOfStock: !hasInStock };
   };
 
   const handleSelectAttributeOption = (attrName: string, optionVal: string) => {
     setShowVariantAlert(false);
 
     const currentVal = selectedAttributes[attrName];
-    const isCurrentlySelected = Boolean(
-      currentVal &&
-      (currentVal.toLowerCase().trim() === optionVal.toLowerCase().trim() ||
-        normalizeOptionString(currentVal) === normalizeOptionString(optionVal))
-    );
+    const isCurrentlySelected =
+      Boolean(currentVal) && normOptionVal(currentVal) === normOptionVal(optionVal);
 
     // Toggle off if already selected
     if (isCurrentlySelected) {
@@ -700,35 +591,11 @@ export default function ProductDetails({
       return;
     }
 
-    // Update selection directly without destructively wiping other selections unless explicitly out of stock
-    const newSelections: Record<string, string> = {
-      ...selectedAttributes,
+    // Update selection cleanly without altering any other attribute
+    setSelectedAttributes((prev) => ({
+      ...prev,
       [attrName]: optionVal,
-    };
-
-    if (product.variations_data && product.variations_data.length > 0) {
-      variationAttributes.forEach((otherAttr) => {
-        if (otherAttr.name === attrName) return;
-        const otherVal = newSelections[otherAttr.name];
-        if (!otherVal) return;
-
-        const matchingCombo = product.variations_data!.filter(
-          (v) =>
-            isVariationMatchingAttr(v, attrName, optionVal) &&
-            isVariationMatchingAttr(v, otherAttr.name, otherVal)
-        );
-
-        // Only clear the other attribute if the combo exists in variations_data and is explicitly out of stock
-        if (
-          matchingCombo.length > 0 &&
-          matchingCombo.every((v) => !isVariationInStock(v))
-        ) {
-          delete newSelections[otherAttr.name];
-        }
-      });
-    }
-
-    setSelectedAttributes(newSelections);
+    }));
   };
 
   const [quantity, setQuantity] = useState<number>(1);
@@ -1202,22 +1069,16 @@ export default function ProductDetails({
 
                                   const isSelected = Boolean(
                                     currentVal &&
-                                    (currentVal.toLowerCase().trim() ===
-                                      option.toLowerCase().trim() ||
-                                      normalizeOptionString(currentVal) ===
-                                      normalizeOptionString(option))
+                                    normOptionVal(currentVal) === normOptionVal(option)
                                   );
 
-                                  const {
-                                    isExplicitlyOutOfStockEverywhere,
-                                    isExplicitlyOutOfStockForSelection,
-                                  } = getOptionStatus(attr.name, option);
+                                  const { isOutOfStock } = getOptionStatus(attr.name, option);
 
                                   return (
                                     <button
                                       key={option}
                                       type="button"
-                                      disabled={isExplicitlyOutOfStockEverywhere}
+                                      disabled={isOutOfStock && !isSelected}
                                       onClick={() =>
                                         handleSelectAttributeOption(
                                           attr.name,
@@ -1226,18 +1087,14 @@ export default function ProductDetails({
                                       }
                                       className={`min-w-[44px] h-9 px-3 rounded-none text-xs font-semibold flex items-center justify-center border transition-all relative ${isSelected
                                         ? "bg-primary text-white border-primary shadow-xs ring-2 ring-primary/30 cursor-pointer"
-                                        : isExplicitlyOutOfStockEverywhere
+                                        : isOutOfStock
                                           ? "border-border/60 text-description/40 bg-bg/30 line-through cursor-not-allowed opacity-40 select-none pointer-events-none"
-                                          : isExplicitlyOutOfStockForSelection
-                                            ? "border-dashed border-border text-description/70 bg-bg/20 hover:border-primary hover:text-primary cursor-pointer"
-                                            : "border-border text-dark bg-white hover:border-primary hover:text-primary cursor-pointer"
+                                          : "border-border text-dark bg-white hover:border-primary hover:text-primary cursor-pointer"
                                         }`}
                                       title={
-                                        isExplicitlyOutOfStockEverywhere
+                                        isOutOfStock
                                           ? `${option} (Out of stock)`
-                                          : isExplicitlyOutOfStockForSelection
-                                            ? `${option} (Click to switch combination)`
-                                            : option
+                                          : option
                                       }
                                     >
                                       {option}
