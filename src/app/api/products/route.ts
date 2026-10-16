@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getProducts, getCategories } from "@/lib/woocommerce";
+import { getProducts, getCategories, getGeneralSettings } from "@/lib/woocommerce";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -10,6 +10,10 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get("type");
 
   if (type === "categories") {
+    const settings = await getGeneralSettings();
+    if (settings?.header_categories && settings.header_categories.length > 0) {
+      return NextResponse.json(settings.header_categories);
+    }
     const categories = await getCategories();
     return NextResponse.json(categories);
   }
@@ -17,3 +21,4 @@ export async function GET(request: NextRequest) {
   const products = await getProducts({ search, category, page, per_page });
   return NextResponse.json(products);
 }
+

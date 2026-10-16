@@ -1,10 +1,12 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Phone, Mail, MapPin, Home, ShoppingBag, Heart, User, SlidersHorizontal } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { GeneralSettingsData } from "@/types/woocommerce";
 
 const collections = [
   { label: "New Arrivals", href: "/new-arrivals", highlight: true },
@@ -21,27 +23,6 @@ const support = [
   { label: "Returns & Exchange", href: "/returns-exchange" },
 ];
 
-const contactInfo = [
-  {
-    icon: <Phone size={15} strokeWidth={1.75} />,
-    label: "CALL US",
-    value: "+8801XXXXXXXX",
-    href: "tel:+8801XXXXXXXX",
-  },
-  {
-    icon: <Mail size={15} strokeWidth={1.75} />,
-    label: "EMAIL US",
-    value: "support@luxuryladies.com",
-    href: "mailto:support@luxuryladies.com",
-  },
-  {
-    icon: <MapPin size={15} strokeWidth={1.75} />,
-    label: "VISIT US",
-    value: "Dottobari, Bogura",
-    href: "https://maps.google.com",
-  },
-];
-
 const bottomLinks = [
   { label: "Privacy Policy", href: "/privacy-policy" },
   { label: "Terms of Service", href: "/terms-of-service" },
@@ -51,6 +32,27 @@ const bottomLinks = [
 export default function Footer() {
   const pathname = usePathname();
   const { cartCount } = useCart();
+  const [settings, setSettings] = useState<GeneralSettingsData | null>(null);
+
+  useEffect(() => {
+    fetch("/api/general-settings")
+      .then((res) => res.json())
+      .then((json) => {
+        if (json?.success && json?.data) {
+          setSettings(json.data);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const phoneValue = settings?.information?.phone || "+8801XXXXXXXX";
+  const emailValue = settings?.information?.email || "support@luxuryladies.com";
+  const addressValue = settings?.information?.address || "Dottobari, Bogura";
+
+  const facebookUrl = settings?.social_links?.facebook || "https://facebook.com";
+  const instagramUrl = settings?.social_links?.instagram || "https://instagram.com";
+  const tiktokUrl = settings?.social_links?.tiktok || "https://tiktok.com";
+  const youtubeUrl = settings?.social_links?.youtube || "https://youtube.com";
 
   const isShopPage =
     pathname === "/shop" ||
@@ -83,21 +85,28 @@ export default function Footer() {
             </p>
             {/* Socials */}
             <div className="footer-socials">
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+              <a href={facebookUrl} target="_blank" rel="noopener noreferrer" aria-label="Facebook">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
                 </svg>
               </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+              <a href={instagramUrl} target="_blank" rel="noopener noreferrer" aria-label="Instagram">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="2" y="2" width="20" height="20" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
                 </svg>
               </a>
-              <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+              <a href={tiktokUrl} target="_blank" rel="noopener noreferrer" aria-label="TikTok">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z" />
                 </svg>
               </a>
+              {settings?.social_links?.youtube && (
+                <a href={youtubeUrl} target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                  </svg>
+                </a>
+              )}
             </div>
           </div>
 
@@ -134,15 +143,33 @@ export default function Footer() {
           <div className="footer-col">
             <h4 className="footer-col-title">Get In Touch</h4>
             <ul className="footer-contact-list">
-              {contactInfo.map((info) => (
-                <li key={info.label} className="footer-contact-item">
-                  <span className="footer-contact-icon">{info.icon}</span>
-                  <div>
-                    <p className="footer-contact-label">{info.label}</p>
-                    <a href={info.href} className="footer-contact-value">{info.value}</a>
-                  </div>
-                </li>
-              ))}
+              <li className="footer-contact-item">
+                <span className="footer-contact-icon">
+                  <Phone size={15} strokeWidth={1.75} />
+                </span>
+                <div>
+                  <p className="footer-contact-label">CALL US</p>
+                  <a href={`tel:${phoneValue.replace(/\s+/g, '')}`} className="footer-contact-value">{phoneValue}</a>
+                </div>
+              </li>
+              <li className="footer-contact-item">
+                <span className="footer-contact-icon">
+                  <Mail size={15} strokeWidth={1.75} />
+                </span>
+                <div>
+                  <p className="footer-contact-label">EMAIL US</p>
+                  <a href={`mailto:${emailValue}`} className="footer-contact-value">{emailValue}</a>
+                </div>
+              </li>
+              <li className="footer-contact-item">
+                <span className="footer-contact-icon">
+                  <MapPin size={15} strokeWidth={1.75} />
+                </span>
+                <div>
+                  <p className="footer-contact-label">VISIT US</p>
+                  <span className="footer-contact-value">{addressValue}</span>
+                </div>
+              </li>
             </ul>
           </div>
 

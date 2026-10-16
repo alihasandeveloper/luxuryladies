@@ -2,45 +2,60 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight as ChevronNext } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
-import { getProducts, getCategories } from "@/lib/woocommerce";
+import HeroBanner from "@/components/HeroBanner";
+import { getProducts, getCategories, getGeneralSettings } from "@/lib/woocommerce";
 
 export default async function Home() {
-  const [allProducts, fetchedCategories] = await Promise.all([
-    getProducts({ per_page: 50 }),
+  const [allProducts, generalSettings, fetchedCategories] = await Promise.all([
+    getProducts({ per_page: 100 }),
+    getGeneralSettings(),
     getCategories(),
   ]);
 
-  // Categories for the "Shop by Category" section
-  const categories = fetchedCategories.map((c) => {
-    // If WooCommerce category has an uploaded image, use it; otherwise use first product image from that category
+  // 1. Hero Gallery Images from WordPress plugin general-settings
+  const heroGallery = generalSettings?.hero_gallery && generalSettings.hero_gallery.length > 0
+    ? generalSettings.hero_gallery
+    : [{ id: 0, url: "/hero-bg.png", alt: "Anniversary Luxury Collection - luxuryladies" }];
+
+  // 2. Categories for the "Shop by Category" section from WordPress plugin general-settings
+  const rawShopCategories = generalSettings?.shop_by_categories && generalSettings.shop_by_categories.length > 0
+    ? generalSettings.shop_by_categories
+    : generalSettings?.featured_categories && generalSettings.featured_categories.length > 0
+    ? generalSettings.featured_categories
+    : fetchedCategories;
+
+  const categories = rawShopCategories.map((c: any) => {
+    // If WooCommerce category has an uploaded image URL, use it; otherwise fallback to first product image or placeholder
     const catProductImg = allProducts.find((p) =>
-      p.categories?.some((cat) => cat.slug === c.slug)
+      p.categories?.some((cat) => cat.slug === c.slug || cat.id === c.id)
     )?.images?.[0]?.src;
 
+    let imageUrl = "/woocommerce-placeholder.webp";
+    if (typeof c.image === "string" && c.image.trim()) {
+      imageUrl = c.image;
+    } else if (c.image && typeof c.image === "object" && c.image.src) {
+      imageUrl = c.image.src;
+    } else if (catProductImg) {
+      imageUrl = catProductImg;
+    }
+
     return {
-      id: c.slug,
+      id: c.slug || String(c.id),
       name: c.name,
       href: `/category/${c.slug}`,
-      image: c.image?.src || catProductImg || "/woocommerce-placeholder.webp",
+      image: imageUrl,
     };
   });
 
-  // Take the first 2-3 categories to render product grids
-  const topCategories = fetchedCategories.slice(0, 3);
+  // 3. Landing Page Category Product Groups from WordPress plugin general-settings
+  const landingCategories = generalSettings?.landing_page_categories && generalSettings.landing_page_categories.length > 0
+    ? generalSettings.landing_page_categories
+    : fetchedCategories.slice(0, 4);
 
   return (
     <div className="w-full">
-      {/* ── Full Width Hero Section ── */}
-      <section className="w-full relative h-[240px] sm:h-[380px] md:h-[520px] lg:h-[708px] overflow-hidden bg-bg">
-        <Image
-          src="/hero-bg.png"
-          alt="Anniversary Luxury Collection - luxuryladies"
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-center"
-        />
-      </section>
+      {/* ── Full Width Hero Section Gallery ── */}
+      <HeroBanner images={heroGallery} />
 
       {/* ── Main Content Container ── */}
       <div className="container py-10 md:py-14">
@@ -85,16 +100,16 @@ export default async function Home() {
           </>
         )}
 
-        {/* ── Product Grids for the first 2-3 categories from WooCommerce ── */}
-        {topCategories.map((cat) => {
+        {/* ── Product Grids for configured Landing Page Categories ── */}
+        {landingCategories.map((cat: any) => {
           const categoryProducts = allProducts.filter((p) =>
-            p.categories?.some((c) => c.slug === cat.slug)
+            p.categories?.some((c) => c.slug === cat.slug || c.id === cat.id)
           );
 
           if (categoryProducts.length === 0) return null;
 
           return (
-            <section key={cat.id} className="mt-14 md:mt-20">
+            <section key={cat.id || cat.slug} className="mt-14 md:mt-20">
               <div className="flex items-center justify-between mb-4 md:mb-5">
                 <h2 className="text-xl md:text-2xl font-medium tracking-tight text-dark">
                   {cat.name}

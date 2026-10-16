@@ -183,5 +183,49 @@ export interface WooCommerceState {
   name: string;
 }
 
+export interface HeroGalleryItem {
+  id: number;
+  url: string;
+  title?: string;
+  alt?: string;
+  thumbnail?: string;
+  medium?: string;
+  large?: string;
+  full?: string;
+}
+
+export interface PluginCategoryItem {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string;
+  count?: number;
+  parent?: number;
+  image?: string | null;
+}
+
+export interface ContactInformation {
+  phone?: string;
+  email?: string;
+  address?: string;
+}
+
+export interface SocialLinks {
+  facebook?: string;
+  instagram?: string;
+  tiktok?: string;
+  youtube?: string;
+}
+
+export interface GeneralSettingsData {
+  header_categories: PluginCategoryItem[];
+  shop_by_categories: PluginCategoryItem[];
+  featured_categories: PluginCategoryItem[];
+  landing_page_categories: PluginCategoryItem[];
+  hero_gallery: HeroGalleryItem[];
+  information: ContactInformation;
+  social_links: SocialLinks;
+}
+
 
 

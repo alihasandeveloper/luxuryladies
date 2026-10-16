@@ -96,22 +96,53 @@ export default function Header() {
       })
       .catch(() => { });
 
-    fetch("/api/products?type=categories")
+    fetch("/api/general-settings")
       .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
+      .then((json) => {
+        const headerCats = json?.data?.header_categories;
+        if (Array.isArray(headerCats) && headerCats.length > 0) {
           setLiveCategories(
-            data
-              .filter((c: any) => c.slug !== "uncategorized")
-              .slice(0, 8)
-              .map((c: any) => ({
-                label: c.name,
-                slug: c.slug,
-              }))
+            headerCats.map((c: any) => ({
+              label: c.name,
+              slug: c.slug,
+            }))
           );
+        } else {
+          // Fallback
+          fetch("/api/products?type=categories")
+            .then((res) => res.json())
+            .then((data) => {
+              if (Array.isArray(data)) {
+                setLiveCategories(
+                  data
+                    .filter((c: any) => c.slug !== "uncategorized")
+                    .map((c: any) => ({
+                      label: c.name,
+                      slug: c.slug,
+                    }))
+                );
+              }
+            })
+            .catch(() => { });
         }
       })
-      .catch(() => { });
+      .catch(() => {
+        fetch("/api/products?type=categories")
+          .then((res) => res.json())
+          .then((data) => {
+            if (Array.isArray(data)) {
+              setLiveCategories(
+                data
+                  .filter((c: any) => c.slug !== "uncategorized")
+                  .map((c: any) => ({
+                    label: c.name,
+                    slug: c.slug,
+                  }))
+              );
+            }
+          })
+          .catch(() => { });
+      });
   }, []);
 
   const handleSearchSubmit = (e: React.FormEvent) => {

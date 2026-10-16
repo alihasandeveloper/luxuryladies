@@ -9,6 +9,7 @@ import {
   WooCommercePaymentGateway,
   WooCommerceShippingMethod,
   WooCommerceState,
+  GeneralSettingsData,
 } from "@/types/woocommerce";
 
 const WP_URL = process.env.WP_BACKEND_URL || "https://headless.local";
@@ -1036,5 +1037,37 @@ export async function verifyWooCommerceCoupon(
   };
 }
 
+/**
+ * Fetch general settings from NextJS Helper WordPress plugin
+ * (Header categories, Shop by categories, Landing page categories, Hero gallery, Information, Social links)
+ */
+export async function getGeneralSettings(): Promise<GeneralSettingsData | null> {
+  try {
+    const authHeader = getAuthHeader();
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (authHeader) {
+      headers["Authorization"] = authHeader;
+    }
 
+    const res = await fetch(`${getBaseUrl()}/wp-json/nextjs-helper/v1/general-settings`, {
+      headers,
+      next: { revalidate: 60 },
+    });
 
+    if (!res.ok) {
+      console.warn(`[getGeneralSettings] API returned ${res.status}: ${res.statusText}`);
+      return null;
+    }
+
+    const data = await res.json();
+    if (data && data.success && data.data) {
+      return data.data as GeneralSettingsData;
+    }
+    return null;
+  } catch (err) {
+    console.error("Failed to fetch general settings from WordPress:", err);
+    return null;
+  }
+}
