@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { Search, Heart, Truck, ShoppingBag, User, X, LogIn, ChevronRight, Menu, Sparkles } from "lucide-react";
+import { Search, Heart, Truck, ShoppingBag, User, X, LogIn, LogOut, Package, MapPin, ChevronRight, Menu, Sparkles } from "lucide-react";
 import { WooCommerceProduct } from "@/types/woocommerce";
 
 const navLinks = [
@@ -298,15 +298,120 @@ export default function Header() {
                 )}
               </Link>
 
-              {/* Account */}
-              <Link
-                href={isAuthenticated ? "/account" : "/login"}
-                className="action-btn"
-                aria-label={isAuthenticated ? "My Account" : "Sign In"}
-                title={isAuthenticated ? `Signed in as ${user?.first_name || user?.display_name || user?.username}` : "Sign In"}
-              >
-                <User size={19} strokeWidth={1.75} />
-              </Link>
+              {/* Account Dropdown */}
+              <div className="relative group">
+                <Link
+                  href={isAuthenticated ? "/account" : "/login"}
+                  className="action-btn"
+                  aria-label={isAuthenticated ? "My Account" : "Sign In"}
+                >
+                  <User size={19} strokeWidth={1.75} />
+                </Link>
+
+                {/* Submenu Dropdown on Hover */}
+                <div className="absolute right-0 top-full pt-2 opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto transition-all duration-200 z-50">
+                  <div className="w-64 bg-white border border-border shadow-xl rounded-none overflow-hidden text-left">
+                    {isAuthenticated && user ? (
+                      <div>
+                        {/* User Header */}
+                        <div className="p-3.5 border-b border-border bg-slate-50/70">
+                          <p className="text-xs font-bold text-dark truncate">
+                            {user.first_name
+                              ? `${user.first_name} ${user.last_name || ""}`.trim()
+                              : user.display_name || user.username}
+                          </p>
+                          <p className="text-[11px] text-description truncate mt-0.5">
+                            {user.email}
+                          </p>
+                        </div>
+
+                        {/* Navigation Links */}
+                        <div className="py-1">
+                          <Link
+                            href="/account?tab=dashboard"
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-dark hover:text-primary hover:bg-bg/40 transition-colors"
+                          >
+                            <User size={14} className="text-slate-400" />
+                            <span>My Account</span>
+                          </Link>
+                          <Link
+                            href="/account?tab=orders"
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-dark hover:text-primary hover:bg-bg/40 transition-colors"
+                          >
+                            <Package size={14} className="text-slate-400" />
+                            <span>My Orders</span>
+                          </Link>
+                          <Link
+                            href="/account?tab=addresses"
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-dark hover:text-primary hover:bg-bg/40 transition-colors"
+                          >
+                            <MapPin size={14} className="text-slate-400" />
+                            <span>Saved Addresses</span>
+                          </Link>
+                          <Link
+                            href="/track-order"
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-dark hover:text-primary hover:bg-bg/40 transition-colors"
+                          >
+                            <Truck size={14} className="text-slate-400" />
+                            <span>Track Order</span>
+                          </Link>
+                        </div>
+
+                        {/* Sign Out */}
+                        <div className="p-2 border-t border-border bg-slate-50/40">
+                          <button
+                            type="button"
+                            onClick={() => logout()}
+                            className="w-full flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors cursor-pointer text-left rounded-none"
+                          >
+                            <LogOut size={13} />
+                            <span>Sign Out</span>
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        {/* Guest Welcome */}
+                        <div className="p-3.5 border-b border-border bg-slate-50/70 text-center">
+                          <p className="text-xs font-bold text-dark uppercase tracking-wider">
+                            Welcome
+                          </p>
+                          <p className="text-[11px] text-description mt-0.5">
+                            Manage your orders and profile
+                          </p>
+                        </div>
+
+                        {/* Auth Buttons */}
+                        <div className="p-3 flex flex-col gap-2">
+                          <Link
+                            href="/login"
+                            className="w-full py-2 px-3 bg-primary hover:bg-primary-hover !text-white text-xs font-bold uppercase tracking-wider text-center transition-colors rounded-none"
+                          >
+                            Sign In
+                          </Link>
+                          <Link
+                            href="/register"
+                            className="w-full py-2 px-3 bg-white hover:bg-bg text-dark border border-border hover:border-primary text-xs font-bold uppercase tracking-wider text-center transition-colors rounded-none"
+                          >
+                            Create Account
+                          </Link>
+                        </div>
+
+                        {/* Quick Links */}
+                        <div className="border-t border-border py-1">
+                          <Link
+                            href="/track-order"
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-dark hover:text-primary hover:bg-bg/40 transition-colors"
+                          >
+                            <Truck size={14} className="text-slate-400" />
+                            <span>Track Order</span>
+                          </Link>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 

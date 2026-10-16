@@ -10,7 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 import { GeneralSettingsData } from "@/types/woocommerce";
 
 const collections = [
-  { label: "New Arrivals", href: "/new-arrivals", highlight: true },
+  { label: "New Arrivals", href: "/new-arrivals" },
   { label: "Luxury Heels", href: "/luxury-heels" },
   { label: "Luxury Bags", href: "/luxury-bags" },
   { label: "Party Clutch", href: "/party-clutch" },
@@ -19,16 +19,14 @@ const collections = [
 
 const support = [
   { label: "Track Your Order", href: "/track-order" },
-  { label: "Pre-Order Policy", href: "/pre-order-policy" },
-  { label: "Custom Orders", href: "/custom-orders" },
-  { label: "Shipping Info", href: "/shipping-info" },
-  { label: "Returns & Exchange", href: "/returns-exchange" },
+  { label: "Delivery & Shipping Policy", href: "/shipping-policy" },
+  { label: "Return & Exchange Policy", href: "/returns-exchange" },
+  { label: "Support Center", href: "/support" },
 ];
 
 const bottomLinks = [
   { label: "Privacy Policy", href: "/privacy-policy" },
-  { label: "Terms of Service", href: "/terms-of-service" },
-  { label: "Support Center", href: "/support" },
+  { label: "Terms & Conditions", href: "/terms-and-conditions" },
 ];
 
 export default function Footer() {
@@ -117,16 +115,19 @@ export default function Footer() {
           <div className="footer-col">
             <h4 className="footer-col-title">Collections</h4>
             <ul>
-              {collections.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className={item.highlight ? "footer-link footer-link-highlight" : "footer-link"}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
+              {collections.map((item) => {
+                const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className={isActive ? "footer-link footer-link-highlight" : "footer-link"}
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </div>
 
@@ -134,11 +135,19 @@ export default function Footer() {
           <div className="footer-col">
             <h4 className="footer-col-title">Support</h4>
             <ul>
-              {support.map((item) => (
-                <li key={item.href}>
-                  <Link href={item.href} className="footer-link">{item.label}</Link>
-                </li>
-              ))}
+              {support.map((item) => {
+                const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className={isActive ? "footer-link footer-link-highlight" : "footer-link"}
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </div>
 
@@ -189,12 +198,20 @@ export default function Footer() {
             </span>
           </p>
           <nav className="footer-bottom-links justify-center md:justify-start flex-wrap w-full md:w-auto">
-            {bottomLinks.map((link, i) => (
-              <span key={link.href} className="footer-bottom-link-wrap">
-                {i > 0 && <span className="footer-bottom-sep">|</span>}
-                <Link href={link.href} className="footer-bottom-link">{link.label}</Link>
-              </span>
-            ))}
+            {bottomLinks.map((link, i) => {
+              const isActive = pathname === link.href;
+              return (
+                <span key={link.href} className="footer-bottom-link-wrap">
+                  {i > 0 && <span className="footer-bottom-sep">|</span>}
+                  <Link
+                    href={link.href}
+                    className={`footer-bottom-link ${isActive ? "!text-primary font-semibold" : ""}`}
+                  >
+                    {link.label}
+                  </Link>
+                </span>
+              );
+            })}
           </nav>
         </div>
       </div>
