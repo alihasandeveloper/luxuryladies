@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ChevronRight as ChevronNext } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import HeroBanner from "@/components/HeroBanner";
-import { getProducts, getCategories, getGeneralSettings } from "@/lib/woocommerce";
+import { getProducts, getCategories, getGeneralSettings, decodeHtml } from "@/lib/woocommerce";
 
 export default async function Home() {
   const [allProducts, generalSettings, fetchedCategories] = await Promise.all([
@@ -41,7 +41,7 @@ export default async function Home() {
 
     return {
       id: c.slug || String(c.id),
-      name: c.name,
+      name: decodeHtml(c.name || ""),
       href: `/category/${c.slug}`,
       image: imageUrl,
     };
@@ -112,7 +112,7 @@ export default async function Home() {
             <section key={cat.id || cat.slug} className="mt-14 md:mt-20">
               <div className="flex items-center justify-between mb-4 md:mb-5">
                 <h2 className="text-xl md:text-2xl font-medium tracking-tight text-dark">
-                  {cat.name}
+                  {decodeHtml(cat.name || "")}
                 </h2>
                 <Link
                   href={`/category/${cat.slug}`}

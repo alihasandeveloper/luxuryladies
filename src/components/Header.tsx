@@ -96,6 +96,15 @@ export default function Header() {
       })
       .catch(() => { });
 
+    const cleanName = (str: string) =>
+      (str || "")
+        .replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&quot;/g, '"')
+        .replace(/&#039;/g, "'")
+        .replace(/&nbsp;/g, " ");
+
     fetch("/api/general-settings")
       .then((res) => res.json())
       .then((json) => {
@@ -103,7 +112,7 @@ export default function Header() {
         if (Array.isArray(headerCats) && headerCats.length > 0) {
           setLiveCategories(
             headerCats.map((c: any) => ({
-              label: c.name,
+              label: cleanName(c.name),
               slug: c.slug,
             }))
           );
@@ -117,7 +126,7 @@ export default function Header() {
                   data
                     .filter((c: any) => c.slug !== "uncategorized")
                     .map((c: any) => ({
-                      label: c.name,
+                      label: cleanName(c.name),
                       slug: c.slug,
                     }))
                 );
@@ -135,7 +144,7 @@ export default function Header() {
                 data
                   .filter((c: any) => c.slug !== "uncategorized")
                   .map((c: any) => ({
-                    label: c.name,
+                    label: cleanName(c.name),
                     slug: c.slug,
                   }))
               );

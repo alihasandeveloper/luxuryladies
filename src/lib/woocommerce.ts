@@ -37,14 +37,17 @@ function getBaseUrl(): string {
 
 export const DEFAULT_PRODUCT_PLACEHOLDER = "/woocommerce-placeholder.webp";
 
-function decodeHtml(html: string): string {
+export function decodeHtml(html: string): string {
+  if (!html) return "";
   return html
     .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
-    .replace(/&#039;/g, "'");
+    .replace(/&#039;/g, "'")
+    .replace(/&nbsp;/g, " ");
 }
+
 
 function normalizeProduct(raw: any): WooCommerceProduct {
   const catName = raw.categories?.[0]?.name ? decodeHtml(raw.categories[0].name) : "Luxury Collection";
@@ -1063,7 +1066,18 @@ export async function getGeneralSettings(): Promise<GeneralSettingsData | null> 
 
     const data = await res.json();
     if (data && data.success && data.data) {
-      return data.data as GeneralSettingsData;
+      const formatCat = (cat: any) => ({
+        ...cat,
+        name: decodeHtml(cat.name || ""),
+      });
+
+      return {
+        ...data.data,
+        header_categories: (data.data.header_categories || []).map(formatCat),
+        shop_by_categories: (data.data.shop_by_categories || []).map(formatCat),
+        featured_categories: (data.data.featured_categories || []).map(formatCat),
+        landing_page_categories: (data.data.landing_page_categories || []).map(formatCat),
+      } as GeneralSettingsData;
     }
     return null;
   } catch (err) {
