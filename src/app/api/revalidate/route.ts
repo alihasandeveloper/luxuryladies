@@ -27,7 +27,7 @@ async function handleRevalidate(request: NextRequest) {
     }
 
     if (tag) {
-      revalidateTag(tag);
+      revalidateTag(tag, "max");
       return NextResponse.json({
         success: true,
         revalidated: true,
@@ -47,12 +47,12 @@ async function handleRevalidate(request: NextRequest) {
     }
 
     // Default: revalidate all primary cache tags and routes
-    revalidateTag("products");
-    revalidateTag("categories");
-    revalidateTag("offers");
-    revalidateTag("general-settings");
-    revalidateTag("payment-gateways");
-    revalidateTag("countries");
+    revalidateTag("products", "max");
+    revalidateTag("categories", "max");
+    revalidateTag("offers", "max");
+    revalidateTag("general-settings", "max");
+    revalidateTag("payment-gateways", "max");
+    revalidateTag("countries", "max");
     revalidatePath("/");
     revalidatePath("/shop");
 

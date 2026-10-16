@@ -8,6 +8,7 @@ import { Heart, ShoppingCart, Check } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { toast } from "sonner";
+import { WooCommerceProduct } from "@/types/woocommerce";
 
 interface ProductCardProps {
   product: WooCommerceProduct;
@@ -26,7 +27,7 @@ export default function ProductCard({
       : 0;
 
   const isOutOfStock = product.stock_status === "outofstock";
-  const badgeMeta = product.meta_data?.find((m) => m.key === "_badge")?.value;
+  const badgeMeta = product.meta_data?.find((m: any) => m.key === "_badge")?.value;
   const initialImage = product.images?.[0]?.src || "/woocommerce-placeholder.webp";
   const [imgSrc, setImgSrc] = useState(initialImage);
   const [justAdded, setJustAdded] = useState(false);

@@ -704,7 +704,7 @@ export default function CheckoutView({
                 {placedOrder.customer.address2 ? `, ${placedOrder.customer.address2}` : ""}
               </p>
               <p className="text-slate-900 font-semibold mt-0.5">
-                {placedOrder.customer.city || placedOrder.customer.district}, {placedOrder.customer.country || "Bangladesh"}
+                {placedOrder.customer.city || placedOrder.customer.state}, {placedOrder.customer.country || "Bangladesh"}
               </p>
             </div>
 
