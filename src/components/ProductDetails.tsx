@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 import { toast } from "sonner";
 import {
   Heart,
@@ -570,7 +571,8 @@ export default function ProductDetails({
   };
 
   const [quantity, setQuantity] = useState<number>(1);
-  const [isWishlisted, setIsWishlisted] = useState<boolean>(false);
+  const { isInWishlist, toggleWishlist } = useWishlist();
+  const isWishlisted = isInWishlist(product.id);
   const [justAdded, setJustAdded] = useState<boolean>(false);
   const [showVariantAlert, setShowVariantAlert] = useState<boolean>(false);
   const alertTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -836,16 +838,27 @@ export default function ProductDetails({
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => setIsWishlisted(!isWishlisted)}
+                    onClick={() => {
+                      toggleWishlist({
+                        id: product.id,
+                        name: product.name,
+                        slug: product.slug,
+                        price: currentPrice > 0 ? currentPrice : regularPrice,
+                        regularPrice: regularPrice > currentPrice ? regularPrice : undefined,
+                        image: (product.images?.[0]?.src) || "/woocommerce-placeholder.webp",
+                        stockStatus: product.stock_status,
+                        type: product.type,
+                      });
+                    }}
                     className={`w-9 h-9 rounded-full flex items-center justify-center border transition-colors cursor-pointer ${isWishlisted
                       ? "bg-bg border-primary text-primary"
                       : "border-border text-description hover:border-primary hover:text-primary bg-white"
                       }`}
-                    aria-label="Wishlist"
+                    aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                   >
                     <Heart
                       size={18}
-                      className={isWishlisted ? "fill-primary" : ""}
+                      className={isWishlisted ? "fill-primary text-primary" : ""}
                     />
                   </button>
                 </div>

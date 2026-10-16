@@ -5,8 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Heart, ShoppingCart, Check } from "lucide-react";
-import { WooCommerceProduct } from "@/types/woocommerce";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 import { toast } from "sonner";
 
 interface ProductCardProps {
@@ -16,7 +16,7 @@ interface ProductCardProps {
 
 export default function ProductCard({
   product,
-  showWishlist = false,
+  showWishlist = true,
 }: ProductCardProps) {
   const regular = parseFloat(product.regular_price || product.price);
   const current = parseFloat(product.sale_price || product.price);
@@ -32,11 +32,28 @@ export default function ProductCard({
   const [justAdded, setJustAdded] = useState(false);
 
   const { addToCart } = useCart();
+  const { isInWishlist, toggleWishlist } = useWishlist();
+  const isWishlisted = isInWishlist(product.id);
   const router = useRouter();
 
   const isVariable =
     product.type === "variable" ||
     (product.variations && product.variations.length > 0);
+
+  const handleWishlistClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleWishlist({
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      price: current > 0 ? current : regular,
+      regularPrice: regular > current ? regular : undefined,
+      image: imgSrc,
+      stockStatus: product.stock_status,
+      type: product.type,
+    });
+  };
 
   const handleCartClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -107,10 +124,19 @@ export default function ProductCard({
         {showWishlist && (
           <button
             type="button"
-            className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-gray-700 hover:text-primary flex items-center justify-center transition-all duration-200 shadow-xs cursor-pointer"
-            aria-label="Add to wishlist"
+            onClick={handleWishlistClick}
+            className={`absolute top-2 right-2 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 shadow-xs cursor-pointer ${
+              isWishlisted
+                ? "bg-white text-primary"
+                : "bg-white/90 hover:bg-white text-gray-700 hover:text-primary"
+            }`}
+            aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
           >
-            <Heart size={16} strokeWidth={1.75} />
+            <Heart
+              size={16}
+              strokeWidth={1.75}
+              className={isWishlisted ? "fill-primary text-primary" : ""}
+            />
           </button>
         )}
       </div>

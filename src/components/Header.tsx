@@ -15,6 +15,7 @@ const navLinks = [
 
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
+import { useWishlist } from "@/context/WishlistContext";
 
 interface HeaderCategory {
   label: string;
@@ -36,6 +37,7 @@ export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const { cartCount } = useCart();
+  const { wishlistCount } = useWishlist();
   const { user, isAuthenticated, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -272,9 +274,20 @@ export default function Header() {
             {/* Icon Actions (Right side: Cart, User on mobile; Wishlist, Compare, Cart, User on desktop) */}
             <div className="header-actions">
               {/* Wishlist (desktop only) */}
-              <button className="action-btn desktop-only" aria-label="Wishlist">
-                <Heart size={19} strokeWidth={1.75} />
-              </button>
+              <Link
+                href="/wishlist"
+                className="action-btn desktop-only relative"
+                aria-label={`Wishlist (${wishlistCount} items)`}
+                title="Wishlist"
+              >
+                <Heart
+                  size={19}
+                  strokeWidth={1.75}
+                />
+                {wishlistCount > 0 && (
+                  <span className="cart-badge" aria-hidden="true">{wishlistCount}</span>
+                )}
+              </Link>
 
               {/* Track Order (desktop only) */}
               <Link
@@ -639,12 +652,22 @@ export default function Header() {
               <Link
                 href="/wishlist"
                 onClick={() => setDrawerOpen(false)}
-                className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-md border text-xs font-medium gap-1.5 transition-colors ${pathname === "/wishlist"
+                className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-md border text-xs font-medium gap-1.5 transition-colors relative ${pathname === "/wishlist"
                     ? "border-primary text-primary bg-bg"
                     : "border-border hover:border-primary hover:text-primary text-slate-600"
                   }`}
               >
-                <Heart size={16} strokeWidth={1.75} />
+                <div className="relative">
+                  <Heart
+                    size={16}
+                    strokeWidth={1.75}
+                  />
+                  {wishlistCount > 0 && (
+                    <span className="absolute -top-1.5 -right-2.5 min-w-[14px] h-3.5 px-0.5 rounded-full bg-primary text-white text-[9px] font-bold flex items-center justify-center">
+                      {wishlistCount}
+                    </span>
+                  )}
+                </div>
                 <span>Wishlist</span>
               </Link>
               <Link

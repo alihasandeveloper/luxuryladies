@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { Phone, Mail, MapPin, Home, ShoppingBag, Heart, User, SlidersHorizontal } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
+import { useWishlist } from "@/context/WishlistContext";
 import { GeneralSettingsData } from "@/types/woocommerce";
 
 const collections = [
@@ -32,6 +33,7 @@ const bottomLinks = [
 export default function Footer() {
   const pathname = usePathname();
   const { cartCount } = useCart();
+  const { wishlistCount } = useWishlist();
   const { isAuthenticated } = useAuth();
   const [settings, setSettings] = useState<GeneralSettingsData | null>(null);
 
@@ -286,12 +288,22 @@ export default function Footer() {
         </Link>
 
         <Link
-          href="/about"
-          className={`flex flex-col items-center justify-center gap-1 py-1 px-3 text-[11px] font-medium transition-colors ${
-            pathname === "/about" ? "text-primary font-semibold" : "text-description hover:text-dark"
+          href="/wishlist"
+          className={`relative flex flex-col items-center justify-center gap-1 py-1 px-3 text-[11px] font-medium transition-colors ${
+            pathname === "/wishlist" ? "text-primary font-semibold" : "text-description hover:text-dark"
           }`}
         >
-          <Heart size={20} strokeWidth={pathname === "/about" ? 2.3 : 1.8} />
+          <div className="relative">
+            <Heart
+              size={20}
+              strokeWidth={pathname === "/wishlist" ? 2.3 : 1.8}
+            />
+            {wishlistCount > 0 && (
+              <span className="absolute -top-1.5 -right-2.5 min-w-[16px] h-4 px-1 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center shadow-xs">
+                {wishlistCount}
+              </span>
+            )}
+          </div>
           <span>Wishlist</span>
         </Link>
 

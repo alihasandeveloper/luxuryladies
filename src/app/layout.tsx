@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
+import { WishlistProvider } from "@/context/WishlistContext";
 import ThemeToaster from "@/components/ThemeToaster";
 import "./globals.css";
 
@@ -29,12 +30,14 @@ export default function RootLayout({
       <body suppressHydrationWarning>
         <AuthProvider>
           <CartProvider>
-            <Header />
-            <main className="site-main">
-              {children}
-            </main>
-            <Footer />
-            <ThemeToaster />
+            <WishlistProvider>
+              <Header />
+              <main className="site-main">
+                {children}
+              </main>
+              <Footer />
+              <ThemeToaster />
+            </WishlistProvider>
           </CartProvider>
         </AuthProvider>
       </body>
