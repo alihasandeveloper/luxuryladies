@@ -922,28 +922,13 @@ export default function ProductDetails({
 
                         return (
                           <div key={attr.id || attr.name}>
-                            <div className="flex items-center justify-between mb-2">
+                            <div className="mb-2">
                               <span className="text-xs font-semibold text-dark">
                                 Select {attr.name}:{" "}
                                 <span className="font-bold text-primary">
                                   {currentVal || "Choose an option"}
                                 </span>
                               </span>
-                              {currentVal && (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setSelectedAttributes((prev) => {
-                                      const next = { ...prev };
-                                      delete next[attr.name];
-                                      return next;
-                                    });
-                                  }}
-                                  className="text-[11px] font-medium text-description hover:text-primary transition-colors cursor-pointer underline"
-                                >
-                                  Clear
-                                </button>
-                              )}
                             </div>
 
                             {/* Options box with pink outline when validation fails */}
@@ -983,6 +968,25 @@ export default function ProductDetails({
                                 })}
                               </div>
                             </div>
+
+                            {/* Clear button positioned below variation options */}
+                            {currentVal && (
+                              <div className="mt-1 px-2">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedAttributes((prev) => {
+                                      const next = { ...prev };
+                                      delete next[attr.name];
+                                      return next;
+                                    });
+                                  }}
+                                  className="text-[11px] font-medium text-description hover:text-primary transition-colors cursor-pointer underline"
+                                >
+                                  Clear
+                                </button>
+                              </div>
+                            )}
                           </div>
                         );
                       })}
