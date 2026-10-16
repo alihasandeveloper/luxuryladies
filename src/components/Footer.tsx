@@ -1,5 +1,10 @@
+"use client";
+
 import Image from "next/image";
-import { Phone, Mail, MapPin } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Phone, Mail, MapPin, Home, ShoppingBag, Heart, User, SlidersHorizontal } from "lucide-react";
+import { useCart } from "@/context/CartContext";
 
 const collections = [
   { label: "New Arrivals", href: "/new-arrivals", highlight: true },
@@ -44,6 +49,15 @@ const bottomLinks = [
 ];
 
 export default function Footer() {
+  const pathname = usePathname();
+  const { cartCount } = useCart();
+
+  const isShopPage =
+    pathname === "/shop" ||
+    pathname.startsWith("/shop/") ||
+    pathname.startsWith("/category/") ||
+    pathname === "/search";
+
   return (
     <footer className="site-footer">
       {/* Gradient top line */}
@@ -55,7 +69,7 @@ export default function Footer() {
 
           {/* ── Brand Column ── */}
           <div className="footer-brand">
-            <a href="/" className="footer-logo inline-flex items-center" aria-label="luxuryladies Home">
+            <Link href="/" className="footer-logo inline-flex items-center" aria-label="luxuryladies Home">
               <Image
                 src="/luxuryladies-logo.png"
                 alt="luxuryladies"
@@ -63,7 +77,7 @@ export default function Footer() {
                 height={78}
                 className="w-[210px] md:w-[250px] lg:w-[260px] h-auto object-contain"
               />
-            </a>
+            </Link>
             <p className="footer-desc mt-3">
               Redefining contemporary women&apos;s luxury fashion. Premium heels, chic bags, party clutches, and curated sleepwear crafted for modern elegance.
             </p>
@@ -93,12 +107,12 @@ export default function Footer() {
             <ul>
               {collections.map((item) => (
                 <li key={item.href}>
-                  <a
+                  <Link
                     href={item.href}
                     className={item.highlight ? "footer-link footer-link-highlight" : "footer-link"}
                   >
                     {item.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -110,7 +124,7 @@ export default function Footer() {
             <ul>
               {support.map((item) => (
                 <li key={item.href}>
-                  <a href={item.href} className="footer-link">{item.label}</a>
+                  <Link href={item.href} className="footer-link">{item.label}</Link>
                 </li>
               ))}
             </ul>
@@ -136,22 +150,114 @@ export default function Footer() {
       </div>
 
       {/* ── Bottom Bar ── */}
-      <div className="footer-bottom">
-        <div className="container footer-bottom-inner">
-          <p className="footer-copy">
+      <div className="footer-bottom pb-20 md:pb-4">
+        <div className="container footer-bottom-inner flex flex-col-reverse md:flex-row items-center text-center md:text-left justify-between">
+          <p className="footer-copy text-center md:text-left w-full md:w-auto">
             © 2026 luxuryladies. All rights reserved.{" "}
-            <span>Designed &amp; Developed by <strong>Ali Hasan</strong></span>
+            <span className="block sm:inline mt-0.5 sm:mt-0">
+              Designed &amp; Developed by <strong>Ali Hasan</strong>
+            </span>
           </p>
-          <nav className="footer-bottom-links">
+          <nav className="footer-bottom-links justify-center md:justify-start flex-wrap w-full md:w-auto">
             {bottomLinks.map((link, i) => (
               <span key={link.href} className="footer-bottom-link-wrap">
                 {i > 0 && <span className="footer-bottom-sep">|</span>}
-                <a href={link.href} className="footer-bottom-link">{link.label}</a>
+                <Link href={link.href} className="footer-bottom-link">{link.label}</Link>
               </span>
             ))}
           </nav>
         </div>
       </div>
+
+      {/* ── Mobile Bottom Navigation Bar ── */}
+      <nav
+        className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-border flex md:hidden items-center justify-around px-2 py-2 shadow-[0_-4px_20px_rgba(25,20,38,0.06)] print:hidden"
+        aria-label="Mobile Bottom Navigation"
+      >
+        <Link
+          href="/"
+          className={`flex flex-col items-center justify-center gap-1 py-1 px-3 text-[11px] font-medium transition-colors ${
+            pathname === "/" ? "text-primary font-semibold" : "text-description hover:text-dark"
+          }`}
+        >
+          <Home size={20} strokeWidth={pathname === "/" ? 2.3 : 1.8} />
+          <span>Home</span>
+        </Link>
+
+        {isShopPage ? (
+          <button
+            type="button"
+            onClick={() => {
+              window.dispatchEvent(new CustomEvent("open-mobile-filter"));
+              document.getElementById("mobile-filter-open-btn")?.click();
+            }}
+            className="flex flex-col items-center justify-center gap-1 py-1 px-3 text-[11px] font-medium transition-colors text-primary font-semibold cursor-pointer"
+            aria-label="Open Filters"
+          >
+            <SlidersHorizontal size={20} strokeWidth={2.3} />
+            <span>Filters</span>
+          </button>
+        ) : (
+          <Link
+            href="/shop"
+            className="flex flex-col items-center justify-center gap-1 py-1 px-3 text-[11px] font-medium transition-colors text-description hover:text-dark"
+          >
+            <ShoppingBag size={20} strokeWidth={1.8} />
+            <span>Shop</span>
+          </Link>
+        )}
+
+        <Link
+          href="/cart"
+          className={`relative flex flex-col items-center justify-center gap-1 py-1 px-3 text-[11px] font-medium transition-colors ${
+            pathname === "/cart" ? "text-primary font-semibold" : "text-description hover:text-dark"
+          }`}
+        >
+          <div className="relative">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={pathname === "/cart" ? 2.3 : 1.8}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="9" cy="21" r="1" />
+              <circle cx="20" cy="21" r="1" />
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+            </svg>
+            {cartCount > 0 && (
+              <span className="absolute -top-1.5 -right-2.5 min-w-[16px] h-4 px-1 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center shadow-xs">
+                {cartCount}
+              </span>
+            )}
+          </div>
+          <span>Cart</span>
+        </Link>
+
+        <Link
+          href="/about"
+          className={`flex flex-col items-center justify-center gap-1 py-1 px-3 text-[11px] font-medium transition-colors ${
+            pathname === "/about" ? "text-primary font-semibold" : "text-description hover:text-dark"
+          }`}
+        >
+          <Heart size={20} strokeWidth={pathname === "/about" ? 2.3 : 1.8} />
+          <span>Wishlist</span>
+        </Link>
+
+        <Link
+          href="/checkout"
+          className={`flex flex-col items-center justify-center gap-1 py-1 px-3 text-[11px] font-medium transition-colors ${
+            pathname === "/checkout" ? "text-primary font-semibold" : "text-description hover:text-dark"
+          }`}
+        >
+          <User size={20} strokeWidth={pathname === "/checkout" ? 2.3 : 1.8} />
+          <span>Profile</span>
+        </Link>
+      </nav>
     </footer>
   );
 }

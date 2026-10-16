@@ -225,7 +225,7 @@ a {
 .header-search:focus-within {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(214, 51, 108, 0.08);
-  background-color: #fff;
+  background-color: var(--color-surface);
 }
 
 .search-icon {
@@ -295,7 +295,7 @@ a.action-btn {
   top: 3px;
   right: 3px;
   background-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-surface);
   font-size: 0.6rem;
   font-weight: 700;
   min-width: 15px;
@@ -306,7 +306,7 @@ a.action-btn {
   justify-content: center;
   padding-inline: 3px;
   line-height: 1;
-  border: 1.5px solid #fff;
+  border: 1.5px solid var(--color-surface);
 }
 
 /* ── Category Bar ── */
@@ -425,7 +425,7 @@ a.action-btn {
   width: 300px;
   max-width: 85vw;
   height: 100dvh;
-  background: #ffffff;
+  background: var(--color-surface);
   z-index: 300;
   display: flex;
   flex-direction: column;
@@ -507,7 +507,7 @@ a.action-btn {
   justify-content: center;
   gap: var(--space-sm);
   background: var(--color-primary);
-  color: #fff;
+  color: var(--color-surface);
   font-size: 0.875rem;
   font-weight: 600;
   padding: 0.7rem;
@@ -518,7 +518,7 @@ a.action-btn {
 
 .drawer-signin-btn:hover {
   background: var(--color-dark);
-  color: #fff;
+  color: var(--color-surface);
 }
 
 .drawer-create-link {
@@ -536,12 +536,12 @@ a.action-btn {
 /*  FOOTER                                                     */
 /* ─────────────────────────────────────────────────────────── */
 .site-footer {
-  background: linear-gradient(180deg, #FFF5F7 0%, #ffffff 100%);
+  background: linear-gradient(180deg, var(--color-bg) 0%, var(--color-surface) 100%);
 }
 
 .footer-gradient-line {
   height: 2px;
-  background: linear-gradient(90deg, #191426, var(--color-primary) 50%, #F8BBD0);
+  background: linear-gradient(90deg, var(--color-dark), var(--color-primary) 50%, var(--color-secondary));
 }
 
 .footer-main {
@@ -590,7 +590,7 @@ a.action-btn {
 .footer-socials a:hover {
   background-color: var(--color-primary);
   border-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-surface);
 }
 
 /* Link columns */
@@ -681,7 +681,8 @@ a.action-btn {
 /* Bottom bar */
 .footer-bottom {
   border-top: 1px solid var(--color-secondary);
-  padding-block: var(--space-md);
+  padding-top: var(--space-md);
+  padding-bottom: var(--space-md);
 }
 
 .footer-bottom-inner {
@@ -716,7 +717,7 @@ a.action-btn {
 }
 
 .footer-bottom-sep {
-  color: #d8cad0;
+  color: var(--color-border);
   font-size: 0.75rem;
 }
 
@@ -724,7 +725,7 @@ a.action-btn {
 .footer-bottom-link-disabled {
   font-size: 0.8rem;
   font-weight: 500;
-  color: #55444c;
+  color: var(--color-description);
   cursor: pointer;
 }
 
@@ -803,10 +804,26 @@ a.action-btn {
     grid-column: 1 / -1;
   }
 
+  .footer-bottom {
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
   .footer-bottom-inner {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: column-reverse;
+    align-items: center;
+    text-align: center;
     gap: var(--space-sm);
+  }
+
+  .footer-copy {
+    text-align: center;
+    width: 100%;
+  }
+
+  .footer-bottom-links {
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
   }
 }
 
@@ -901,46 +918,35 @@ a.action-btn {
 
 /* ─── Sonner Toast Brand Styling ─────────────────────────── */
 [data-sonner-toaster] [data-button] {
-  background-color: #E91E63 !important;
-  color: #ffffff !important;
-  font-weight: 600 !important;
-  border-radius: 0px !important;
-  transition: background-color 0.15s ease !important;
+  @apply !bg-primary !text-white font-semibold !rounded-xs transition-colors duration-150;
 }
 
 [data-sonner-toaster] [data-sonner-toast] {
-  border-radius: 0px !important;
+  @apply !rounded-md;
 }
 
 [data-sonner-toaster] [data-button]:hover {
-  background-color: #C2185B !important;
+  @apply !bg-primary-hover;
 }
 
 [data-sonner-toaster] [data-close-button] {
   left: auto !important;
-  right: 0 !important;
-  top: 0 !important;
-  transform: translate(35%, -35%) !important;
-  color: #6F6470 !important;
-  border-color: #E8E2E5 !important;
-  background-color: #ffffff !important;
-  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease !important;
+  right: 10px !important;
+  top: 10px !important;
+  transform: none !important;
+  @apply !rounded-xs !text-description !border-border !bg-white transition-colors duration-150;
 }
 
 [data-sonner-toaster] [data-close-button]:hover {
-  color: #E91E63 !important;
-  border-color: #E91E63 !important;
-  background-color: #FFF5F7 !important;
+  @apply !text-primary !border-primary !bg-bg;
 }
 
 [data-sonner-toaster] [data-type="error"] {
-  border-color: #E53935 !important;
-  color: #191426 !important;
+  @apply !border-error !text-dark;
 }
 
 [data-sonner-toaster] [data-type="success"] {
-  border-color: #2E7D32 !important;
-  color: #191426 !important;
+  @apply !border-success !text-dark;
 }
 
 /* ─── Print Styles (Single Page A4 Order Receipt) ────────── */

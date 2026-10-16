@@ -185,6 +185,13 @@ export default function ShopArchive({
   const [sortBy, setSortBy] = useState<string>("newest");
   const [mobileFilterOpen, setMobileFilterOpen] = useState<boolean>(false);
 
+  // Listen for open-mobile-filter event triggered by bottom navigation
+  useEffect(() => {
+    const handleOpenFilter = () => setMobileFilterOpen(true);
+    window.addEventListener("open-mobile-filter", handleOpenFilter);
+    return () => window.removeEventListener("open-mobile-filter", handleOpenFilter);
+  }, []);
+
   // Lock body scroll when mobile filter is open (iOS-safe)
   React.useEffect(() => {
     if (mobileFilterOpen) {
@@ -598,6 +605,7 @@ export default function ShopArchive({
         <div className="flex items-center gap-3">
           {/* Mobile Filter Button */}
           <button
+            id="mobile-filter-open-btn"
             type="button"
             onClick={() => setMobileFilterOpen(true)}
             className="md:hidden flex items-center gap-2 px-3.5 py-2 text-xs font-semibold bg-white border border-border rounded-md text-dark hover:border-primary"
@@ -702,8 +710,8 @@ export default function ShopArchive({
             onClick={() => setMobileFilterOpen(false)}
           />
 
-          {/* Full Screen Drawer Panel */}
-          <div className="relative ml-auto w-full max-w-[340px] h-[100dvh] bg-white shadow-2xl flex flex-col z-10 animate-in slide-in-from-right duration-200">
+          {/* Full Screen Drawer Panel (Opens from Left) */}
+          <div className="relative mr-auto w-full max-w-[340px] h-[100dvh] bg-white shadow-2xl flex flex-col z-10 animate-in slide-in-from-left duration-200">
             {/* Clean Modal Header */}
             <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-white shrink-0">
               <div className="flex items-center gap-2">

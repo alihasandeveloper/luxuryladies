@@ -25,9 +25,9 @@ export default function ThemeToaster() {
           background: "#ffffff",
           color: "var(--color-dark)",
           border: "1px solid var(--color-border)",
-          borderRadius: "0px",
+          borderRadius: "6px",
           boxShadow: "0 10px 25px -5px rgba(25, 20, 38, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04)",
-          padding: "12px 14px",
+          padding: "14px 36px 14px 16px",
         },
         actionButtonStyle: {
           background: "var(--color-primary)",
@@ -35,14 +35,14 @@ export default function ThemeToaster() {
           fontWeight: "600",
           fontSize: "12px",
           padding: "6px 12px",
-          borderRadius: "0px",
+          borderRadius: "4px",
         },
         classNames: {
-          toast: "font-sans !border-border !bg-white shadow-lg !rounded-none",
+          toast: "font-sans !border-border !bg-white shadow-lg !rounded-md",
           title: "!text-dark font-semibold text-xs sm:text-sm",
           description: "!text-description text-xs",
-          actionButton: "!bg-primary hover:!bg-primary-hover !text-white text-xs font-semibold px-3 py-1.5 !rounded-none transition-colors",
-          closeButton: "!left-auto !right-0 !translate-x-[35%] !bg-white !border-border !text-description hover:!text-primary !rounded-none",
+          actionButton: "!bg-primary hover:!bg-primary-hover !text-white text-xs font-semibold px-3 py-1.5 !rounded-md transition-colors",
+          closeButton: "!left-auto !right-2.5 !top-2.5 !transform-none !bg-white !border-border !text-description hover:!text-primary !rounded-md",
         },
       }}
     />

@@ -1106,7 +1106,7 @@ export default function CheckoutView({
 
                     <div className="space-y-2.5">
                       {!selectedDistrict ? (
-                        <div className="py-5 px-4 rounded-none border border-dashed border-border bg-bg/40 text-center">
+                        <div className="py-5 px-4 rounded-none border border-dashed border-secondary bg-bg/40 text-center">
                           <Truck size={20} className="mx-auto text-description mb-1.5" />
                           <p className="text-xs font-semibold text-description">
                             Please select your district above to view available shipping options.

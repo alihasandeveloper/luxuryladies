@@ -82,7 +82,7 @@ export default function CartView() {
                   return (
                     <div
                       key={item.id}
-                      className="bg-white rounded-none border border-border p-4 sm:p-5 shadow-sm hover:border-primary/40 hover:shadow-md transition-all"
+                      className="bg-white rounded-none border border-border p-4 sm:p-5 shadow-sm hover:shadow-md transition-all"
                     >
                       {/* Top Row: Thumbnail + Info + Trash/Quantity */}
                       <div className="flex items-start gap-4">
@@ -124,7 +124,7 @@ export default function CartView() {
                                 ([attrKey, attrVal]) => (
                                   <span
                                     key={attrKey}
-                                    className="px-2 py-0.5 rounded-none border border-border text-[10px] sm:text-[11px] font-semibold text-description uppercase bg-bg"
+                                    className="px-2 py-0.5 rounded-sm border border-secondary text-[10px] sm:text-[11px] font-semibold text-description uppercase bg-bg"
                                   >
                                     {attrKey}: <span className="font-bold text-dark">{attrVal}</span>
                                   </span>
