@@ -128,11 +128,36 @@ function normalizeProduct(raw: any): WooCommerceProduct {
       variation: Boolean(attr.variation),
       options: (attr.options || []).map((opt: any) => decodeHtml(String(opt).trim())),
     })),
-    default_attributes: (raw.default_attributes || []).map((def: any) => ({
-      id: def.id,
-      name: decodeHtml(def.name || ""),
-      option: decodeHtml(String(def.option || "").trim()),
-    })),
+    default_attributes: (() => {
+      let rawDef: any[] = [];
+      if (Array.isArray(raw.default_attributes) && raw.default_attributes.length > 0) {
+        rawDef = raw.default_attributes;
+      } else if (raw.default_attributes && typeof raw.default_attributes === "object") {
+        rawDef = Object.entries(raw.default_attributes).map(([k, v]) => ({
+          name: k,
+          option: typeof v === "object" && v !== null ? (v as any).option || "" : String(v || ""),
+        }));
+      } else if (Array.isArray(raw.meta_data)) {
+        const metaDef = raw.meta_data.find((m: any) => m && m.key === "_default_attributes");
+        if (metaDef && metaDef.value) {
+          if (Array.isArray(metaDef.value)) {
+            rawDef = metaDef.value;
+          } else if (typeof metaDef.value === "object") {
+            rawDef = Object.entries(metaDef.value).map(([k, v]) => ({
+              name: k,
+              option: typeof v === "object" && v !== null ? (v as any).option || "" : String(v || ""),
+            }));
+          }
+        }
+      }
+      return rawDef
+        .map((def: any) => ({
+          id: def.id ?? 0,
+          name: decodeHtml(def.name || ""),
+          option: decodeHtml(String(def.option || def.value || "").trim()),
+        }))
+        .filter((def: any) => def.name && def.option);
+    })(),
     variations: raw.variations || [],
     variations_data: raw.variations_data || [],
     meta_data: raw.meta_data || [],

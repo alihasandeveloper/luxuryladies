@@ -304,22 +304,39 @@ export default function ProductDetails({
     const initial: Record<string, string> = {};
     if (variationAttributes.length === 0) return initial;
 
-    if (product.default_attributes && product.default_attributes.length > 0) {
-      variationAttributes.forEach((attr) => {
-        const def = product.default_attributes?.find(
-          (d) =>
-            (d.id && attr.id && Number(d.id) > 0 && Number(d.id) === Number(attr.id)) ||
-            matchAttributeKey(d.name, attr.name, attr.slug)
-        );
-        const defOpt = (def as any)?.option ?? (def as any)?.value ?? "";
-        if (def && String(defOpt).trim() !== "") {
-          const matched = findMatchingOption(attr.options, String(defOpt));
-          if (matched) {
-            initial[attr.name] = matched;
+    const defaultAttrs = product.default_attributes || [];
+    // If NO default attributes are set in WooCommerce, return empty {} (no attribute is selected!)
+    if (!Array.isArray(defaultAttrs) || defaultAttrs.length === 0) {
+      return {};
+    }
+
+    variationAttributes.forEach((attr) => {
+      const def = defaultAttrs.find(
+        (d) =>
+          (d.id && attr.id && Number(d.id) > 0 && Number(d.id) === Number(attr.id)) ||
+          matchAttributeKey(d.name, attr.name, attr.slug) ||
+          d.name.toLowerCase().trim() === attr.name.toLowerCase().trim() ||
+          (attr.slug && d.name.toLowerCase().trim() === attr.slug.toLowerCase().trim())
+      );
+
+      const defOpt = (def as any)?.option ?? (def as any)?.value ?? "";
+      if (def && String(defOpt).trim() !== "") {
+        const matched = findMatchingOption(attr.options, String(defOpt));
+        if (matched) {
+          initial[attr.name] = matched;
+        } else {
+          // Fallback direct match in options
+          const fallback = attr.options.find(
+            (opt) =>
+              String(opt).toLowerCase().trim() === String(defOpt).toLowerCase().trim() ||
+              normalizeOptionString(String(opt)) === normalizeOptionString(String(defOpt))
+          );
+          if (fallback) {
+            initial[attr.name] = String(fallback);
           }
         }
-      });
-    }
+      }
+    });
 
     return initial;
   };
@@ -336,7 +353,7 @@ export default function ProductDetails({
     } else {
       setSelectedAttributes({});
     }
-  }, [product.id, isVariableProduct]);
+  }, [product.id, isVariableProduct, product.default_attributes]);
 
   // Check if all variation attributes are currently selected
   const isAllAttributesSelected = useMemo(() => {
