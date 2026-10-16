@@ -14,6 +14,31 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    if (process.env.ENABLE_DEMO === "true" || process.env.NEXT_PUBLIC_ENABLE_DEMO === "true") {
+      return NextResponse.json({
+        success: true,
+        order: {
+          id: Number(cleanId),
+          order_number: `LL-${cleanId}`,
+          status: "processing",
+          date_created: new Date().toISOString(),
+          total: "3480",
+          currency: "BDT",
+          payment_method: "Cash on Delivery",
+          shipping_city: "Dhaka",
+          items: [
+            {
+              id: 1,
+              name: "Satin 3 Pcs PJ Set with Robe - Wine",
+              quantity: 1,
+              total: "2600",
+              image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&auto=format&fit=crop&q=80",
+            },
+          ],
+        },
+      });
+    }
+
     const targetUrl = getWpAuthUrl(`/wp-json/wc/v3/orders/${cleanId}`);
     const headers = getWpAuthHeaders();
 

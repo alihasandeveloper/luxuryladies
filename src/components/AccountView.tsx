@@ -276,9 +276,6 @@ export default function AccountView() {
                 <h1 className="text-xl md:text-2xl font-medium text-dark">
                   {user.first_name ? `${user.first_name} ${user.last_name}` : user.display_name}
                 </h1>
-                <span className="text-[10px] font-bold tracking-wider px-2 py-0.5 bg-primary/10 text-primary uppercase rounded-full">
-                  Customer
-                </span>
               </div>
               <p className="text-xs md:text-sm text-description mt-0.5">{user.email}</p>
             </div>
@@ -303,11 +300,10 @@ export default function AccountView() {
               <button
                 type="button"
                 onClick={() => handleTabChange("dashboard")}
-                className={`w-full flex items-center justify-between px-5 py-3.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer ${
-                  activeTab === "dashboard"
-                    ? "bg-primary text-white"
-                    : "text-dark hover:bg-bg hover:text-primary"
-                }`}
+                className={`w-full flex items-center justify-between px-5 py-3.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer ${activeTab === "dashboard"
+                  ? "bg-primary text-white"
+                  : "text-dark hover:bg-bg hover:text-primary"
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <LayoutDashboard size={16} />
@@ -319,20 +315,18 @@ export default function AccountView() {
               <button
                 type="button"
                 onClick={() => handleTabChange("orders")}
-                className={`w-full flex items-center justify-between px-5 py-3.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer ${
-                  activeTab === "orders"
-                    ? "bg-primary text-white"
-                    : "text-dark hover:bg-bg hover:text-primary"
-                }`}
+                className={`w-full flex items-center justify-between px-5 py-3.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer ${activeTab === "orders"
+                  ? "bg-primary text-white"
+                  : "text-dark hover:bg-bg hover:text-primary"
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <Package size={16} />
                   <span>Orders</span>
                 </div>
                 {orders.length > 0 && (
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
-                    activeTab === "orders" ? "bg-white text-primary" : "bg-primary/10 text-primary"
-                  }`}>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${activeTab === "orders" ? "bg-white text-primary" : "bg-primary/10 text-primary"
+                    }`}>
                     {orders.length}
                   </span>
                 )}
@@ -341,11 +335,10 @@ export default function AccountView() {
               <button
                 type="button"
                 onClick={() => handleTabChange("addresses")}
-                className={`w-full flex items-center justify-between px-5 py-3.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer ${
-                  activeTab === "addresses"
-                    ? "bg-primary text-white"
-                    : "text-dark hover:bg-bg hover:text-primary"
-                }`}
+                className={`w-full flex items-center justify-between px-5 py-3.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer ${activeTab === "addresses"
+                  ? "bg-primary text-white"
+                  : "text-dark hover:bg-bg hover:text-primary"
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <MapPin size={16} />
@@ -357,11 +350,10 @@ export default function AccountView() {
               <button
                 type="button"
                 onClick={() => handleTabChange("account")}
-                className={`w-full flex items-center justify-between px-5 py-3.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer ${
-                  activeTab === "account"
-                    ? "bg-primary text-white"
-                    : "text-dark hover:bg-bg hover:text-primary"
-                }`}
+                className={`w-full flex items-center justify-between px-5 py-3.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer ${activeTab === "account"
+                  ? "bg-primary text-white"
+                  : "text-dark hover:bg-bg hover:text-primary"
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <UserIcon size={16} />

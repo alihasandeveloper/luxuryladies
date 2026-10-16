@@ -13,6 +13,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (process.env.ENABLE_DEMO === "true" || process.env.NEXT_PUBLIC_ENABLE_DEMO === "true") {
+      const newUser = {
+        id: 1,
+        email: email,
+        username: username || email.split("@")[0],
+        first_name: first_name || "Demo",
+        last_name: last_name || "User",
+        display_name: `${first_name || "Demo"} ${last_name || "User"}`.trim(),
+      };
+      const response = NextResponse.json({
+        success: true,
+        message: "Registration successful (Demo Mode)!",
+        user: newUser,
+        token: "demo_jwt_token_123456",
+      });
+      response.cookies.set("ll_auth_token", "demo_jwt_token_123456", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 30,
+      });
+      response.cookies.set("ll_user_id", "1", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 30,
+      });
+      return response;
+    }
+
     const res = await fetch(`${getWpBaseUrl()}/wp-json/nextjs-helper/v1/auth/register`, {
       method: "POST",
       headers: getWpAuthHeaders(),

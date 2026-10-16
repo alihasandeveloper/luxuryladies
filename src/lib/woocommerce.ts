@@ -11,6 +11,14 @@ import {
   WooCommerceState,
   GeneralSettingsData,
 } from "@/types/woocommerce";
+import demoData from "@/data/demo-data.json";
+
+export const isDemoMode = (): boolean => {
+  return (
+    process.env.ENABLE_DEMO === "true" ||
+    process.env.NEXT_PUBLIC_ENABLE_DEMO === "true"
+  );
+};
 
 const WP_URL = (process.env.WP_BACKEND_URL || "").trim().replace(/\/+$/, "");
 const WP_CK = process.env.WP_CK || "";
@@ -188,6 +196,32 @@ export async function getProducts(params?: {
   search?: string;
   featured?: boolean;
 }): Promise<WooCommerceProduct[]> {
+  if (isDemoMode()) {
+    let prods = demoData.products as unknown as WooCommerceProduct[];
+    if (params?.featured !== undefined) {
+      prods = prods.filter((p) => p.featured === params.featured);
+    }
+    if (params?.category) {
+      const catSlug = params.category.toLowerCase().trim();
+      prods = prods.filter((p) =>
+        p.categories?.some((c) => c.slug.toLowerCase() === catSlug)
+      );
+    }
+    if (params?.search) {
+      const q = params.search.toLowerCase().trim();
+      prods = prods.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.description?.toLowerCase().includes(q) ||
+          p.categories?.some((c) => c.name.toLowerCase().includes(q))
+      );
+    }
+    const page = params?.page || 1;
+    const perPage = params?.per_page || 12;
+    const start = (page - 1) * perPage;
+    return prods.slice(start, start + perPage);
+  }
+
   try {
     const authHeader = getAuthHeader();
     if (!authHeader) {
@@ -218,7 +252,7 @@ export async function getProducts(params?: {
         Authorization: authHeader,
         "Content-Type": "application/json",
       },
-      next: { revalidate: 30 },
+      next: { revalidate: 60, tags: ["products"] },
     });
 
     if (!res.ok) {
@@ -242,6 +276,11 @@ export async function getProducts(params?: {
  * Fetch variations for a variable product from WooCommerce REST API
  */
 export async function getProductVariations(productId: number): Promise<WooCommerceVariation[]> {
+  if (isDemoMode()) {
+    const prod = (demoData.products as unknown as WooCommerceProduct[]).find((p) => p.id === productId);
+    return (prod?.variations_data as WooCommerceVariation[]) || [];
+  }
+
   try {
     const authHeader = getAuthHeader();
     if (!authHeader) return [];
@@ -327,6 +366,14 @@ export async function getProductVariations(productId: number): Promise<WooCommer
  * Fetch single product by slug from WooCommerce REST API
  */
 export async function getProductBySlug(slug: string): Promise<WooCommerceProduct | null> {
+  if (isDemoMode()) {
+    const clean = decodeURIComponent(slug).toLowerCase();
+    const prod = (demoData.products as unknown as WooCommerceProduct[]).find(
+      (p) => p.slug.toLowerCase() === clean || String(p.id) === clean
+    );
+    return prod || null;
+  }
+
   try {
     const authHeader = getAuthHeader();
     if (!authHeader) {
@@ -340,7 +387,7 @@ export async function getProductBySlug(slug: string): Promise<WooCommerceProduct
           Authorization: authHeader,
           "Content-Type": "application/json",
         },
-        cache: "no-store",
+        next: { revalidate: 60, tags: ["product", `product-${slug}`] },
       }
     );
 
@@ -372,6 +419,10 @@ export async function getProductBySlug(slug: string): Promise<WooCommerceProduct
  * Fetch categories from WooCommerce REST API
  */
 export async function getCategories(): Promise<WooCommerceCategory[]> {
+  if (isDemoMode()) {
+    return demoData.categories as unknown as WooCommerceCategory[];
+  }
+
   try {
     const authHeader = getAuthHeader();
     if (!authHeader) {
@@ -385,7 +436,7 @@ export async function getCategories(): Promise<WooCommerceCategory[]> {
           Authorization: authHeader,
           "Content-Type": "application/json",
         },
-        next: { revalidate: 60 },
+        next: { revalidate: 300, tags: ["categories"] },
       }
     );
 
@@ -424,6 +475,27 @@ export async function getCategories(): Promise<WooCommerceCategory[]> {
 export async function createWooCommerceOrder(
   orderPayload: CreateOrderPayload
 ): Promise<WooCommerceOrderResponse> {
+  if (isDemoMode()) {
+    const demoId = 30000 + Math.floor(Math.random() * 9000);
+    return {
+      id: demoId,
+      order_key: `wc_order_demo_${demoId}`,
+      status: "processing",
+      currency: "BDT",
+      total: String(
+        orderPayload.line_items.reduce((sum, item) => sum + 2600 * item.quantity, 0) +
+          (Number(orderPayload.shipping_lines?.[0]?.total) || 80)
+      ),
+      billing: orderPayload.billing,
+      shipping: orderPayload.shipping,
+      payment_method: orderPayload.payment_method,
+      payment_method_title: orderPayload.payment_method_title,
+      line_items: orderPayload.line_items as any,
+      date_created: new Date().toISOString(),
+      customer_id: orderPayload.customer_id,
+    } as WooCommerceOrderResponse;
+  }
+
   const authHeader = getAuthHeader();
   if (!authHeader) {
     throw new Error("WooCommerce API keys are not configured");
@@ -461,6 +533,10 @@ export async function createWooCommerceOrder(
  * Fetch available and enabled payment gateways from WooCommerce REST API
  */
 export async function getPaymentGateways(): Promise<WooCommercePaymentGateway[]> {
+  if (isDemoMode()) {
+    return demoData.paymentGateways as WooCommercePaymentGateway[];
+  }
+
   try {
     const authHeader = getAuthHeader();
     if (!authHeader) {
@@ -472,7 +548,7 @@ export async function getPaymentGateways(): Promise<WooCommercePaymentGateway[]>
         Authorization: authHeader,
         "Content-Type": "application/json",
       },
-      next: { revalidate: 30 },
+      next: { revalidate: 3600, tags: ["payment-gateways"] },
     });
 
     if (!res.ok) {
@@ -555,6 +631,10 @@ let cachedStoreCountry: { timestamp: number; country: string } | null = null;
  * and store base location (`woocommerce_default_country`).
  */
 export async function getStoreDefaultCountry(): Promise<string> {
+  if (isDemoMode()) {
+    return "BD";
+  }
+
   const now = Date.now();
   if (cachedStoreCountry && now - cachedStoreCountry.timestamp < 60000) {
     return cachedStoreCountry.country;
@@ -569,7 +649,7 @@ export async function getStoreDefaultCountry(): Promise<string> {
         Authorization: authHeader,
         "Content-Type": "application/json",
       },
-      next: { revalidate: 3600 },
+      next: { revalidate: 86400, tags: ["countries"] },
     });
 
     if (res.ok) {
@@ -629,6 +709,10 @@ let cachedStatesMap = new Map<string, { timestamp: number; states: WooCommerceSt
 export async function getCountryStates(
   countryCode?: string
 ): Promise<WooCommerceState[]> {
+  if (isDemoMode()) {
+    return demoData.countryStates as WooCommerceState[];
+  }
+
   const code = (countryCode || (await getStoreDefaultCountry())).trim().toUpperCase();
   const now = Date.now();
   const cached = cachedStatesMap.get(code);
@@ -649,7 +733,7 @@ export async function getCountryStates(
           Authorization: authHeader,
           "Content-Type": "application/json",
         },
-        next: { revalidate: 3600 },
+        next: { revalidate: 86400, tags: ["countries"] },
       }
     );
 
@@ -679,6 +763,15 @@ export async function getShippingMethods(
   district?: string,
   countryCode?: string
 ): Promise<WooCommerceShippingMethod[]> {
+  if (isDemoMode()) {
+    if (!district || !district.trim()) return [];
+    const isDhaka = district.trim().toLowerCase().includes("dhaka");
+    if (isDhaka) {
+      return [demoData.shippingMethods[0] as WooCommerceShippingMethod];
+    }
+    return [demoData.shippingMethods[1] as WooCommerceShippingMethod];
+  }
+
   if (!district || !district.trim()) {
     return [];
   }
@@ -935,6 +1028,22 @@ export async function verifyWooCommerceCoupon(
     return { success: false, message: "Please enter a coupon code." };
   }
 
+  if (isDemoMode()) {
+    const upper = cleanCode.toUpperCase();
+    const found = demoData.coupons.find((c) => c.code.toUpperCase() === upper);
+    if (!found) {
+      return { success: false, message: `Coupon code "${code}" is invalid or expired.` };
+    }
+    if (subtotal < found.minSpend) {
+      return { success: false, message: `Minimum spend of Tk ${found.minSpend} required for this coupon.` };
+    }
+    return {
+      success: true,
+      message: "Coupon applied successfully!",
+      coupon: found,
+    };
+  }
+
   const authHeader = getAuthHeader();
   if (authHeader) {
     try {
@@ -1086,6 +1195,10 @@ export async function verifyWooCommerceCoupon(
  * (Header categories, Shop by categories, Landing page categories, Hero gallery, Information, Social links)
  */
 export async function getGeneralSettings(): Promise<GeneralSettingsData | null> {
+  if (isDemoMode()) {
+    return demoData.generalSettings as unknown as GeneralSettingsData;
+  }
+
   try {
     const authHeader = getAuthHeader();
     const headers: Record<string, string> = {
@@ -1097,7 +1210,7 @@ export async function getGeneralSettings(): Promise<GeneralSettingsData | null> 
 
     const res = await fetch(`${getBaseUrl()}/wp-json/nextjs-helper/v1/general-settings`, {
       headers,
-      next: { revalidate: 60 },
+      next: { revalidate: 300, tags: ["general-settings"] },
     });
 
     if (!res.ok) {
@@ -1136,6 +1249,10 @@ export async function getGeneralSettings(): Promise<GeneralSettingsData | null> 
  * Fetch offers taxonomy terms from WordPress / WooCommerce
  */
 export async function getOffers(): Promise<WooCommerceCategory[]> {
+  if (isDemoMode()) {
+    return demoData.offers as unknown as WooCommerceCategory[];
+  }
+
   try {
     const authHeader = getAuthHeader();
     const headers: Record<string, string> = {
@@ -1148,7 +1265,7 @@ export async function getOffers(): Promise<WooCommerceCategory[]> {
     // 1. Try WP REST API endpoint for custom taxonomy 'offers'
     const res = await fetch(`${getBaseUrl()}/wp-json/wp/v2/offers?per_page=100&hide_empty=false`, {
       headers,
-      next: { revalidate: 60 },
+      next: { revalidate: 300, tags: ["offers"] },
     });
 
     if (res.ok) {

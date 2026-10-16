@@ -109,8 +109,7 @@ export default async function Home() {
         {/* ── Product Grids for configured Landing Page Offers (High Priority) ── */}
         {landingOffers.map((offer: any) => {
           const offerProducts = allProducts.filter((p) =>
-            p.offers?.some((o) => o.slug === offer.slug || o.id === offer.id) ||
-            p.categories?.some((c) => c.slug === offer.slug || c.id === offer.id)
+            p.offers?.some((o) => o.slug === offer.slug || o.id === offer.id)
           );
 
           if (offerProducts.length === 0) return null;

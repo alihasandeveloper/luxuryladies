@@ -311,12 +311,11 @@ export default function ShopArchive({
           if (currentStock !== "outofstock") return false;
         }
 
-        // Offers filter
+        // Offers filter (strictly match assigned offer taxonomy terms)
         if (selectedOffers.length > 0) {
-          const matchesOffer =
-            product.offers?.some((o) => selectedOffers.includes(o.slug) || (o.id && selectedOffers.includes(String(o.id)))) ||
-            product.categories?.some((c) => selectedOffers.includes(c.slug) || (c.id && selectedOffers.includes(String(c.id)))) ||
-            (selectedOffers.some((slug) => slug.includes("sale") || slug.includes("deal")) && product.on_sale);
+          const matchesOffer = product.offers?.some(
+            (o) => selectedOffers.includes(o.slug) || (o.id && selectedOffers.includes(String(o.id)))
+          );
 
           if (!matchesOffer) return false;
         }
@@ -377,10 +376,9 @@ export default function ShopArchive({
   const offersWithCount = useMemo(() => {
     return activeOffers.map((offer) => {
       const matchingCount = allProducts.filter((p) =>
-        p.offers?.some((o) => o.slug === offer.slug || o.id === offer.id) ||
-        p.categories?.some((c) => c.slug === offer.slug || c.id === offer.id)
+        p.offers?.some((o) => o.slug === offer.slug || o.id === offer.id)
       ).length;
-      const count = matchingCount > 0 ? matchingCount : (offer.count || 0);
+      const count = typeof offer.count === "number" && offer.count > 0 ? offer.count : matchingCount;
       return { ...offer, count };
     }).sort((a, b) => b.count - a.count);
   }, [allProducts, activeOffers]);

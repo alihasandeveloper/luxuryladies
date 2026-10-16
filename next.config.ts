@@ -17,6 +17,8 @@ if (wpUrl) {
 
 const nextConfig: NextConfig = {
   images: {
+    // Cache optimized images for 7 days to reduce backend bandwidth
+    minimumCacheTTL: 60 * 60 * 24 * 7,
     // Required in Next.js 16+ for local dev domains resolving to private IP 127.0.0.1
     dangerouslyAllowLocalIP: true,
     remotePatterns: [

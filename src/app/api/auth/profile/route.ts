@@ -7,6 +7,22 @@ export async function POST(request: NextRequest) {
     const cookieUserId = request.cookies.get("ll_user_id")?.value;
     const authToken = request.cookies.get("ll_auth_token")?.value;
 
+    if (process.env.ENABLE_DEMO === "true" || process.env.NEXT_PUBLIC_ENABLE_DEMO === "true") {
+      return NextResponse.json({
+        success: true,
+        message: "Profile updated successfully (Demo Mode).",
+        user: {
+          id: 1,
+          email: body.email || "demo@luxuryladies.com",
+          first_name: body.first_name || "Demo",
+          last_name: body.last_name || "User",
+          display_name: `${body.first_name || "Demo"} ${body.last_name || "User"}`.trim(),
+          billing: body.billing,
+          shipping: body.shipping,
+        },
+      });
+    }
+
     if (!cookieUserId || !authToken) {
       return NextResponse.json(
         { success: false, message: "User not authenticated." },
