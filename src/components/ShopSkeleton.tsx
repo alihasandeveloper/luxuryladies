@@ -29,7 +29,7 @@ export default function ShopSkeleton() {
         {/* ── Main Layout: Sidebar + Product Grid ── */}
         <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-12 gap-6 md:gap-8 items-start">
           {/* ── Desktop Sidebar Filter Skeleton (Identical bg, padding, and box-shadow to ShopArchive) ── */}
-          <aside className="hidden md:block md:col-span-1 lg:col-span-3 bg-white p-5 shadow-xs sticky top-28">
+          <aside className="hidden md:block md:col-span-1 lg:col-span-3 bg-white p-5 shadow-sm sticky top-28">
             <div className="flex flex-col space-y-6 animate-pulse">
               {/* Filter Header */}
               <div className="flex items-center justify-between pb-3 border-b border-gray-100">

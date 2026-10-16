@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -11,12 +11,57 @@ import {
   CreditCard,
   Truck,
   Package,
+  Tag,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { toast } from "sonner";
 import Button from "@/components/Button";
 
 export default function CartView() {
-  const { cart, cartCount, subtotal, updateQuantity, removeFromCart } = useCart();
+  const {
+    cart,
+    cartCount,
+    subtotal,
+    discount,
+    appliedCoupon,
+    applyCoupon,
+    removeCoupon,
+    updateQuantity,
+    removeFromCart,
+  } = useCart();
+
+  const [couponInput, setCouponInput] = useState("");
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+  const [couponMessage, setCouponMessage] = useState<{ text: string; isError: boolean } | null>(null);
+
+  const handleApplyCoupon = async (codeToApply?: string) => {
+    const code = (codeToApply || couponInput).trim();
+    if (!code) {
+      setCouponMessage({ text: "Please enter a coupon code.", isError: true });
+      return;
+    }
+
+    setIsApplyingCoupon(true);
+    setCouponMessage(null);
+    try {
+      const res = await applyCoupon(code);
+      if (res.success) {
+        toast.success(res.message);
+        setCouponInput("");
+        setCouponMessage({ text: res.message, isError: false });
+      } else {
+        toast.error(res.message);
+        setCouponMessage({ text: res.message, isError: true });
+      }
+    } catch {
+      toast.error("Failed to apply coupon.");
+      setCouponMessage({ text: "Failed to apply coupon.", isError: true });
+    } finally {
+      setIsApplyingCoupon(false);
+    }
+  };
+
+  const finalTotal = Math.max(0, subtotal - discount);
 
   return (
     <div className="w-full py-8 md:py-12 bg-bg/20 min-h-[75vh]">
@@ -212,14 +257,88 @@ export default function CartView() {
                   </span>
                 </div>
 
+                {/* Coupon discount line (if applied) */}
+                {appliedCoupon && discount > 0 && (
+                  <div className="flex items-center justify-between text-xs sm:text-sm text-success mb-3">
+                    <span className="flex items-center gap-1.5 font-medium">
+                      <Tag size={13} className="text-success shrink-0" />
+                      <span>Coupon ({appliedCoupon.code})</span>
+                    </span>
+                    <span className="font-bold text-success">
+                      -Tk {discount.toFixed(2)}
+                    </span>
+                  </div>
+                )}
+
+                {/* Coupon Input / Status Box */}
+                <div className="pt-2 pb-3 mb-2 border-t border-border">
+                  {appliedCoupon ? (
+                    <div className="flex items-center justify-between bg-success-bg border border-success/30 rounded-none px-3 py-2 text-xs">
+                      <div className="flex items-center gap-2 text-success">
+                        <Tag size={14} className="text-success shrink-0" />
+                        <span>
+                          Code <strong>{appliedCoupon.code}</strong> applied (-Tk {discount.toFixed(2)})
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          removeCoupon();
+                          setCouponMessage(null);
+                          toast.info("Coupon removed.");
+                        }}
+                        className="text-description hover:text-error font-bold ml-2 cursor-pointer p-0.5"
+                        title="Remove coupon"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="flex gap-2 items-center">
+                        <input
+                          type="text"
+                          value={couponInput}
+                          disabled={isApplyingCoupon}
+                          onChange={(e) => {
+                            setCouponInput(e.target.value.toUpperCase());
+                            if (couponMessage) setCouponMessage(null);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleApplyCoupon();
+                            }
+                          }}
+                          placeholder="Coupon code"
+                          className="flex-1 h-9 px-3 rounded-none border border-border text-xs text-dark placeholder:text-description uppercase tracking-wider focus:outline-none focus:border-primary disabled:bg-gray-50"
+                        />
+                        <button
+                          type="button"
+                          disabled={isApplyingCoupon}
+                          onClick={() => handleApplyCoupon()}
+                          className="h-9 px-4 rounded-none bg-dark hover:bg-dark/90 disabled:opacity-60 text-white text-xs font-bold transition-colors cursor-pointer flex items-center justify-center shrink-0"
+                        >
+                          {isApplyingCoupon ? "Applying..." : "Apply"}
+                        </button>
+                      </div>
+                      {couponMessage && (
+                        <p className={`text-xs mt-1.5 ${couponMessage.isError ? "text-error" : "text-success"}`}>
+                          {couponMessage.text}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
                 {/* Divider */}
-                <div className="border-t border-border my-4" />
+                <div className="border-t border-border my-3" />
 
                 {/* Total */}
                 <div className="flex items-center justify-between text-base font-bold text-dark mb-5">
                   <span>Total</span>
                   <span className="text-lg text-primary">
-                    Tk {subtotal.toFixed(2)}
+                    Tk {finalTotal.toFixed(2)}
                   </span>
                 </div>
 

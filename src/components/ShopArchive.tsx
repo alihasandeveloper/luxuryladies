@@ -637,7 +637,7 @@ export default function ShopArchive({
       {/* ── Main Layout: Sidebar + Product Grid ── */}
       <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-12 gap-6 md:gap-8 items-start">
         {/* Desktop Sidebar (Left side, exactly matching user mockup) */}
-        <aside className="hidden md:block md:col-span-1 lg:col-span-3 bg-white p-5 shadow-xs sticky top-28">
+        <aside className="hidden md:block md:col-span-1 lg:col-span-3 bg-white p-5 shadow-sm sticky top-28">
           {FilterContent}
         </aside>
 

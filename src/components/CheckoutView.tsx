@@ -25,6 +25,9 @@ import {
   Check,
   X,
   Truck,
+  Minus,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useCart } from "@/context/CartContext";
@@ -84,6 +87,8 @@ export default function CheckoutView({
     appliedCoupon,
     applyCoupon,
     removeCoupon,
+    updateQuantity,
+    removeFromCart,
     clearCart,
   } = useCart();
 
@@ -1181,8 +1186,8 @@ export default function CheckoutView({
                   </span>
                 </div>
 
-                {/* Items Preview */}
-                <div className="max-h-64 overflow-y-auto divide-y divide-border pr-1 mb-4">
+                {/* Items Preview with Quantity Stepper & Remove Button */}
+                <div className="max-h-72 overflow-y-auto divide-y divide-border pr-1 mb-4">
                   {cart.map((item) => (
                     <div key={item.id} className="py-3 flex items-start gap-3">
                       <div className="relative w-14 h-14 rounded-none bg-bg border border-border overflow-hidden shrink-0">
@@ -1193,23 +1198,55 @@ export default function CheckoutView({
                           className="object-cover"
                           unoptimized={Boolean(!item.image || item.image.startsWith("/"))}
                         />
-                        <span className="absolute bottom-0 right-0 bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-tl-none">
-                          ×{item.quantity}
-                        </span>
                       </div>
                       <div className="flex-1 min-w-0 pr-1">
-                        <p className="text-xs font-semibold text-dark line-clamp-1">
-                          {item.name}
-                        </p>
+                        <div className="flex items-start justify-between gap-1">
+                          <p className="text-xs font-semibold text-dark line-clamp-1" title={item.name}>
+                            {item.name}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => removeFromCart(item.id)}
+                            className="text-description hover:text-error transition-colors p-0.5 -mt-0.5 cursor-pointer shrink-0"
+                            title={`Remove ${item.name}`}
+                            aria-label={`Remove ${item.name}`}
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
                         {item.selectedAttributes &&
                           Object.entries(item.selectedAttributes).map(([k, v]) => (
                             <span key={k} className="text-[10px] text-description block">
                               {k}: <strong className="text-dark">{String(v)}</strong>
                             </span>
                           ))}
-                        <span className="text-xs font-bold text-primary mt-1 block">
-                          Tk {(item.price * item.quantity).toFixed(2)}
-                        </span>
+                        <div className="mt-2 flex items-center justify-between gap-2">
+                          <span className="text-xs font-bold text-primary">
+                            Tk {(item.price * item.quantity).toFixed(2)}
+                          </span>
+                          {/* Quantity Stepper */}
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              className="w-5 h-5 rounded-none border border-border hover:border-primary text-description hover:text-primary flex items-center justify-center transition-colors cursor-pointer bg-white"
+                              aria-label="Decrease quantity"
+                            >
+                              <Minus size={10} strokeWidth={2.5} />
+                            </button>
+                            <span className="min-w-6 h-5 px-1 rounded-none border border-border text-dark text-[11px] font-bold flex items-center justify-center bg-bg select-none">
+                              {item.quantity}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              className="w-5 h-5 rounded-none border border-border hover:border-primary text-description hover:text-primary flex items-center justify-center transition-colors cursor-pointer bg-white"
+                              aria-label="Increase quantity"
+                            >
+                              <Plus size={10} strokeWidth={2.5} />
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}
