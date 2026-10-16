@@ -3,18 +3,28 @@ import { getWpBaseUrl, getWpAuthHeaders } from "@/lib/auth-server";
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const paramUserId = searchParams.get("user_id");
     const cookieUserId = request.cookies.get("ll_user_id")?.value;
+    const authToken = request.cookies.get("ll_auth_token")?.value;
 
-    const userId = paramUserId || cookieUserId;
-
-    if (!userId) {
+    if (!cookieUserId || !authToken) {
       return NextResponse.json(
         { success: false, message: "User not authenticated." },
         { status: 401 }
       );
     }
+
+    const { searchParams } = new URL(request.url);
+    const paramUserId = searchParams.get("user_id");
+
+    // Prevent IDOR: If paramUserId is specified, it MUST match the authenticated user
+    if (paramUserId && paramUserId !== cookieUserId) {
+      return NextResponse.json(
+        { success: false, message: "Access denied." },
+        { status: 403 }
+      );
+    }
+
+    const userId = cookieUserId;
 
     const res = await fetch(
       `${getWpBaseUrl()}/wp-json/nextjs-helper/v1/customer/profile?user_id=${encodeURIComponent(userId)}`,

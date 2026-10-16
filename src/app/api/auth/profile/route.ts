@@ -5,18 +5,19 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const cookieUserId = request.cookies.get("ll_user_id")?.value;
+    const authToken = request.cookies.get("ll_auth_token")?.value;
 
-    const payload = {
-      ...body,
-      user_id: body.user_id || cookieUserId,
-    };
-
-    if (!payload.user_id) {
+    if (!cookieUserId || !authToken) {
       return NextResponse.json(
         { success: false, message: "User not authenticated." },
         { status: 401 }
       );
     }
+
+    const payload = {
+      ...body,
+      user_id: Number(cookieUserId),
+    };
 
     const res = await fetch(`${getWpBaseUrl()}/wp-json/nextjs-helper/v1/customer/profile`, {
       method: "POST",

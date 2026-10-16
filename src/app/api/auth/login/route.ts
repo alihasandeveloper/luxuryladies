@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     // Set secure HTTP-only cookies
     response.cookies.set("ll_auth_token", data.token, {
-      httpOnly: false,
+      httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     });
 
     response.cookies.set("ll_user_id", String(data.user.id), {
-      httpOnly: false,
+      httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",

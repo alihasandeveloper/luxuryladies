@@ -68,14 +68,14 @@ export async function POST(req: Request) {
     const resolvedCity = customer.city?.trim() || customer.district?.trim() || customer.state?.trim() || "Dhaka";
     const resolvedState = customer.state?.trim() || customer.district?.trim() || "Dhaka";
 
-    // Link order to logged-in customer if available
+    // Link order to logged-in customer if authenticated via secure cookie
     const cookieHeader = req.headers.get("cookie") || "";
     const cookieMatch = cookieHeader.match(/ll_user_id=([^;]+)/);
     const cookieUserId = cookieMatch ? Number(cookieMatch[1]) : 0;
-    const resolvedCustomerId = Number(body.customerId || customer?.customerId || cookieUserId || 0);
+    const resolvedCustomerId = cookieUserId > 0 ? cookieUserId : undefined;
 
     const payload: CreateOrderPayload = {
-      customer_id: resolvedCustomerId > 0 ? resolvedCustomerId : undefined,
+      customer_id: resolvedCustomerId,
       status: "processing",
       payment_method: paymentMethod || "cod",
       payment_method_title: finalPaymentTitle,
@@ -141,23 +141,35 @@ export async function POST(req: Request) {
     try {
       orderResponse = await createWooCommerceOrder(payload);
     } catch (wcErr: any) {
-      console.warn("WooCommerce order creation failed or backend offline. Generating fallback order:", wcErr.message);
-      // Fallback order generation for offline/local development
-      const fallbackId = Math.floor(10000 + Math.random() * 90000);
-      orderResponse = {
-        id: fallbackId,
-        order_key: `wc_order_${fallbackId}_simulated`,
-        status: "processing",
-        currency: "BDT",
-        total: String(total || 0),
-        billing: payload.billing,
-        shipping: payload.shipping,
-        payment_method: payload.payment_method,
-        payment_method_title: payload.payment_method_title,
-        line_items: payload.line_items,
-        date_created: new Date().toISOString(),
-        isSimulated: true,
-      };
+      console.error("WooCommerce order creation failed:", wcErr);
+
+      // Only allow simulated orders in development mode if explicitly enabled
+      if (process.env.NODE_ENV === "development" && process.env.ENABLE_SIMULATED_ORDERS === "true") {
+        console.warn("Generating simulated order for local development testing...");
+        const fallbackId = Math.floor(10000 + Math.random() * 90000);
+        orderResponse = {
+          id: fallbackId,
+          order_key: `wc_order_${fallbackId}_simulated`,
+          status: "processing",
+          currency: "BDT",
+          total: String(total || 0),
+          billing: payload.billing,
+          shipping: payload.shipping,
+          payment_method: payload.payment_method,
+          payment_method_title: payload.payment_method_title,
+          line_items: payload.line_items,
+          date_created: new Date().toISOString(),
+          isSimulated: true,
+        };
+      } else {
+        return NextResponse.json(
+          {
+            success: false,
+            error: wcErr.message || "Failed to process order with store backend. Please try again or contact support.",
+          },
+          { status: 502 }
+        );
+      }
     }
 
     return NextResponse.json({
