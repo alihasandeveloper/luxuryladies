@@ -36,6 +36,7 @@ export default function Footer() {
   const { wishlistCount } = useWishlist();
   const { isAuthenticated } = useAuth();
   const [settings, setSettings] = useState<GeneralSettingsData | null>(null);
+  const [categories, setCategories] = useState<{ label: string; href: string; count?: number }[]>([]);
 
   useEffect(() => {
     fetch("/api/general-settings")
@@ -43,6 +44,27 @@ export default function Footer() {
       .then((json) => {
         if (json?.success && json?.data) {
           setSettings(json.data);
+        }
+      })
+      .catch(() => {});
+
+    fetch("/api/categories")
+      .then((res) => res.json())
+      .then((json) => {
+        const rawCats = Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : [];
+        if (rawCats.length > 0) {
+          const valid = rawCats.filter((c: any) => c.slug && c.slug !== "uncategorized");
+          // Sort descending by product count (highest count first)
+          const sorted = [...valid].sort((a: any, b: any) => (Number(b.count) || 0) - (Number(a.count) || 0));
+          // Take top 5 categories
+          const top5 = sorted.slice(0, 5).map((c: any) => ({
+            label: c.name,
+            href: `/category/${c.slug}`,
+            count: Number(c.count) || 0,
+          }));
+          if (top5.length > 0) {
+            setCategories(top5);
+          }
         }
       })
       .catch(() => {});
@@ -113,11 +135,11 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* ── Collections Column ── */}
+          {/* ── Categories Column ── */}
           <div className="footer-col">
-            <h4 className="footer-col-title">Collections</h4>
+            <h4 className="footer-col-title">Categories</h4>
             <ul>
-              {collections.map((item) => {
+              {(categories.length > 0 ? categories : collections).map((item) => {
                 const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
                 return (
                   <li key={item.href}>
