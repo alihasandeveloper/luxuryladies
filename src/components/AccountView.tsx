@@ -84,13 +84,34 @@ function OrderItemThumbnail({ src, alt }: { src?: string | null; alt: string }) 
   );
 }
 
+function normalizeAccountTab(tab?: string | null): string {
+  if (!tab) return "dashboard";
+  const lower = tab.toLowerCase().trim();
+  if (lower === "orders" || lower === "order") return "orders";
+  if (lower === "addresses" || lower === "address") return "addresses";
+  if (lower === "profile" || lower === "account" || lower === "details") return "account";
+  return "dashboard";
+}
+
 export default function AccountView() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialTab = searchParams.get("tab") || "dashboard";
+  const urlTab = searchParams.get("tab");
 
   const { user, isAuthenticated, isLoading, logout, updateProfile } = useAuth();
-  const [activeTab, setActiveTab] = useState<string>(initialTab);
+  const [activeTab, setActiveTab] = useState<string>(() => normalizeAccountTab(urlTab));
+
+  // Sync state whenever the URL search parameter changes (e.g. from header link or direct URL)
+  useEffect(() => {
+    setActiveTab(normalizeAccountTab(urlTab));
+  }, [urlTab]);
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", tab);
+    router.replace(`/account?${params.toString()}`, { scroll: false });
+  };
 
   // Orders state
   const [orders, setOrders] = useState<CustomerOrder[]>([]);
@@ -281,7 +302,7 @@ export default function AccountView() {
             <nav className="bg-white border border-border divide-y divide-border">
               <button
                 type="button"
-                onClick={() => setActiveTab("dashboard")}
+                onClick={() => handleTabChange("dashboard")}
                 className={`w-full flex items-center justify-between px-5 py-3.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer ${
                   activeTab === "dashboard"
                     ? "bg-primary text-white"
@@ -297,7 +318,7 @@ export default function AccountView() {
 
               <button
                 type="button"
-                onClick={() => setActiveTab("orders")}
+                onClick={() => handleTabChange("orders")}
                 className={`w-full flex items-center justify-between px-5 py-3.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer ${
                   activeTab === "orders"
                     ? "bg-primary text-white"
@@ -319,7 +340,7 @@ export default function AccountView() {
 
               <button
                 type="button"
-                onClick={() => setActiveTab("addresses")}
+                onClick={() => handleTabChange("addresses")}
                 className={`w-full flex items-center justify-between px-5 py-3.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer ${
                   activeTab === "addresses"
                     ? "bg-primary text-white"
@@ -335,7 +356,7 @@ export default function AccountView() {
 
               <button
                 type="button"
-                onClick={() => setActiveTab("account")}
+                onClick={() => handleTabChange("account")}
                 className={`w-full flex items-center justify-between px-5 py-3.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer ${
                   activeTab === "account"
                     ? "bg-primary text-white"
@@ -373,13 +394,13 @@ export default function AccountView() {
                   </h2>
                   <p className="text-xs md:text-sm text-description leading-relaxed">
                     From your account dashboard, you can effortlessly view your{" "}
-                    <button onClick={() => setActiveTab("orders")} className="text-primary font-semibold hover:underline">
+                    <button onClick={() => handleTabChange("orders")} className="text-primary font-semibold hover:underline">
                       recent orders
                     </button>, manage your{" "}
-                    <button onClick={() => setActiveTab("addresses")} className="text-primary font-semibold hover:underline">
+                    <button onClick={() => handleTabChange("addresses")} className="text-primary font-semibold hover:underline">
                       shipping and billing addresses
                     </button>, and edit your{" "}
-                    <button onClick={() => setActiveTab("account")} className="text-primary font-semibold hover:underline">
+                    <button onClick={() => handleTabChange("account")} className="text-primary font-semibold hover:underline">
                       password and account details
                     </button>.
                   </p>
@@ -388,7 +409,7 @@ export default function AccountView() {
                 {/* Quick stats grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div
-                    onClick={() => setActiveTab("orders")}
+                    onClick={() => handleTabChange("orders")}
                     className="bg-white border border-border p-5 hover:border-primary transition-colors cursor-pointer group"
                   >
                     <div className="flex items-center justify-between mb-3">
@@ -404,7 +425,7 @@ export default function AccountView() {
                   </div>
 
                   <div
-                    onClick={() => setActiveTab("addresses")}
+                    onClick={() => handleTabChange("addresses")}
                     className="bg-white border border-border p-5 hover:border-primary transition-colors cursor-pointer group"
                   >
                     <div className="flex items-center justify-between mb-3">
@@ -424,7 +445,7 @@ export default function AccountView() {
                   </div>
 
                   <div
-                    onClick={() => setActiveTab("account")}
+                    onClick={() => handleTabChange("account")}
                     className="bg-white border border-border p-5 hover:border-primary transition-colors cursor-pointer group"
                   >
                     <div className="flex items-center justify-between mb-3">
@@ -448,7 +469,7 @@ export default function AccountView() {
                         Recent Orders
                       </h3>
                       <button
-                        onClick={() => setActiveTab("orders")}
+                        onClick={() => handleTabChange("orders")}
                         className="text-xs text-primary font-semibold hover:underline"
                       >
                         View All
