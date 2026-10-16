@@ -521,58 +521,6 @@ export default function ProductDetails({
     (product.type === "variable" && !hasConfiguredVariations) ||
     (!isVariableProduct && product.purchasable === false && currentPrice <= 0);
 
-  /**
-   * Safe Option Status Checker:
-   * Checks whether selecting this option (with other currently selected attributes)
-   * corresponds to an in-stock variation in WooCommerce.
-   */
-  const getOptionStatus = (
-    attrName: string,
-    optionVal: string
-  ): {
-    isOutOfStock: boolean;
-  } => {
-    if (!product.variations_data || product.variations_data.length === 0) {
-      return { isOutOfStock: false };
-    }
-
-    // Other currently selected attributes (excluding attrName being evaluated)
-    const otherSelections: Record<string, string> = {};
-    for (const [key, val] of Object.entries(selectedAttributes)) {
-      if (key !== attrName && val) {
-        otherSelections[key] = val;
-      }
-    }
-
-    // 1. If other attributes are already selected, test combination
-    if (Object.keys(otherSelections).length > 0) {
-      const combo = { ...otherSelections, [attrName]: optionVal };
-      const matchingVars = product.variations_data.filter((v) =>
-        variationMatchesAllSelections(v, combo)
-      );
-
-      if (matchingVars.length === 0) {
-        // Combination does not exist at all in WooCommerce
-        return { isOutOfStock: true };
-      }
-
-      // In stock if ANY matching variation is in stock
-      const hasInStock = matchingVars.some((v) => isVariationInStock(v));
-      return { isOutOfStock: !hasInStock };
-    }
-
-    // 2. If no other attributes are selected, check if ANY variation with this option is in stock
-    const varsWithOption = product.variations_data.filter((v) =>
-      isVariationMatchingAttr(v, attrName, optionVal)
-    );
-
-    if (varsWithOption.length === 0) {
-      return { isOutOfStock: true };
-    }
-
-    const hasInStock = varsWithOption.some((v) => isVariationInStock(v));
-    return { isOutOfStock: !hasInStock };
-  };
 
   const handleSelectAttributeOption = (attrName: string, optionVal: string) => {
     setShowVariantAlert(false);
@@ -1072,30 +1020,20 @@ export default function ProductDetails({
                                     normOptionVal(currentVal) === normOptionVal(option)
                                   );
 
-                                  const { isOutOfStock } = getOptionStatus(attr.name, option);
-
                                   return (
                                     <button
                                       key={option}
                                       type="button"
-                                      disabled={isOutOfStock && !isSelected}
                                       onClick={() =>
                                         handleSelectAttributeOption(
                                           attr.name,
                                           option
                                         )
                                       }
-                                      className={`min-w-[44px] h-9 px-3 rounded-none text-xs font-semibold flex items-center justify-center border transition-all relative ${isSelected
-                                        ? "bg-primary text-white border-primary shadow-xs ring-2 ring-primary/30 cursor-pointer"
-                                        : isOutOfStock
-                                          ? "border-border/60 text-description/40 bg-bg/30 line-through cursor-not-allowed opacity-40 select-none pointer-events-none"
-                                          : "border-border text-dark bg-white hover:border-primary hover:text-primary cursor-pointer"
+                                      className={`min-w-[44px] h-9 px-3 rounded-none text-xs font-semibold flex items-center justify-center border transition-all relative cursor-pointer ${isSelected
+                                        ? "bg-primary text-white border-primary shadow-xs ring-2 ring-primary/30"
+                                        : "border-border text-dark bg-white hover:border-primary hover:text-primary"
                                         }`}
-                                      title={
-                                        isOutOfStock
-                                          ? `${option} (Out of stock)`
-                                          : option
-                                      }
                                     >
                                       {option}
                                     </button>
