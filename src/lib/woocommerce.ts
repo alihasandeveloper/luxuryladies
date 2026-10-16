@@ -259,6 +259,8 @@ export async function getProductVariations(productId: number): Promise<WooCommer
         stock_status: isOutOfStock
           ? "outofstock"
           : ((v.stock_status as any) || "instock"),
+        stock_quantity: v.stock_quantity !== undefined && v.stock_quantity !== null ? Number(v.stock_quantity) : null,
+        manage_stock: Boolean(v.manage_stock),
         attributes: (v.attributes || []).map((a: any) => ({
           id: a.id ?? 0,
           name: decodeHtml(a.name || ""),

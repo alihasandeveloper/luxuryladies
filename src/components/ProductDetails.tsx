@@ -96,11 +96,47 @@ export default function ProductDetails({
   const router = useRouter();
   const { addToCart } = useCart();
 
-  // Gallery active image
-  const galleryImages =
-    product.images && product.images.length > 0
-      ? product.images
-      : [{ id: 1, src: "/woocommerce-placeholder.webp", name: product.name, alt: product.name }];
+  // DEBUG: Log full product data to browser console
+  console.log("=== PRODUCT DEBUG ===");
+  console.log("Product:", product);
+  console.log("Type:", product.type);
+  console.log("Purchasable:", product.purchasable);
+  console.log("Price:", product.price);
+  console.log("Regular Price:", product.regular_price);
+  console.log("Sale Price:", product.sale_price);
+  console.log("Stock Status:", product.stock_status);
+  console.log("Attributes:", product.attributes);
+  console.log("Variations (IDs):", product.variations);
+  console.log("Variations Data:", product.variations_data);
+  console.log("Default Attributes:", product.default_attributes);
+  console.log("=====================");
+
+  // Dynamic gallery images: includes product gallery + any unique variation images so active image switching always works
+  const galleryImages = useMemo(() => {
+    const baseImages =
+      product.images && product.images.length > 0
+        ? [...product.images]
+        : [{ id: 1, src: "/woocommerce-placeholder.webp", name: product.name, alt: product.name }];
+
+    if (product.variations_data && product.variations_data.length > 0) {
+      product.variations_data.forEach((v) => {
+        if (
+          v.image &&
+          v.image.src &&
+          !baseImages.some((img) => img.src === v.image?.src)
+        ) {
+          baseImages.push({
+            id: v.image.id || v.id,
+            src: v.image.src,
+            name: v.image.name || `${product.name} - ${v.sku || "Variation"}`,
+            alt: v.image.alt || `${product.name} - ${v.sku || "Variation"}`,
+          });
+        }
+      });
+    }
+
+    return baseImages;
+  }, [product.images, product.variations_data, product.name]);
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [showThumbNav, setShowThumbNav] = useState(false);
@@ -396,6 +432,19 @@ export default function ProductDetails({
     const prodSale = parseFloat(product.sale_price || "0");
     const prodPrice = parseFloat(product.price || "0");
 
+    // For variable products, WooCommerce often returns empty price on parent.
+    // Fall back to priceRange min so the page never shows ৳0 before selection.
+    if (isVariableProduct && prodReg === 0 && prodSale === 0 && prodPrice === 0 && priceRange) {
+      return {
+        regularPrice: priceRange.max > priceRange.min ? priceRange.max : priceRange.min,
+        currentPrice: priceRange.min,
+        isOnSale: priceRange.max > priceRange.min,
+        discountPercent: priceRange.max > priceRange.min
+          ? Math.round(((priceRange.max - priceRange.min) / priceRange.max) * 100)
+          : 0,
+      };
+    }
+
     if (prodSale > 0 && prodReg > 0 && prodReg > prodSale) {
       return {
         regularPrice: prodReg,
@@ -412,7 +461,7 @@ export default function ProductDetails({
       isOnSale: Boolean(product.on_sale && fallbackPrice > prodSale && prodSale > 0),
       discountPercent: 0,
     };
-  }, [matchingVariation, product]);
+  }, [matchingVariation, product, isVariableProduct, priceRange]);
 
   // Accurate stock status for current selection
   const isCurrentOutOfStock = isVariableProduct
@@ -423,12 +472,17 @@ export default function ProductDetails({
       : !hasAnyInStock
     : product.stock_status === "outofstock" || product.purchasable === false;
 
-  // A variable product with 0 variations created in WooCommerce is unconfigured and unavailable
+  // A variable product with 0 variations created in WooCommerce is unconfigured and unavailable.
+  // NOTE: WooCommerce intentionally returns purchasable:false and price:"" on parent variable products
+  // because purchases happen through variations — never treat a variable product with variations as unavailable.
   const isUnconfiguredOrUnavailable =
     (product.type === "variable" && !hasConfiguredVariations) ||
-    (product.purchasable === false && currentPrice <= 0);
+    (!isVariableProduct && product.purchasable === false && currentPrice <= 0);
 
-  // Helper to check if a specific attribute option exists and has available stock across the product
+  // Helper to check if a specific attribute option exists and has available stock.
+  // NOTE: intentionally does NOT filter by other selected attributes because WooCommerce
+  // REST API returns id:0 for variation attributes, making cross-attribute ID matching unreliable.
+  // Strict per-combination availability is handled by matchingVariation after all attrs are selected.
   const getOptionStatus = (
     attrName: string,
     optionVal: string
@@ -448,7 +502,7 @@ export default function ProductDetails({
           matchAttributeKey(a.name, attrName, targetAttr?.slug)
       );
 
-      // Empty option means "Any" in WooCommerce
+      // Empty option means "Any" in WooCommerce — counts as matching
       if (!thisVAttr || !thisVAttr.option || thisVAttr.option.trim() === "") {
         return true;
       }
@@ -462,12 +516,21 @@ export default function ProductDetails({
     });
 
     if (matchingVars.length === 0) {
-      return { exists: false, inStock: false };
+      // Option not found in any variation — could be a matching issue, show as available
+      return { exists: true, inStock: true };
     }
 
     const inStock = matchingVars.some(
       (v) => v.stock_status !== "outofstock" && v.purchasable !== false
     );
+
+    // If inStock check fails but purchasable check is the only issue, double check stock_status
+    if (!inStock) {
+      const hasInStockByStatus = matchingVars.some(
+        (v) => v.stock_status === "instock" || v.stock_status === "onbackorder"
+      );
+      if (hasInStockByStatus) return { exists: true, inStock: true };
+    }
 
     return { exists: true, inStock };
   };
@@ -524,53 +587,78 @@ export default function ProductDetails({
         return;
       }
 
-      // 2. If incompatible with current other selections, find compatible variation for clicked option
+      // 2. If incompatible with current other selections: keep clicked option, but only keep other selections that can co-exist
       const targetAttr = variationAttributes.find((a) => a.name === attrName);
-      const compatibleVars = product.variations_data.filter((v) => {
-        if (!v.attributes || v.attributes.length === 0) return true;
-        const thisVAttr = v.attributes.find(
-          (a) =>
-            (targetAttr && a.id && targetAttr.id && a.id === targetAttr.id) ||
-            matchAttributeKey(a.name, attrName, targetAttr?.slug)
-        );
-        if (!thisVAttr || !thisVAttr.option || thisVAttr.option.trim() === "") return true;
-        const opts = [thisVAttr.option];
-        if (thisVAttr.slug && thisVAttr.slug !== thisVAttr.option) opts.push(thisVAttr.slug);
-        return Boolean(findMatchingOption(opts, optionVal));
-      });
+      const compatibleSelections: Record<string, string> = { [attrName]: optionVal };
 
-      if (compatibleVars.length > 0) {
-        // Prefer an in-stock compatible variation
-        const preferredVar =
-          compatibleVars.find(
-            (v) => v.stock_status !== "outofstock" && v.purchasable !== false
-          ) || compatibleVars[0];
+      variationAttributes.forEach((otherAttr) => {
+        if (otherAttr.name === attrName) return;
+        const currentOtherVal = selectedAttributes[otherAttr.name];
+        if (!currentOtherVal) return;
 
-        const updatedSelections: Record<string, string> = { [attrName]: optionVal };
-        variationAttributes.forEach((otherAttr) => {
-          if (otherAttr.name === attrName) return;
-          const otherVAttr = preferredVar.attributes?.find(
+        // Check if there is ANY variation with optionVal AND currentOtherVal
+        const canCoexist = product.variations_data?.some((v) => {
+          if (!v.attributes || v.attributes.length === 0) return true;
+          const thisVAttr = v.attributes.find(
+            (a) =>
+              (targetAttr && a.id && targetAttr.id && a.id === targetAttr.id) ||
+              matchAttributeKey(a.name, attrName, targetAttr?.slug)
+          );
+          if (thisVAttr && thisVAttr.option && thisVAttr.option.trim() !== "") {
+            const opts = [thisVAttr.option];
+            if (thisVAttr.slug && thisVAttr.slug !== thisVAttr.option) opts.push(thisVAttr.slug);
+            if (!findMatchingOption(opts, optionVal)) return false;
+          }
+
+          const otherVAttr = v.attributes.find(
             (a) =>
               (otherAttr.id && a.id && otherAttr.id === a.id) ||
               matchAttributeKey(a.name, otherAttr.name, otherAttr.slug)
           );
           if (otherVAttr && otherVAttr.option && otherVAttr.option.trim() !== "") {
-            const matchedOpt = findMatchingOption(otherAttr.options, otherVAttr.option);
-            if (matchedOpt) {
-              updatedSelections[otherAttr.name] = matchedOpt;
-            }
+            const opts = [otherVAttr.option];
+            if (otherVAttr.slug && otherVAttr.slug !== otherVAttr.option) opts.push(otherVAttr.slug);
+            if (!findMatchingOption(opts, currentOtherVal)) return false;
           }
+          return true;
         });
 
-        setSelectedAttributes(updatedSelections);
-        return;
-      }
+        if (canCoexist) {
+          compatibleSelections[otherAttr.name] = currentOtherVal;
+        }
+      });
+
+      setSelectedAttributes(compatibleSelections);
+      return;
     }
 
     setSelectedAttributes(newSelections);
   };
 
   const [quantity, setQuantity] = useState<number>(1);
+
+  // Maximum purchasable quantity for currently selected variation or product
+  const maxAvailableQuantity = useMemo(() => {
+    if (matchingVariation) {
+      if (
+        matchingVariation.manage_stock &&
+        matchingVariation.stock_quantity !== null &&
+        matchingVariation.stock_quantity !== undefined &&
+        matchingVariation.stock_quantity > 0
+      ) {
+        return matchingVariation.stock_quantity;
+      }
+    }
+    return 99;
+  }, [matchingVariation]);
+
+  // Reset quantity if it exceeds maxAvailableQuantity when switching variations
+  useEffect(() => {
+    if (quantity > maxAvailableQuantity) {
+      setQuantity(Math.max(1, maxAvailableQuantity));
+    }
+  }, [maxAvailableQuantity, quantity]);
+
   const { isInWishlist, toggleWishlist } = useWishlist();
   const isWishlisted = isInWishlist(product.id);
   const [justAdded, setJustAdded] = useState<boolean>(false);
@@ -603,7 +691,13 @@ export default function ProductDetails({
     }
 
     if (isCurrentOutOfStock) return;
-    const cartItemId = `${product.id}-${matchingVariation?.id || 0}-${JSON.stringify(selectedAttributes)}`;
+    const sortedAttrs = Object.keys(selectedAttributes)
+      .sort()
+      .reduce<Record<string, string>>((acc, key) => {
+        acc[key] = selectedAttributes[key];
+        return acc;
+      }, {});
+    const cartItemId = `${product.id}-${matchingVariation?.id || 0}-${JSON.stringify(sortedAttrs)}`;
     addToCart(
       {
         id: cartItemId,
@@ -647,7 +741,13 @@ export default function ProductDetails({
     }
 
     if (isCurrentOutOfStock) return;
-    const cartItemId = `${product.id}-${matchingVariation?.id || 0}-${JSON.stringify(selectedAttributes)}`;
+    const sortedAttrs = Object.keys(selectedAttributes)
+      .sort()
+      .reduce<Record<string, string>>((acc, key) => {
+        acc[key] = selectedAttributes[key];
+        return acc;
+      }, {});
+    const cartItemId = `${product.id}-${matchingVariation?.id || 0}-${JSON.stringify(sortedAttrs)}`;
     addToCart(
       {
         id: cartItemId,
@@ -671,7 +771,7 @@ export default function ProductDetails({
   };
 
   const handleQuantityChange = (delta: number) => {
-    setQuantity((prev) => Math.max(1, prev + delta));
+    setQuantity((prev) => Math.max(1, Math.min(maxAvailableQuantity, prev + delta)));
   };
 
   return (
@@ -874,10 +974,16 @@ export default function ProductDetails({
               {/* Price Row */}
               {!isUnconfiguredOrUnavailable && (currentPrice > 0 || priceRange) && (
                 <div className="flex items-baseline gap-3 mb-2">
-                  {isVariableProduct && !isAllAttributesSelected && priceRange?.isRange ? (
-                    <h3 className="text-2xl md:text-3xl font-bold text-primary">
-                      Tk {priceRange.min.toLocaleString()} – Tk {priceRange.max.toLocaleString()}
-                    </h3>
+                  {isVariableProduct && !isAllAttributesSelected && priceRange ? (
+                    priceRange.isRange ? (
+                      <h3 className="text-2xl md:text-3xl font-bold text-primary">
+                        Tk {priceRange.min.toLocaleString()} – Tk {priceRange.max.toLocaleString()}
+                      </h3>
+                    ) : (
+                      <h3 className="text-2xl md:text-3xl font-bold text-primary">
+                        Tk {priceRange.min.toLocaleString()}
+                      </h3>
+                    )
                   ) : (
                     <>
                       <h3 className="text-2xl md:text-3xl font-bold text-primary">
@@ -889,7 +995,7 @@ export default function ProductDetails({
                         </span>
                       )}
                       {discountPercent > 0 && (
-                        <span className="px-2 py-0.5 bg-bg text-accent border border-secondary rounded-md text-xs font-bold">
+                        <span className="px-2 py-0.5 bg-bg text-accent border border-secondary rounded-none text-xs font-bold">
                           {discountPercent}% OFF
                         </span>
                       )}
@@ -946,7 +1052,7 @@ export default function ProductDetails({
 
                             {/* Options box with pink outline when validation fails */}
                             <div
-                              className={`p-2 rounded-md transition-all duration-300 ${isMissing
+                              className={`p-2 rounded-none transition-all duration-300 ${isMissing
                                   ? "border-2 border-primary"
                                   : "border-2 border-transparent"
                                 }`}
@@ -965,7 +1071,7 @@ export default function ProductDetails({
                                       key={option}
                                       type="button"
                                       onClick={() => handleSelectAttributeOption(attr.name, option)}
-                                      className={`min-w-[44px] h-9 px-3 rounded-md text-xs font-semibold flex items-center justify-center border transition-all cursor-pointer relative ${isSelected
+                                      className={`min-w-[44px] h-9 px-3 rounded-none text-xs font-semibold flex items-center justify-center border transition-all cursor-pointer relative ${isSelected
                                           ? inStock
                                             ? "bg-primary text-white border-primary shadow-xs ring-2 ring-primary/30"
                                             : "bg-error text-white border-error shadow-xs ring-2 ring-error/30"
@@ -1007,7 +1113,7 @@ export default function ProductDetails({
                   )}
 
                   {/* Stock status text */}
-                  <div className="mb-5 flex items-center">
+                  <div className="mb-5 flex items-center flex-wrap gap-2">
                     <span
                       className={`text-xs font-medium flex items-center gap-1.5 ${isCurrentOutOfStock ? "text-error" : "text-success"
                         }`}
@@ -1017,6 +1123,18 @@ export default function ProductDetails({
                         {isCurrentOutOfStock ? "Out of stock" : "Stock available"}
                       </span>
                     </span>
+
+                    {/* Low stock badge */}
+                    {!isCurrentOutOfStock &&
+                      matchingVariation?.manage_stock &&
+                      matchingVariation.stock_quantity !== null &&
+                      matchingVariation.stock_quantity !== undefined &&
+                      matchingVariation.stock_quantity > 0 &&
+                      matchingVariation.stock_quantity <= 5 && (
+                        <span className="text-[11px] text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-none font-semibold">
+                          Only {matchingVariation.stock_quantity} left in stock!
+                        </span>
+                      )}
                   </div>
 
                   {/* Quantity Selector */}

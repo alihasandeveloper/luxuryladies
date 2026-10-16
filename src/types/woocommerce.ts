@@ -50,6 +50,8 @@ export interface WooCommerceVariation {
   on_sale: boolean;
   purchasable?: boolean;
   stock_status?: "instock" | "outofstock" | "onbackorder";
+  stock_quantity?: number | null;
+  manage_stock?: boolean;
   attributes: WooCommerceVariationAttribute[];
   image?: WooCommerceImage | null;
 }
