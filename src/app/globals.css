@@ -101,6 +101,14 @@ body {
   flex-direction: column;
 }
 
+/* Bengali font styling for authentic typography */
+body.lang-bn,
+[lang="bn"],
+.font-bangla {
+  font-family: var(--font-hind-siliguri), "Hind Siliguri", var(--font-montserrat), sans-serif;
+  letter-spacing: normal;
+}
+
 /* Body scroll lock used by drawers/modals — safe iOS approach */
 body.scroll-locked {
   overflow: hidden;

@@ -26,6 +26,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/context/LanguageContext";
 
 /**
  * Format order prices cleanly without leaking raw WooCommerce HTML tags
@@ -99,6 +100,7 @@ export default function AccountView() {
   const urlTab = searchParams.get("tab");
 
   const { user, isAuthenticated, isLoading, logout, updateProfile } = useAuth();
+  const { t, formatPrice, formatNumber, isBangla } = useLanguage();
   const [activeTab, setActiveTab] = useState<string>(() => normalizeAccountTab(urlTab));
 
   // Sync state whenever the URL search parameter changes (e.g. from header link or direct URL)
@@ -287,7 +289,7 @@ export default function AccountView() {
               className="px-5 py-2.5 bg-primary hover:bg-primary-hover !text-white text-xs font-bold uppercase tracking-wider transition-colors inline-flex items-center gap-1.5"
             >
               <ShoppingBag size={14} />
-              <span>Continue Shopping</span>
+              <span>{t("common.continueShopping")}</span>
             </Link>
           </div>
         </div>
@@ -307,7 +309,7 @@ export default function AccountView() {
               >
                 <div className="flex items-center gap-3">
                   <LayoutDashboard size={16} />
-                  <span>Dashboard</span>
+                  <span>{t("account.dashboard")}</span>
                 </div>
                 <ChevronRight size={14} />
               </button>
@@ -322,12 +324,12 @@ export default function AccountView() {
               >
                 <div className="flex items-center gap-3">
                   <Package size={16} />
-                  <span>Orders</span>
+                  <span>{t("account.orders")}</span>
                 </div>
                 {orders.length > 0 && (
                   <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${activeTab === "orders" ? "bg-white text-primary" : "bg-primary/10 text-primary"
                     }`}>
-                    {orders.length}
+                    {formatNumber(orders.length)}
                   </span>
                 )}
               </button>
@@ -342,7 +344,7 @@ export default function AccountView() {
               >
                 <div className="flex items-center gap-3">
                   <MapPin size={16} />
-                  <span>Addresses</span>
+                  <span>{t("account.addresses")}</span>
                 </div>
                 <ChevronRight size={14} />
               </button>
@@ -357,7 +359,7 @@ export default function AccountView() {
               >
                 <div className="flex items-center gap-3">
                   <UserIcon size={16} />
-                  <span>Account Details</span>
+                  <span>{t("account.accountDetails")}</span>
                 </div>
                 <ChevronRight size={14} />
               </button>
@@ -369,7 +371,7 @@ export default function AccountView() {
               >
                 <div className="flex items-center gap-3">
                   <LogOut size={16} />
-                  <span>Sign Out</span>
+                  <span>{t("account.logout")}</span>
                 </div>
               </button>
             </nav>

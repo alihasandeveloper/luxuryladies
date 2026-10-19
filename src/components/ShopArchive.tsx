@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Sparkles, SlidersHorizontal, X, ChevronDown, Check } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import { WooCommerceProduct, WooCommerceCategory } from "@/types/woocommerce";
+import { useLanguage } from "@/context/LanguageContext";
 
 export interface FilterState {
   minPrice: number;
@@ -31,6 +32,7 @@ export default function ShopArchive({
   offers,
   initialOfferSlug,
 }: ShopArchiveProps) {
+  const { t, formatPrice, formatNumber } = useLanguage();
   // Infinite scroll product states
   const [allProducts, setAllProducts] = useState<WooCommerceProduct[]>(initialProducts);
   const [page, setPage] = useState<number>(1);
@@ -400,21 +402,21 @@ export default function ShopArchive({
       <div className="hidden md:flex items-center justify-between pb-3 border-b border-border">
         <div className="flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-primary" strokeWidth={2} />
-          <h2 className="text-lg font-bold text-dark tracking-tight">Filter</h2>
+          <h2 className="text-lg font-bold text-dark tracking-tight">{t("shopArchive.filterTitle")}</h2>
         </div>
         <button
           type="button"
           onClick={handleClearAll}
           className="text-xs font-semibold text-primary hover:text-primary-hover transition-colors cursor-pointer"
         >
-          Clear All
+          {t("shopArchive.clearFilters")}
         </button>
       </div>
 
       {/* ── 1. Price Multi-Range Slider ── */}
       <div>
         <span className="block text-sm font-semibold text-dark mb-3">
-          Price Range
+          {t("shopArchive.priceRange")}
         </span>
         <div className="relative h-6 flex items-center">
           {/* Background Track */}
@@ -457,10 +459,10 @@ export default function ShopArchive({
         {/* Price Value Indicators */}
         <div className="flex items-center justify-between mt-2">
           <span className="price-indicator inline-flex items-center justify-center px-3 py-1 bg-bg rounded-md text-xs font-semibold text-dark min-w-[70px]">
-            Tk {minPrice.toLocaleString()}
+            {formatPrice(minPrice)}
           </span>
           <span className="price-indicator inline-flex items-center justify-center px-3 py-1 bg-bg rounded-md text-xs font-semibold text-dark min-w-[70px]">
-            Tk {maxPrice.toLocaleString()}
+            {formatPrice(maxPrice)}
           </span>
         </div>
       </div>
@@ -469,7 +471,7 @@ export default function ShopArchive({
       {offersWithCount.length > 0 && (
         <>
           <div className="pt-2">
-            <h3 className="text-sm font-semibold text-dark mb-3">Offers</h3>
+            <h3 className="text-sm font-semibold text-dark mb-3">{t("shopArchive.offers")}</h3>
             <div className="space-y-2.5">
               {offersWithCount.slice(0, visibleOfferCount).map((offer) => {
                 const isChecked = selectedOffers.includes(offer.slug);
@@ -493,7 +495,7 @@ export default function ShopArchive({
                     </div>
                     {/* Offer Count */}
                     <span className="text-[11px] text-description group-hover:text-primary transition-colors font-medium">
-                      ({offer.count})
+                      ({formatNumber(offer.count)})
                     </span>
                   </label>
                 );
@@ -507,7 +509,7 @@ export default function ShopArchive({
                 onClick={() => setVisibleOfferCount((prev) => prev + 5)}
                 className="mt-3 text-xs font-semibold text-primary hover:underline cursor-pointer inline-flex items-center gap-1 transition-colors"
               >
-                + Show More
+                {t("common.showMore")}
               </button>
             )}
           </div>
@@ -519,7 +521,7 @@ export default function ShopArchive({
 
       {/* ── Category Filter (Ordered by count, showing 5 initially with Show More) ── */}
       <div className="pt-2">
-        <h3 className="text-sm font-semibold text-dark mb-3">Category</h3>
+        <h3 className="text-sm font-semibold text-dark mb-3">{t("shopArchive.categories")}</h3>
         <div className="space-y-2.5">
           {categoriesWithCount.slice(0, visibleCategoryCount).map((cat) => {
             const isChecked = selectedCategories.includes(cat.slug);
@@ -542,7 +544,7 @@ export default function ShopArchive({
                 </div>
                 {/* Category Count */}
                 <span className="text-[11px] text-description group-hover:text-primary transition-colors font-medium">
-                  ({cat.count})
+                  ({formatNumber(cat.count)})
                 </span>
               </label>
             );
@@ -556,7 +558,7 @@ export default function ShopArchive({
             onClick={() => setVisibleCategoryCount((prev) => prev + 5)}
             className="mt-3 text-xs font-semibold text-primary hover:underline cursor-pointer inline-flex items-center gap-1 transition-colors"
           >
-            + Show More
+            {t("common.showMore")}
           </button>
         )}
       </div>
@@ -566,7 +568,7 @@ export default function ShopArchive({
 
       {/* ── 4. Stock Status ── */}
       <div className="pt-2">
-        <h3 className="text-sm font-semibold text-dark mb-3">Stock Status</h3>
+        <h3 className="text-sm font-semibold text-dark mb-3">{t("shopArchive.stockStatus")}</h3>
         <div className="space-y-2.5">
           <label className="flex items-center gap-3 cursor-pointer group select-none text-xs md:text-sm text-dark hover:text-primary transition-colors">
             <div
@@ -578,7 +580,7 @@ export default function ShopArchive({
             >
               {inStock && <Check size={12} strokeWidth={3} />}
             </div>
-            <span onClick={() => setInStock(!inStock)}>In Stock</span>
+            <span onClick={() => setInStock(!inStock)}>{t("shopArchive.inStock")}</span>
           </label>
 
           <label className="flex items-center gap-3 cursor-pointer group select-none text-xs md:text-sm text-dark hover:text-primary transition-colors">
@@ -591,7 +593,7 @@ export default function ShopArchive({
             >
               {outOfStock && <Check size={12} strokeWidth={3} />}
             </div>
-            <span onClick={() => setOutOfStock(!outOfStock)}>Out of Stock</span>
+            <span onClick={() => setOutOfStock(!outOfStock)}>{t("shopArchive.outOfStock")}</span>
           </label>
         </div>
       </div>
@@ -605,10 +607,10 @@ export default function ShopArchive({
         <div>
           <nav className="flex items-center gap-2 text-xs text-description mb-1">
             <Link href="/" className="hover:text-primary transition-colors">
-              Home
+              {t("common.home")}
             </Link>
             <span>/</span>
-            <span className="text-dark font-medium">Shop</span>
+            <span className="text-dark font-medium">{t("common.shop")}</span>
             {categorySlug && (
               <>
                 <span>/</span>
@@ -629,7 +631,7 @@ export default function ShopArchive({
               <>
                 <span>/</span>
                 <span className="text-primary">
-                  Search: &ldquo;{searchQuery.trim()}&rdquo;
+                  {t("common.search")}: &ldquo;{searchQuery.trim()}&rdquo;
                 </span>
               </>
             )}
@@ -637,15 +639,15 @@ export default function ShopArchive({
           <h1 className="text-xl md:text-2xl text-dark">
             {searchQuery.trim() ? (
               <span>
-                Search results for{" "}
+                {t("common.matchingProducts")}{" "}
                 <span className="text-primary">&ldquo;{searchQuery.trim()}&rdquo;</span>
               </span>
             ) : categorySlug ? (
-              activeCategories.find((c) => c.slug === categorySlug)?.name || "Shop Archive"
+              activeCategories.find((c) => c.slug === categorySlug)?.name || t("common.shop")
             ) : initialOfferSlug ? (
-              activeOffers.find((o) => o.slug === initialOfferSlug)?.name || "Special Offers"
+              activeOffers.find((o) => o.slug === initialOfferSlug)?.name || t("shopArchive.offers")
             ) : (
-              "All Products"
+              t("common.allProducts")
             )}
           </h1>
         </div>
@@ -660,7 +662,7 @@ export default function ShopArchive({
             className="md:hidden flex items-center gap-2 px-3.5 py-2 text-xs font-semibold bg-white border border-border rounded-md text-dark hover:border-primary"
           >
             <SlidersHorizontal size={14} className="text-primary" />
-            Filters {isFilterActive && <span className="w-2 h-2 rounded-full bg-primary" />}
+            {t("shopArchive.filterTitle")} {isFilterActive && <span className="w-2 h-2 rounded-full bg-primary" />}
           </button>
 
           {/* Sort dropdown */}
@@ -670,10 +672,10 @@ export default function ShopArchive({
               onChange={(e) => setSortBy(e.target.value)}
               className="appearance-none bg-white border border-border rounded-md px-4 py-2 pr-9 text-xs md:text-sm font-medium text-dark focus:outline-none focus:border-primary cursor-pointer"
             >
-              <option value="newest">Newest Arrivals</option>
-              <option value="price-low-high">Price: Low to High</option>
-              <option value="price-high-low">Price: High to Low</option>
-              <option value="name-a-z">Product Name: A to Z</option>
+              <option value="newest">{t("shopArchive.sortNewest")}</option>
+              <option value="price-low-high">{t("shopArchive.sortPriceLowHigh")}</option>
+              <option value="price-high-low">{t("shopArchive.sortPriceHighLow")}</option>
+              <option value="name-a-z">{t("shopArchive.sortNameAZ")}</option>
             </select>
             <ChevronDown
               size={14}
@@ -695,8 +697,14 @@ export default function ShopArchive({
           {/* Result Count and Active Tags */}
           <div className="flex items-center justify-between mb-4">
             <p className="text-xs text-description">
-              Showing <span className="font-semibold text-dark">{filteredProducts.length}</span>
-              {filteredProducts.length !== allProducts.length ? ` of ${allProducts.length}` : ""} products
+              {filteredProducts.length !== allProducts.length
+                ? t("shopArchive.showingOfProducts", {
+                    count: formatNumber(filteredProducts.length),
+                    total: formatNumber(allProducts.length),
+                  })
+                : t("shopArchive.showingProducts", {
+                    count: formatNumber(filteredProducts.length),
+                  })}
             </p>
 
             {isFilterActive && (
@@ -705,7 +713,7 @@ export default function ShopArchive({
                 onClick={handleClearAll}
                 className="text-xs text-primary hover:underline cursor-pointer"
               >
-                Reset filters
+                {t("shopArchive.resetFilters")}
               </button>
             )}
           </div>
@@ -724,7 +732,7 @@ export default function ShopArchive({
                 {isLoadingMore && (
                   <div className="flex items-center gap-2.5 text-xs font-semibold text-description">
                     <span className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                    <span>Loading more products...</span>
+                    <span>{t("shopArchive.loadMore")}</span>
                   </div>
                 )}
               </div>
@@ -734,16 +742,16 @@ export default function ShopArchive({
               <div className="w-16 h-16 rounded-full bg-bg flex items-center justify-center text-primary mb-4">
                 <SlidersHorizontal size={24} />
               </div>
-              <h3 className="text-base font-semibold text-dark mb-1">No products found</h3>
+              <h3 className="text-base font-semibold text-dark mb-1">{t("shopArchive.noProductsMatch")}</h3>
               <p className="text-xs text-description max-w-sm mb-5">
-                We couldn&apos;t find any items matching your current filters. Try resetting or adjusting your price and filter options.
+                {t("shopArchive.noProductsDesc")}
               </p>
               <Link
                 href="/shop"
                 onClick={handleClearAll}
                 className="px-5 py-2.5 bg-primary hover:bg-primary-hover !text-white text-xs font-semibold rounded-none transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
               >
-                <span className="!text-white text-inherit">All products</span>
+                <span className="!text-white text-inherit">{t("shopArchive.allProductsBtn")}</span>
               </Link>
             </div>
           )}
@@ -765,7 +773,7 @@ export default function ShopArchive({
             <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-white shrink-0">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-primary" strokeWidth={2} />
-                <span className="font-bold text-sm text-dark tracking-tight">Filter Products</span>
+                <span className="font-bold text-sm text-dark tracking-tight">{t("shopArchive.filterProducts")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -773,7 +781,7 @@ export default function ShopArchive({
                   onClick={handleClearAll}
                   className="text-xs font-semibold text-primary hover:text-primary-hover transition-colors cursor-pointer mr-1"
                 >
-                  Clear All
+                  {t("shopArchive.clearFilters")}
                 </button>
                 <button
                   type="button"
@@ -798,7 +806,7 @@ export default function ShopArchive({
                 onClick={() => setMobileFilterOpen(false)}
                 className="w-full py-3 !bg-primary hover:!bg-primary-hover !text-white rounded-none text-xs font-semibold shadow-xs transition-colors flex items-center justify-center gap-2"
               >
-                <span>View {filteredProducts.length} Results</span>
+                <span>{t("shopArchive.viewResults", { count: formatNumber(filteredProducts.length) })}</span>
               </button>
             </div>
           </div>

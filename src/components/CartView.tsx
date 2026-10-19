@@ -14,6 +14,7 @@ import {
   Tag,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { toast } from "sonner";
 import Button from "@/components/Button";
 
@@ -29,6 +30,7 @@ export default function CartView() {
     updateQuantity,
     removeFromCart,
   } = useCart();
+  const { t, formatPrice, formatNumber, isBangla } = useLanguage();
 
   const [couponInput, setCouponInput] = useState("");
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
@@ -37,7 +39,7 @@ export default function CartView() {
   const handleApplyCoupon = async (codeToApply?: string) => {
     const code = (codeToApply || couponInput).trim();
     if (!code) {
-      setCouponMessage({ text: "Please enter a coupon code.", isError: true });
+      setCouponMessage({ text: isBangla ? "অনুগ্রহ করে একটি কুপন কোড লিখুন।" : "Please enter a coupon code.", isError: true });
       return;
     }
 
@@ -54,8 +56,8 @@ export default function CartView() {
         setCouponMessage({ text: res.message, isError: true });
       }
     } catch {
-      toast.error("Failed to apply coupon.");
-      setCouponMessage({ text: "Failed to apply coupon.", isError: true });
+      toast.error(isBangla ? "কুপন প্রয়োগ ব্যর্থ হয়েছে।" : "Failed to apply coupon.");
+      setCouponMessage({ text: isBangla ? "কুপন প্রয়োগ ব্যর্থ হয়েছে।" : "Failed to apply coupon.", isError: true });
     } finally {
       setIsApplyingCoupon(false);
     }
@@ -71,11 +73,11 @@ export default function CartView() {
           <div className="flex items-center gap-2.5">
             <ShoppingCart size={24} className="text-dark" />
             <h1 className="text-xl sm:text-2xl font-bold text-dark">
-              Shopping Cart
+              {t("cart.title")}
             </h1>
           </div>
           <span className="text-xs sm:text-sm text-description font-medium">
-            {cartCount} {cartCount === 1 ? "item" : "items"}
+            {formatNumber(cartCount)} {cartCount === 1 ? t("common.item") : t("common.items")}
           </span>
         </div>
 
@@ -88,10 +90,10 @@ export default function CartView() {
             </div>
 
             <h2 className="text-xl sm:text-2xl font-bold text-dark mb-2.5">
-              Your cart is empty
+              {t("cart.emptyTitle")}
             </h2>
             <p className="text-xs sm:text-sm text-description max-w-sm mx-auto mb-8 leading-relaxed">
-              Looks like you haven&apos;t added any items to your cart yet. Start shopping to fill it up!
+              {t("cart.emptySubtitle")}
             </p>
 
             <Button
@@ -99,7 +101,7 @@ export default function CartView() {
               href="/shop"
               size="lg"
             >
-              Start Shopping
+              {t("cart.startShopping")}
             </Button>
           </div>
         ) : (
@@ -109,10 +111,10 @@ export default function CartView() {
               {/* Section Header */}
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-base font-bold text-dark">
-                  Cart Items ({cartCount})
+                  {t("cart.title")} ({formatNumber(cartCount)})
                 </h2>
                 <span className="text-xs sm:text-sm text-description font-medium">
-                  Total: Tk {subtotal.toFixed(2)}
+                  {t("common.total")}: {formatPrice(subtotal)}
                 </span>
               </div>
 
@@ -181,10 +183,10 @@ export default function CartView() {
                           {/* Unit Price */}
                           <div className="mt-2.5 flex items-baseline gap-1.5">
                             <span className="text-sm sm:text-base font-bold text-primary">
-                              Tk {item.price.toFixed(2)}
+                              {formatPrice(item.price)}
                             </span>
                             <span className="text-xs text-description font-normal">
-                              each
+                              {isBangla ? "প্রতি পিস" : "each"}
                             </span>
                           </div>
                         </div>
@@ -196,8 +198,8 @@ export default function CartView() {
                             type="button"
                             onClick={() => removeFromCart(item.id)}
                             className="text-description hover:text-error transition-colors p-1 cursor-pointer"
-                            aria-label={`Remove ${item.name} from cart`}
-                            title="Remove item"
+                            aria-label={`${t("common.remove")} ${item.name}`}
+                            title={t("common.remove")}
                           >
                             <Trash2 size={16} />
                           </button>
@@ -213,7 +215,7 @@ export default function CartView() {
                               <Minus size={13} strokeWidth={2.5} />
                             </button>
                             <span className="min-w-8 h-7 px-1.5 rounded-none border border-primary text-primary text-xs font-bold flex items-center justify-center bg-white select-none">
-                              {item.quantity}
+                              {formatNumber(item.quantity)}
                             </span>
                             <button
                               type="button"
@@ -229,9 +231,9 @@ export default function CartView() {
 
                       {/* Bottom Line: Subtotal */}
                       <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-xs sm:text-sm">
-                        <span className="text-description font-medium">Subtotal</span>
+                        <span className="text-description font-medium">{t("common.subtotal")}</span>
                         <span className="font-bold text-primary text-sm sm:text-base">
-                          Tk {lineTotal.toFixed(2)}
+                          {formatPrice(lineTotal)}
                         </span>
                       </div>
                     </div>
@@ -246,14 +248,14 @@ export default function CartView() {
                 {/* Header */}
                 <div className="flex items-center gap-2 text-base font-bold text-dark mb-4">
                   <Package size={18} className="text-description" />
-                  <span>Order Summary</span>
+                  <span>{t("cart.orderSummary")}</span>
                 </div>
 
                 {/* Items line */}
                 <div className="flex items-center justify-between text-xs sm:text-sm text-description mb-3">
-                  <span>Items ({cartCount})</span>
+                  <span>{t("common.items")} ({formatNumber(cartCount)})</span>
                   <span className="font-semibold text-dark">
-                    Tk {subtotal.toFixed(2)}
+                    {formatPrice(subtotal)}
                   </span>
                 </div>
 
@@ -262,10 +264,10 @@ export default function CartView() {
                   <div className="flex items-center justify-between text-xs sm:text-sm text-success mb-3">
                     <span className="flex items-center gap-1.5 font-medium">
                       <Tag size={13} className="text-success shrink-0" />
-                      <span>Coupon ({appliedCoupon.code})</span>
+                      <span>{t("common.discount")} ({appliedCoupon.code})</span>
                     </span>
                     <span className="font-bold text-success">
-                      -Tk {discount.toFixed(2)}
+                      -{formatPrice(discount)}
                     </span>
                   </div>
                 )}
@@ -277,7 +279,7 @@ export default function CartView() {
                       <div className="flex items-center gap-2 text-success">
                         <Tag size={14} className="text-success shrink-0" />
                         <span>
-                          Code <strong>{appliedCoupon.code}</strong> applied (-Tk {discount.toFixed(2)})
+                          {appliedCoupon.code} (-{formatPrice(discount)})
                         </span>
                       </div>
                       <button
@@ -285,10 +287,10 @@ export default function CartView() {
                         onClick={() => {
                           removeCoupon();
                           setCouponMessage(null);
-                          toast.info("Coupon removed.");
+                          toast.info(isBangla ? "কুপন সরানো হয়েছে।" : "Coupon removed.");
                         }}
                         className="text-description hover:text-error font-bold ml-2 cursor-pointer p-0.5"
-                        title="Remove coupon"
+                        title={t("cart.removeCoupon")}
                       >
                         ✕
                       </button>
@@ -310,7 +312,7 @@ export default function CartView() {
                               handleApplyCoupon();
                             }
                           }}
-                          placeholder="Coupon code"
+                          placeholder={t("cart.couponPlaceholder")}
                           className="flex-1 h-9 px-3 rounded-none border border-border text-xs text-dark placeholder:text-description uppercase tracking-wider focus:outline-none focus:border-primary disabled:bg-gray-50"
                         />
                         <button
@@ -319,7 +321,7 @@ export default function CartView() {
                           onClick={() => handleApplyCoupon()}
                           className="h-9 px-4 rounded-none bg-dark hover:bg-dark/90 disabled:opacity-60 text-white text-xs font-bold transition-colors cursor-pointer flex items-center justify-center shrink-0"
                         >
-                          {isApplyingCoupon ? "Applying..." : "Apply"}
+                          {isApplyingCoupon ? t("cart.applyingCoupon") : t("common.apply")}
                         </button>
                       </div>
                       {couponMessage && (
@@ -336,9 +338,9 @@ export default function CartView() {
 
                 {/* Total */}
                 <div className="flex items-center justify-between text-base font-bold text-dark mb-5">
-                  <span>Total</span>
+                  <span>{t("common.total")}</span>
                   <span className="text-lg text-primary">
-                    Tk {finalTotal.toFixed(2)}
+                    {formatPrice(finalTotal)}
                   </span>
                 </div>
 
@@ -351,7 +353,7 @@ export default function CartView() {
                     size="lg"
                     icon={<CreditCard size={15} />}
                   >
-                    Proceed to Checkout
+                    {t("cart.proceedToCheckout")}
                   </Button>
 
                   <Button
@@ -361,7 +363,7 @@ export default function CartView() {
                     size="lg"
                     icon={<Truck size={15} />}
                   >
-                    Continue Shopping
+                    {t("common.continueShopping")}
                   </Button>
                 </div>
               </div>

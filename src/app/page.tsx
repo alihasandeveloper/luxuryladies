@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight as ChevronNext } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import HeroBanner from "@/components/HeroBanner";
+import { CategorySectionHeader, SeeMoreLink } from "@/components/HomeClientHeaders";
 import { getProducts, getCategories, getOffers, getGeneralSettings, decodeHtml } from "@/lib/woocommerce";
 
 export default async function Home() {
@@ -68,15 +68,7 @@ export default async function Home() {
         {/* ── Category Section Header ── */}
         {categories.length > 0 && (
           <>
-            <div className="text-center mb-6">
-              <span className="text-[11px] md:text-xs font-semibold tracking-[0.25em] text-description uppercase block mb-2">
-                CURATED COLLECTIONS
-              </span>
-              <h2 className="text-2xl md:text-3xl font-medium tracking-tight text-dark">
-                Shop by Category
-              </h2>
-              <div className="w-12 h-[1px] bg-border mx-auto mt-3" />
-            </div>
+            <CategorySectionHeader />
 
             {/* ── Category Grid ── */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5 md:gap-4">
@@ -120,17 +112,7 @@ export default async function Home() {
                 <h2 className="text-xl md:text-2xl font-medium tracking-tight text-dark">
                   {decodeHtml(offer.name || "")}
                 </h2>
-                <Link
-                  href={`/shop?offer=${offer.slug}`}
-                  className="text-xs md:text-sm font-medium text-description hover:!text-primary inline-flex items-center gap-0.5 transition-colors group cursor-pointer"
-                >
-                  <span className="hover:!text-primary">See More</span>
-                  <ChevronNext
-                    size={15}
-                    strokeWidth={2}
-                    className="transition-transform group-hover:translate-x-0.5"
-                  />
-                </Link>
+                <SeeMoreLink href={`/shop?offer=${offer.slug}`} />
               </div>
 
               {/* Product Grid */}
@@ -157,17 +139,7 @@ export default async function Home() {
                 <h2 className="text-xl md:text-2xl font-medium tracking-tight text-dark">
                   {decodeHtml(cat.name || "")}
                 </h2>
-                <Link
-                  href={`/category/${cat.slug}`}
-                  className="text-xs md:text-sm font-medium text-description hover:!text-primary inline-flex items-center gap-0.5 transition-colors group cursor-pointer"
-                >
-                  <span className="hover:!text-primary">See More</span>
-                  <ChevronNext
-                    size={15}
-                    strokeWidth={2}
-                    className="transition-transform group-hover:translate-x-0.5"
-                  />
-                </Link>
+                <SeeMoreLink href={`/category/${cat.slug}`} />
               </div>
 
               {/* Product Grid */}

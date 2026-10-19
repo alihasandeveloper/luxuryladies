@@ -31,6 +31,7 @@ import {
 import { toast } from "sonner";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 import Button from "@/components/Button";
 import {
   WooCommercePaymentGateway,
@@ -92,6 +93,7 @@ export default function CheckoutView({
     clearCart,
   } = useCart();
   const { user } = useAuth();
+  const { t, formatPrice, formatNumber, isBangla } = useLanguage();
 
   // Dynamic backend data
   const [gateways, setGateways] = useState<WooCommercePaymentGateway[]>(initialGateways);
@@ -364,7 +366,7 @@ export default function CheckoutView({
 
     const nameVal = (formData.fullName || formData.firstName).trim();
     if (!nameVal) {
-      newErrors.fullName = "Full name is required";
+      newErrors.fullName = t("checkout.errors.fullNameRequired");
     }
 
     let cleanPhone = formData.phone.trim().replace(/[\s-]/g, "");
@@ -373,27 +375,27 @@ export default function CheckoutView({
     }
     const bdPhoneRegex = /^(?:\+?88)?01[3-9]\d{8}$/;
     if (!cleanPhone) {
-      newErrors.phone = "Phone number is required";
+      newErrors.phone = t("checkout.errors.phoneRequired");
     } else if (!bdPhoneRegex.test(cleanPhone)) {
-      newErrors.phone = "Enter a valid Bangladeshi number (e.g. 017XXXXXXXX)";
+      newErrors.phone = t("checkout.errors.phoneInvalid");
     }
 
     if (!formData.district?.trim()) {
-      newErrors.district = "District is required";
+      newErrors.district = t("checkout.errors.districtRequired");
     }
 
     if (!formData.address.trim()) {
-      newErrors.address = "Delivery address is required";
+      newErrors.address = t("checkout.errors.addressRequired");
     }
 
     if (shippingMethods.length === 0) {
-      newErrors.shipping = "No shipping options available for the selected district";
+      newErrors.shipping = t("checkout.noShippingZone");
     } else if (!selectedShippingId) {
-      newErrors.shipping = "Please select a shipping method";
+      newErrors.shipping = t("checkout.errors.shippingRequired");
     }
 
     if (!selectedPaymentId && gateways.length > 0) {
-      newErrors.payment = "Please select a payment method";
+      newErrors.payment = t("checkout.errors.paymentRequired");
     }
 
     setErrors(newErrors);
@@ -518,20 +520,20 @@ export default function CheckoutView({
               </div>
 
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-none bg-success-bg text-success text-xs font-semibold uppercase tracking-wider mb-3">
-                Order Confirmed
+                {t("checkout.orderConfirmedBadge")}
               </span>
 
               <h1 className="text-2xl sm:text-3xl font-extrabold text-dark mb-2 tracking-tight">
-                Thank You for Your Order!
+                {t("checkout.orderSuccessTitle")}
               </h1>
               <p className="text-sm sm:text-base text-description max-w-md mx-auto leading-relaxed">
-                Your order has been received and is being processed according to your selected shipping and Payment options.
+                {t("checkout.orderSuccessDesc")}
               </p>
 
               <div className="inline-flex items-center gap-3 bg-bg border border-border rounded-none px-5 py-3 mt-6 text-sm">
-                <span className="text-description font-medium">Order Number:</span>
+                <span className="text-description font-medium">{t("checkout.orderNumber")}:</span>
                 <span className="font-extrabold text-primary text-base tracking-wide font-mono">
-                  {placedOrder.orderNumber}
+                  {formatNumber(placedOrder.orderNumber)}
                 </span>
               </div>
             </div>
@@ -540,7 +542,7 @@ export default function CheckoutView({
               <div className="bg-white rounded-none border border-border p-6 shadow-sm">
                 <h2 className="text-sm font-bold uppercase tracking-wider text-description mb-4 flex items-center gap-2">
                   <MapPin size={16} className="text-primary" />
-                  <span>Delivery Address</span>
+                  <span>{t("checkout.address")}</span>
                 </h2>
                 <div className="space-y-1.5 text-sm text-dark">
                   <p className="font-bold text-base text-dark">
@@ -576,31 +578,31 @@ export default function CheckoutView({
               <div className="bg-white rounded-none border border-border p-6 shadow-sm">
                 <h2 className="text-sm font-bold uppercase tracking-wider text-description mb-4 flex items-center gap-2">
                   <CreditCard size={16} className="text-primary" />
-                  <span>Payment & Shipping</span>
+                  <span>{t("checkout.paymentMethod")} & {t("checkout.shippingOptions")}</span>
                 </h2>
                 <div className="space-y-3 text-sm">
                   <div className="flex items-center justify-between pb-2.5 border-b border-border">
-                    <span className="text-description">Payment options</span>
+                    <span className="text-description">{t("checkout.paymentMethod")}</span>
                     <span className="font-semibold text-dark">
                       {placedOrder.paymentMethodTitle}
                     </span>
                   </div>
                   <div className="flex items-center justify-between pb-2.5 border-b border-border">
-                    <span className="text-description">Shipping options</span>
+                    <span className="text-description">{t("checkout.shippingOptions")}</span>
                     <span className="font-semibold text-dark">
                       {placedOrder.shippingMethodTitle}
                     </span>
                   </div>
                   <div className="flex items-center justify-between pb-2.5 border-b border-border">
-                    <span className="text-description">Shipping Cost:</span>
+                    <span className="text-description">{t("common.deliveryFee")}:</span>
                     <span className="font-semibold text-dark">
-                      {placedOrder.shippingCost === 0 ? "FREE" : `Tk ${placedOrder.shippingCost.toFixed(2)}`}
+                      {placedOrder.shippingCost === 0 ? t("common.free") : formatPrice(placedOrder.shippingCost)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between pt-1">
-                    <span className="text-description">Total Amount:</span>
+                    <span className="text-description">{t("common.total")}:</span>
                     <span className="font-extrabold text-lg text-primary">
-                      Tk {placedOrder.total.toFixed(2)}
+                      {formatPrice(placedOrder.total)}
                     </span>
                   </div>
                 </div>
@@ -610,7 +612,7 @@ export default function CheckoutView({
             <div className="bg-white rounded-none border border-border p-6 shadow-sm mb-8">
               <h2 className="text-sm font-bold uppercase tracking-wider text-description mb-4 flex items-center gap-2">
                 <Package size={16} className="text-primary" />
-                <span>Items in this Order ({placedOrder.items.length})</span>
+                <span>{t("checkout.itemsInOrder")} ({formatNumber(placedOrder.items.length)})</span>
               </h2>
               <div className="divide-y divide-border">
                 {placedOrder.items.map((item, idx) => (
@@ -630,7 +632,7 @@ export default function CheckoutView({
                           {item.name}
                         </p>
                         <p className="text-xs text-description mt-0.5">
-                          Qty: {item.quantity} × Tk {item.price.toFixed(2)}
+                          {t("common.qty")}: {formatNumber(item.quantity)} × {formatPrice(item.price)}
                           {item.selectedAttributes &&
                             Object.entries(item.selectedAttributes).map(([k, v]) => (
                               <span key={k} className="ml-2 font-medium text-dark">
@@ -641,7 +643,7 @@ export default function CheckoutView({
                       </div>
                     </div>
                     <span className="text-sm font-bold text-dark shrink-0">
-                      Tk {(item.price * item.quantity).toFixed(2)}
+                      {formatPrice(item.price * item.quantity)}
                     </span>
                   </div>
                 ))}
@@ -656,7 +658,7 @@ export default function CheckoutView({
                 className="w-full sm:w-auto px-8"
                 icon={<ShoppingBag size={16} />}
               >
-                Continue Shopping
+                {t("common.continueShopping")}
               </Button>
             </div>
           </div>
@@ -857,7 +859,7 @@ export default function CheckoutView({
         {/* Header */}
         <div className="pb-4 mb-6 border-b border-border">
           <h1 className="text-2xl sm:text-3xl font-extrabold text-dark tracking-tight">
-            Checkout
+            {t("checkout.title")}
           </h1>
         </div>
 
@@ -873,10 +875,10 @@ export default function CheckoutView({
                   </div>
                   <div>
                     <h2 className="text-base sm:text-lg font-bold text-dark">
-                      Billing & Delivery Details
+                      {t("checkout.billingDetails")}
                     </h2>
                     <p className="text-xs text-description">
-                      Customer information and delivery location
+                      {t("checkout.customerInfoAndDelivery")}
                     </p>
                   </div>
                 </div>
@@ -885,7 +887,7 @@ export default function CheckoutView({
                   {/* 1. Full Name */}
                   <div>
                     <label htmlFor="fullName" className="block text-xs font-bold text-dark uppercase tracking-wider mb-1.5">
-                      Full Name <span className="text-primary">*</span>
+                      {t("checkout.fullName")} <span className="text-primary">*</span>
                     </label>
                     <div className="relative">
                       <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-description" />
@@ -896,7 +898,7 @@ export default function CheckoutView({
                         required
                         value={formData.fullName}
                         onChange={handleChange}
-                        placeholder="Enter your full name"
+                        placeholder={t("checkout.fullNamePlaceholder")}
                         className={`w-full pl-10 pr-3.5 h-11 rounded-none border text-sm text-dark placeholder:text-description focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all ${errors.fullName ? "border-error bg-red-50/20" : "border-border focus:border-primary"
                           }`}
                       />
@@ -912,7 +914,7 @@ export default function CheckoutView({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label htmlFor="phone" className="block text-xs font-bold text-dark uppercase tracking-wider mb-1.5">
-                        Phone Number <span className="text-primary">*</span>
+                        {t("checkout.phone")} <span className="text-primary">*</span>
                       </label>
                       <div
                         className={`relative flex items-center rounded-none overflow-hidden border transition-all ${errors.phone
@@ -930,7 +932,7 @@ export default function CheckoutView({
                           required
                           value={formData.phone}
                           onChange={handleChange}
-                          placeholder="01XXXXXXXXX"
+                          placeholder={t("checkout.phonePlaceholder")}
                           className="w-full px-3.5 h-11 text-sm text-dark placeholder:text-description focus:outline-none bg-white"
                         />
                       </div>
@@ -943,7 +945,7 @@ export default function CheckoutView({
 
                     <div>
                       <label htmlFor="email" className="block text-xs font-semibold text-description mb-1.5">
-                        Email Address <span className="text-description/70 font-normal">(Optional)</span>
+                        {t("checkout.email")}
                       </label>
                       <div className="relative">
                         <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-description" />
@@ -953,7 +955,7 @@ export default function CheckoutView({
                           type="email"
                           value={formData.email}
                           onChange={handleChange}
-                          placeholder="email@example.com"
+                          placeholder={t("checkout.emailPlaceholder")}
                           className="w-full pl-10 pr-3.5 h-11 rounded-none border border-border text-sm text-dark placeholder:text-description focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                         />
                       </div>
@@ -963,7 +965,7 @@ export default function CheckoutView({
                   {/* 4. District Searchable Dropdown */}
                   <div ref={districtRef} className="relative">
                     <label htmlFor="district-input" className="block text-xs font-bold text-dark uppercase tracking-wider mb-1.5">
-                      District <span className="text-primary">*</span>
+                      {t("checkout.district")} <span className="text-primary">*</span>
                     </label>
                     <div className="relative">
                       <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-description pointer-events-none" />
@@ -983,7 +985,7 @@ export default function CheckoutView({
                           }`}
                       >
                         <span className={formData.district ? "text-dark font-medium" : "text-description"}>
-                          {formData.district || "Select or search district..."}
+                          {formData.district || t("checkout.selectDistrict")}
                         </span>
                       </div>
                       <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
@@ -1019,7 +1021,7 @@ export default function CheckoutView({
                               type="text"
                               value={districtSearch}
                               onChange={(e) => setDistrictSearch(e.target.value)}
-                              placeholder="Type to search (e.g. Dhaka, Sylhet)..."
+                              placeholder={t("checkout.typeToSearchDistrict")}
                               className="w-full pl-8 pr-7 py-1.5 bg-white rounded-none border border-border text-xs text-dark placeholder:text-description focus:outline-none focus:border-primary"
                               autoFocus
                             />
@@ -1039,7 +1041,7 @@ export default function CheckoutView({
                         <div className="max-h-56 overflow-y-auto divide-y divide-gray-50 py-1">
                           {filteredStates.length === 0 ? (
                             <div className="p-3 text-center text-xs text-description">
-                              No district matching &quot;{districtSearch}&quot;
+                              {t("checkout.noDistrictMatch")} &quot;{districtSearch}&quot;
                             </div>
                           ) : (
                             filteredStates.map((st) => {
@@ -1074,7 +1076,7 @@ export default function CheckoutView({
                   {/* 5. Address */}
                   <div>
                     <label htmlFor="address" className="block text-xs font-bold text-dark uppercase tracking-wider mb-1.5">
-                      Delivery Address <span className="text-primary">*</span>
+                      {t("checkout.address")} <span className="text-primary">*</span>
                     </label>
                     <textarea
                       id="address"
@@ -1083,7 +1085,7 @@ export default function CheckoutView({
                       required
                       value={formData.address}
                       onChange={handleChange}
-                      placeholder="House no, road no, area, thana, etc."
+                      placeholder={t("checkout.addressPlaceholder")}
                       className={`w-full p-3.5 rounded-none border text-sm text-dark placeholder:text-description focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none ${errors.address ? "border-error bg-red-50/20" : "border-border focus:border-primary"
                         }`}
                     />
@@ -1097,7 +1099,7 @@ export default function CheckoutView({
                   {/* 6. Order Notes */}
                   <div>
                     <label htmlFor="notes" className="block text-xs font-semibold text-description mb-1.5">
-                      Order Notes <span className="text-description/70 font-normal">(Optional)</span>
+                      {t("checkout.orderNotes")}
                     </label>
                     <div className="relative">
                       <FileText size={15} className="absolute left-3.5 top-3 text-description" />
@@ -1107,7 +1109,7 @@ export default function CheckoutView({
                         type="text"
                         value={formData.notes}
                         onChange={handleChange}
-                        placeholder="Notes about your order, e.g. special delivery instructions"
+                        placeholder={t("checkout.orderNotesPlaceholder")}
                         className="w-full pl-10 pr-3.5 h-11 rounded-none border border-border text-sm text-dark placeholder:text-description focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                       />
                     </div>
@@ -1116,7 +1118,7 @@ export default function CheckoutView({
                   {/* 7. Shipping Options inside Billing & Delivery */}
                   <div className="pt-4 border-t border-border">
                     <label className="block text-xs font-bold text-dark uppercase tracking-wider mb-2.5">
-                      Shipping Options <span className="text-primary">*</span>
+                      {t("checkout.shippingOptions")} <span className="text-primary">*</span>
                     </label>
 
                     <div className="space-y-2.5">
@@ -1124,17 +1126,17 @@ export default function CheckoutView({
                         <div className="py-5 px-4 rounded-none border border-dashed border-secondary bg-bg/40 text-center">
                           <Truck size={20} className="mx-auto text-description mb-1.5" />
                           <p className="text-xs font-semibold text-description">
-                            Please select your district above to view available shipping options.
+                            {t("checkout.selectDistrictFirst")}
                           </p>
                         </div>
                       ) : isLoadingShipping ? (
                         <div className="py-5 flex items-center justify-center gap-2.5 text-xs text-description bg-bg/30 rounded-none border border-dashed border-border">
                           <span className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                          <span>Loading shipping options from WooCommerce...</span>
+                          <span>{t("checkout.loadingShipping")}</span>
                         </div>
                       ) : shippingMethods.length === 0 ? (
                         <div className="p-3.5 rounded-none border border-amber-200 bg-amber-50 text-amber-800 text-xs">
-                          No shipping zone available for {selectedDistrict}. Please select another district.
+                          {t("checkout.noShippingZone")}
                         </div>
                       ) : (
                         shippingMethods.map((method) => {
@@ -1162,7 +1164,7 @@ export default function CheckoutView({
                                       {method.title}
                                     </span>
                                     <span className="text-xs font-extrabold text-primary shrink-0">
-                                      {method.cost === 0 ? "FREE" : `Tk ${method.cost.toFixed(2)}`}
+                                      {method.cost === 0 ? t("common.free") : formatPrice(method.cost)}
                                     </span>
                                   </div>
                                 </div>
@@ -1189,10 +1191,10 @@ export default function CheckoutView({
                 <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-border">
                   <h2 className="text-base font-bold text-dark flex items-center gap-2">
                     <Package size={18} className="text-description" />
-                    <span>Order Summary</span>
+                    <span>{t("checkout.orderSummary")}</span>
                   </h2>
                   <span className="text-xs text-description font-semibold">
-                    {cartCount} {cartCount === 1 ? "item" : "items"}
+                    {formatNumber(cartCount)} {cartCount === 1 ? t("common.item") : t("common.items")}
                   </span>
                 </div>
 
@@ -1232,7 +1234,7 @@ export default function CheckoutView({
                           ))}
                         <div className="mt-2 flex items-center justify-between gap-2">
                           <span className="text-xs font-bold text-primary">
-                            Tk {(item.price * item.quantity).toFixed(2)}
+                            {formatPrice(item.price * item.quantity)}
                           </span>
                           {/* Quantity Stepper */}
                           <div className="flex items-center gap-1 shrink-0">
@@ -1245,7 +1247,7 @@ export default function CheckoutView({
                               <Minus size={10} strokeWidth={2.5} />
                             </button>
                             <span className="min-w-6 h-5 px-1 rounded-none border border-border text-dark text-[11px] font-bold flex items-center justify-center bg-bg select-none">
-                              {item.quantity}
+                              {formatNumber(item.quantity)}
                             </span>
                             <button
                               type="button"
@@ -1269,7 +1271,7 @@ export default function CheckoutView({
                       <div className="flex items-center gap-2 text-success">
                         <Tag size={14} className="text-success" />
                         <span>
-                          Code <strong>{appliedCoupon.code}</strong> applied (-Tk {discount.toFixed(2)})
+                          Code <strong>{appliedCoupon.code}</strong> applied (-{formatPrice(discount)})
                         </span>
                       </div>
                       <button
@@ -1295,7 +1297,7 @@ export default function CheckoutView({
                               handleApplyCoupon();
                             }
                           }}
-                          placeholder="Coupon code"
+                          placeholder={t("cart.couponPlaceholder")}
                           className="flex-1 h-10 px-3.5 rounded-none border border-border text-xs text-dark placeholder:text-description uppercase tracking-wider focus:outline-none focus:border-primary disabled:bg-gray-50"
                         />
                         <button
@@ -1304,7 +1306,7 @@ export default function CheckoutView({
                           onClick={() => handleApplyCoupon()}
                           className="h-10 px-5 rounded-none bg-dark hover:bg-dark/90 disabled:opacity-60 text-white text-xs font-bold transition-colors cursor-pointer flex items-center justify-center shrink-0"
                         >
-                          {isApplyingCoupon ? "Applying..." : "Apply"}
+                          {isApplyingCoupon ? t("cart.applyingCoupon") : t("common.apply")}
                         </button>
                       </div>
                     </div>
@@ -1314,15 +1316,15 @@ export default function CheckoutView({
                 {/* Calculation breakdown */}
                 <div className="pt-3 border-t border-border space-y-2 text-xs sm:text-sm">
                   <div className="flex items-center justify-between text-description">
-                    <span>Subtotal</span>
+                    <span>{t("common.subtotal")}</span>
                     <span className="font-semibold text-dark">
-                      Tk {subtotal.toFixed(2)}
+                      {formatPrice(subtotal)}
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between text-description">
                     <span className="flex items-center gap-1">
-                      <span>Shipping</span>
+                      <span>{t("common.shipping")}</span>
                       {activeShippingMethod?.title && (
                         <span className="text-[11px] text-description">
                           ({activeShippingMethod.title})
@@ -1331,26 +1333,26 @@ export default function CheckoutView({
                     </span>
                     <span className="font-semibold text-dark">
                       {shippingMethods.length === 0 ? (
-                        <span className="text-error font-medium text-xs">Not available</span>
+                        <span className="text-error font-medium text-xs">{t("checkout.noShippingZone")}</span>
                       ) : shippingCost === 0 ? (
-                        <span className="text-success font-bold">FREE</span>
+                        <span className="text-success font-bold">{t("common.free")}</span>
                       ) : (
-                        `Tk ${shippingCost.toFixed(2)}`
+                        formatPrice(shippingCost)
                       )}
                     </span>
                   </div>
 
                   {discount > 0 && (
                     <div className="flex items-center justify-between text-success font-medium">
-                      <span>Discount</span>
-                      <span className="font-bold">-Tk {discount.toFixed(2)}</span>
+                      <span>{t("common.discount")}</span>
+                      <span className="font-bold">-{formatPrice(discount)}</span>
                     </div>
                   )}
 
                   <div className="pt-3 border-t border-border flex items-center justify-between text-base font-extrabold text-dark">
-                    <span>Total</span>
+                    <span>{t("common.total")}</span>
                     <span className="text-lg text-primary">
-                      Tk {grandTotal.toFixed(2)}
+                      {formatPrice(grandTotal)}
                     </span>
                   </div>
                 </div>
@@ -1360,7 +1362,7 @@ export default function CheckoutView({
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-xs font-bold text-dark uppercase tracking-wider flex items-center gap-1.5">
                       <CreditCard size={14} className="text-primary" />
-                      <span>Payment Method</span>
+                      <span>{t("checkout.paymentMethod")}</span>
                     </h3>
                   </div>
 
@@ -1368,11 +1370,11 @@ export default function CheckoutView({
                     {isLoadingGateways ? (
                       <div className="py-4 flex items-center justify-center gap-2 text-xs text-description bg-bg/30 rounded-none border border-dashed border-border">
                         <span className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                        <span>Loading payment options...</span>
+                        <span>{t("checkout.loadingPayment")}</span>
                       </div>
                     ) : gateways.length === 0 ? (
                       <div className="p-3 rounded-none border border-amber-200 bg-amber-50 text-amber-800 text-xs">
-                        No active payment gateways found in WooCommerce.
+                        {t("checkout.noPaymentGateways")}
                       </div>
                     ) : (
                       gateways.map((gateway) => {
@@ -1428,10 +1430,10 @@ export default function CheckoutView({
                     isLoading={isSubmitting}
                     icon={!isSubmitting ? <Lock size={15} /> : undefined}
                   >
-                    {isSubmitting ? "Placing Order..." : `Place Order • Tk ${grandTotal.toFixed(2)}`}
+                    {isSubmitting ? t("checkout.placingOrder") : `${t("checkout.placeOrder")} • ${formatPrice(grandTotal)}`}
                   </Button>
                   <p className="text-[11px] text-description text-center mt-2.5">
-                    Your personal data will be used to process your order and support your experience.
+                    {t("checkout.privacyNotice")}
                   </p>
                 </div>
               </div>

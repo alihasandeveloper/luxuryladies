@@ -8,27 +8,29 @@ import { Phone, Mail, MapPin, Home, ShoppingBag, Heart, User, SlidersHorizontal 
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useWishlist } from "@/context/WishlistContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { GeneralSettingsData } from "@/types/woocommerce";
-
-const support = [
-  { label: "Track Your Order", href: "/track-order" },
-  { label: "Delivery & Shipping Policy", href: "/shipping-policy" },
-  { label: "Return & Exchange Policy", href: "/returns-exchange" },
-  { label: "Support Center", href: "/support" },
-];
-
-const bottomLinks = [
-  { label: "Privacy Policy", href: "/privacy-policy" },
-  { label: "Terms & Conditions", href: "/terms-and-conditions" },
-];
 
 export default function Footer() {
   const pathname = usePathname();
   const { cartCount } = useCart();
   const { wishlistCount } = useWishlist();
   const { isAuthenticated } = useAuth();
+  const { t, formatNumber, isBangla } = useLanguage();
   const [settings, setSettings] = useState<GeneralSettingsData | null>(null);
   const [categories, setCategories] = useState<{ label: string; href: string; count?: number }[]>([]);
+
+  const support = [
+    { label: t("footer.trackOrder"), href: "/track-order" },
+    { label: t("footer.shippingPolicy"), href: "/shipping-policy" },
+    { label: t("footer.returnsPolicy"), href: "/returns-exchange" },
+    { label: t("footer.supportCenter"), href: "/support" },
+  ];
+
+  const bottomLinks = [
+    { label: t("footer.privacyPolicy"), href: "/privacy-policy" },
+    { label: t("footer.termsConditions"), href: "/terms-and-conditions" },
+  ];
 
   useEffect(() => {
     fetch("/api/general-settings")
@@ -73,11 +75,27 @@ export default function Footer() {
   const youtubeUrl = settings?.social_links?.youtube?.trim() || "";
   const hasSocials = Boolean(facebookUrl || instagramUrl || tiktokUrl || youtubeUrl);
 
-  const isShopPage =
-    pathname === "/shop" ||
-    pathname.startsWith("/shop/") ||
-    pathname.startsWith("/category/") ||
-    pathname === "/search";
+  const isHomeActive = pathname === "/" || pathname === "";
+  const isShopArchivePage =
+    pathname.startsWith("/shop") ||
+    pathname.startsWith("/category") ||
+    pathname.startsWith("/search");
+  const isShopActive =
+    isShopArchivePage ||
+    pathname.startsWith("/product");
+  const isCartActive =
+    pathname === "/cart" ||
+    pathname.startsWith("/cart/") ||
+    pathname === "/checkout" ||
+    pathname.startsWith("/checkout/");
+  const isWishlistActive = pathname === "/wishlist" || pathname.startsWith("/wishlist/");
+  const isProfileActive =
+    pathname === "/account" ||
+    pathname.startsWith("/account/") ||
+    pathname === "/login" ||
+    pathname.startsWith("/login/") ||
+    pathname === "/register" ||
+    pathname.startsWith("/register/");
 
   return (
     <footer className="site-footer">
@@ -100,7 +118,7 @@ export default function Footer() {
               />
             </Link>
             <p className="footer-desc mt-3">
-              Redefining contemporary women&apos;s luxury fashion. Premium heels, chic bags, party clutches, and curated sleepwear crafted for modern elegance.
+              {t("footer.brandDesc")}
             </p>
             {/* Socials */}
             {hasSocials && (
@@ -140,7 +158,7 @@ export default function Footer() {
           {/* ── Categories Column (Only rendered if fetched from backend) ── */}
           {categories.length > 0 && (
             <div className="footer-col">
-              <h4 className="footer-col-title">Categories</h4>
+              <h4 className="footer-col-title">{t("footer.categories")}</h4>
               <ul>
                 {categories.map((item) => {
                   const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
@@ -161,7 +179,7 @@ export default function Footer() {
 
           {/* ── Support Column ── */}
           <div className="footer-col">
-            <h4 className="footer-col-title">Support</h4>
+            <h4 className="footer-col-title">{t("footer.support")}</h4>
             <ul>
               {support.map((item) => {
                 const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
@@ -182,7 +200,7 @@ export default function Footer() {
           {/* ── Get In Touch Column (Only rendered if contact information exists in backend) ── */}
           {hasContactInfo && (
             <div className="footer-col">
-              <h4 className="footer-col-title">Get In Touch</h4>
+              <h4 className="footer-col-title">{t("footer.contactUs")}</h4>
               <ul className="footer-contact-list">
                 {phoneValue && (
                   <li className="footer-contact-item">
@@ -190,7 +208,7 @@ export default function Footer() {
                       <Phone size={15} strokeWidth={1.75} />
                     </span>
                     <div>
-                      <p className="footer-contact-label">CALL US</p>
+                      <p className="footer-contact-label">{isBangla ? "কল করুন" : "CALL US"}</p>
                       <a href={`tel:${phoneValue.replace(/\s+/g, '')}`} className="footer-contact-value">{phoneValue}</a>
                     </div>
                   </li>
@@ -201,7 +219,7 @@ export default function Footer() {
                       <Mail size={15} strokeWidth={1.75} />
                     </span>
                     <div>
-                      <p className="footer-contact-label">EMAIL US</p>
+                      <p className="footer-contact-label">{isBangla ? "ইমেইল" : "EMAIL US"}</p>
                       <a href={`mailto:${emailValue}`} className="footer-contact-value">{emailValue}</a>
                     </div>
                   </li>
@@ -212,7 +230,7 @@ export default function Footer() {
                       <MapPin size={15} strokeWidth={1.75} />
                     </span>
                     <div>
-                      <p className="footer-contact-label">VISIT US</p>
+                      <p className="footer-contact-label">{isBangla ? "ঠিকানা" : "VISIT US"}</p>
                       <span className="footer-contact-value">{addressValue}</span>
                     </div>
                   </li>
@@ -259,41 +277,43 @@ export default function Footer() {
       >
         <Link
           href="/"
-          className={`flex flex-col items-center justify-center gap-1 py-1 px-3 text-[11px] font-medium transition-colors ${
-            pathname === "/" ? "text-primary font-semibold" : "text-description hover:text-dark"
+          className={`flex flex-col items-center justify-center gap-1 py-1 px-3 text-[11px] transition-colors ${
+            isHomeActive ? "text-primary font-semibold" : "text-description hover:text-dark font-medium"
           }`}
         >
-          <Home size={20} strokeWidth={pathname === "/" ? 2.3 : 1.8} />
-          <span>Home</span>
+          <Home size={20} strokeWidth={isHomeActive ? 2.3 : 1.8} className={isHomeActive ? "text-primary" : "text-inherit"} />
+          <span className={isHomeActive ? "text-primary font-semibold" : ""}>{t("common.home")}</span>
         </Link>
 
-        {isShopPage ? (
+        {isShopArchivePage ? (
           <button
             type="button"
             onClick={() => {
               window.dispatchEvent(new CustomEvent("open-mobile-filter"));
               document.getElementById("mobile-filter-open-btn")?.click();
             }}
-            className="flex flex-col items-center justify-center gap-1 py-1 px-3 text-[11px] font-medium transition-colors text-primary font-semibold cursor-pointer"
+            className="flex flex-col items-center justify-center gap-1 py-1 px-3 text-[11px] transition-colors text-primary font-semibold cursor-pointer"
             aria-label="Open Filters"
           >
-            <SlidersHorizontal size={20} strokeWidth={2.3} />
-            <span>Filters</span>
+            <SlidersHorizontal size={20} strokeWidth={2.3} className="text-primary" />
+            <span className="text-primary font-semibold">{isBangla ? "ফিল্টার" : "Filters"}</span>
           </button>
         ) : (
           <Link
             href="/shop"
-            className="flex flex-col items-center justify-center gap-1 py-1 px-3 text-[11px] font-medium transition-colors text-description hover:text-dark"
+            className={`flex flex-col items-center justify-center gap-1 py-1 px-3 text-[11px] transition-colors ${
+              isShopActive ? "text-primary font-semibold" : "text-description hover:text-dark font-medium"
+            }`}
           >
-            <ShoppingBag size={20} strokeWidth={1.8} />
-            <span>Shop</span>
+            <ShoppingBag size={20} strokeWidth={isShopActive ? 2.3 : 1.8} className={isShopActive ? "text-primary" : "text-inherit"} />
+            <span className={isShopActive ? "text-primary font-semibold" : ""}>{t("common.shop")}</span>
           </Link>
         )}
 
         <Link
           href="/cart"
-          className={`relative flex flex-col items-center justify-center gap-1 py-1 px-3 text-[11px] font-medium transition-colors ${
-            pathname === "/cart" ? "text-primary font-semibold" : "text-description hover:text-dark"
+          className={`relative flex flex-col items-center justify-center gap-1 py-1 px-3 text-[11px] transition-colors ${
+            isCartActive ? "text-primary font-semibold" : "text-description hover:text-dark font-medium"
           }`}
         >
           <div className="relative">
@@ -304,9 +324,10 @@ export default function Footer() {
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth={pathname === "/cart" ? 2.3 : 1.8}
+              strokeWidth={isCartActive ? 2.3 : 1.8}
               strokeLinecap="round"
               strokeLinejoin="round"
+              className={isCartActive ? "text-primary" : "text-inherit"}
             >
               <circle cx="9" cy="21" r="1" />
               <circle cx="20" cy="21" r="1" />
@@ -314,43 +335,44 @@ export default function Footer() {
             </svg>
             {cartCount > 0 && (
               <span className="absolute -top-1.5 -right-2.5 min-w-[16px] h-4 px-1 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center shadow-xs">
-                {cartCount}
+                {formatNumber(cartCount)}
               </span>
             )}
           </div>
-          <span>Cart</span>
+          <span className={isCartActive ? "text-primary font-semibold" : ""}>{t("header.cartTooltip")}</span>
         </Link>
 
         <Link
           href="/wishlist"
-          className={`relative flex flex-col items-center justify-center gap-1 py-1 px-3 text-[11px] font-medium transition-colors ${
-            pathname === "/wishlist" ? "text-primary font-semibold" : "text-description hover:text-dark"
+          className={`relative flex flex-col items-center justify-center gap-1 py-1 px-3 text-[11px] transition-colors ${
+            isWishlistActive ? "text-primary font-semibold" : "text-description hover:text-dark font-medium"
           }`}
         >
           <div className="relative">
             <Heart
               size={20}
-              strokeWidth={pathname === "/wishlist" ? 2.3 : 1.8}
+              strokeWidth={isWishlistActive ? 2.3 : 1.8}
+              className={isWishlistActive ? "text-primary fill-primary/10" : "text-inherit"}
             />
             {wishlistCount > 0 && (
               <span className="absolute -top-1.5 -right-2.5 min-w-[16px] h-4 px-1 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center shadow-xs">
-                {wishlistCount}
+                {formatNumber(wishlistCount)}
               </span>
             )}
           </div>
-          <span>Wishlist</span>
+          <span className={isWishlistActive ? "text-primary font-semibold" : ""}>{t("header.wishlistTooltip")}</span>
         </Link>
 
         <Link
           href={isAuthenticated ? "/account" : "/login"}
-          className={`flex flex-col items-center justify-center gap-1 py-1 px-3 text-[11px] font-medium transition-colors ${
-            pathname === "/account" || pathname === "/login"
-              ? "text-primary font-semibold"
-              : "text-description hover:text-dark"
+          className={`flex flex-col items-center justify-center gap-1 py-1 px-3 text-[11px] transition-colors ${
+            isProfileActive ? "text-primary font-semibold" : "text-description hover:text-dark font-medium"
           }`}
         >
-          <User size={20} strokeWidth={pathname === "/account" || pathname === "/login" ? 2.3 : 1.8} />
-          <span>{isAuthenticated ? "Account" : "Profile"}</span>
+          <User size={20} strokeWidth={isProfileActive ? 2.3 : 1.8} className={isProfileActive ? "text-primary" : "text-inherit"} />
+          <span className={isProfileActive ? "text-primary font-semibold" : ""}>
+            {isAuthenticated ? t("header.myAccount") : (isBangla ? "প্রোফাইল" : "Profile")}
+          </span>
         </Link>
       </nav>
     </footer>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -28,6 +29,7 @@ import {
 import { WooCommerceProduct, WooCommerceVariation } from "@/types/woocommerce";
 import ProductCard from "@/components/ProductCard";
 import Button from "@/components/Button";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface ProductDetailsProps {
   product: WooCommerceProduct;
@@ -153,6 +155,7 @@ export default function ProductDetails({
 }: ProductDetailsProps) {
   const router = useRouter();
   const { addToCart } = useCart();
+  const { t, formatPrice, formatNumber } = useLanguage();
 
   // DEBUG: Log full product data in a single object to browser console
   useEffect(() => {
@@ -211,7 +214,12 @@ export default function ProductDetails({
   const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxZoom, setLightboxZoom] = useState(1);
+  const [mounted, setMounted] = useState(false);
   const thumbnailsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Close lightbox on Escape and support keyboard arrow navigation
   useEffect(() => {
@@ -919,27 +927,26 @@ export default function ProductDetails({
                       priceRange ? (
                       priceRange.isRange ? (
                         <h3 className="text-2xl md:text-3xl font-bold text-primary">
-                          Tk {priceRange.min.toLocaleString()} – Tk{" "}
-                          {priceRange.max.toLocaleString()}
+                          {formatPrice(priceRange.min)} – {formatPrice(priceRange.max)}
                         </h3>
                       ) : (
                         <h3 className="text-2xl md:text-3xl font-bold text-primary">
-                          Tk {priceRange.min.toLocaleString()}
+                          {formatPrice(priceRange.min)}
                         </h3>
                       )
                     ) : (
                       <>
                         <h3 className="text-2xl md:text-3xl font-bold text-primary">
-                          Tk {currentPrice.toLocaleString()}
+                          {formatPrice(currentPrice)}
                         </h3>
                         {regularPrice > currentPrice && (
                           <span className="text-base text-description line-through">
-                            Tk {regularPrice.toLocaleString()}
+                            {formatPrice(regularPrice)}
                           </span>
                         )}
                         {discountPercent > 0 && (
                           <span className="px-2 py-0.5 bg-bg text-accent border border-secondary rounded-full text-xs font-bold">
-                            {discountPercent}% OFF
+                            {formatNumber(discountPercent)}% {t("productCard.off")}
                           </span>
                         )}
                       </>
@@ -1077,7 +1084,7 @@ export default function ProductDetails({
                           •
                         </span>
                         <span>
-                          {isCurrentOutOfStock ? "Out of stock" : "In stock"}
+                          {isCurrentOutOfStock ? t("productDetails.outOfStock") : t("productDetails.inStock")}
                         </span>
                       </span>
 
@@ -1089,8 +1096,7 @@ export default function ProductDetails({
                         Number(matchingVariation.stock_quantity) > 0 &&
                         Number(matchingVariation.stock_quantity) <= 5 && (
                           <span className="text-[11px] text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-none font-semibold">
-                            Only {matchingVariation.stock_quantity} left in
-                            stock!
+                            {t("productDetails.onlyLeft", { count: formatNumber(matchingVariation.stock_quantity) })}
                           </span>
                         )}
                     </div>
@@ -1099,7 +1105,7 @@ export default function ProductDetails({
                   {/* Quantity Selector */}
                   <div className="mb-6">
                     <span className="block text-xs font-semibold text-dark mb-2">
-                      Quantity
+                      {t("productDetails.quantity")}
                     </span>
                     <div className="inline-flex items-center border border-border rounded-none bg-white">
                       <button
@@ -1111,7 +1117,7 @@ export default function ProductDetails({
                         <Minus size={13} strokeWidth={2.5} />
                       </button>
                       <span className="w-10 text-center text-xs font-bold text-dark">
-                        {quantity}
+                        {formatNumber(quantity)}
                       </span>
                       <button
                         type="button"
@@ -1131,7 +1137,7 @@ export default function ProductDetails({
                         <div className="absolute -top-11 left-1/2 -translate-x-1/2 z-30 animate-in fade-in zoom-in-95 duration-200 pointer-events-none drop-shadow-md">
                           <div className="relative bg-white text-dark border border-border shadow-md px-4 py-2 rounded-none flex items-center gap-2 whitespace-nowrap text-xs sm:text-[13px] font-semibold">
                             <Info size={16} className="text-primary shrink-0" />
-                            <span>Please select all variants first</span>
+                            <span>{t("productDetails.selectVariantsAlert")}</span>
                             <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-r border-b border-border rotate-45" />
                           </div>
                         </div>
@@ -1156,10 +1162,10 @@ export default function ProductDetails({
                           }
                         >
                           {isCurrentOutOfStock
-                            ? "Out of Stock"
+                            ? t("productDetails.outOfStock")
                             : justAdded
-                              ? "Added to Cart"
-                              : "Add to Cart"}
+                              ? t("productDetails.addedToCart")
+                              : t("productDetails.addToCart")}
                         </Button>
 
                         <Button
@@ -1169,7 +1175,7 @@ export default function ProductDetails({
                           disabled={isCurrentOutOfStock}
                           onClick={handleBuyNow}
                         >
-                          {isCurrentOutOfStock ? "Out of Stock" : "Buy Now"}
+                          {isCurrentOutOfStock ? t("productDetails.outOfStock") : t("productDetails.buyNow")}
                         </Button>
                       </div>
                     </div>
@@ -1182,16 +1188,15 @@ export default function ProductDetails({
                 <div className="flex items-center gap-2">
                   <Clock size={15} className="text-description shrink-0" />
                   <span>
-                    Delivery Time:{" "}
-                    <strong className="text-dark">3-5 days</strong>
+                    {t("productDetails.deliveryTime")}:{" "}
+                    <strong className="text-dark">{t("productDetails.deliveryTimeVal")}</strong>
                   </span>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <ShieldCheck size={15} className="text-description shrink-0" />
                   <span>
-                    Payment:{" "}
-                    <strong className="text-dark">COD Available</strong>
+                    <strong className="text-dark">{t("productDetails.paymentCOD")}</strong>
                   </span>
                 </div>
               </div>
@@ -1207,7 +1212,7 @@ export default function ProductDetails({
                 <Layers size={18} />
               </div>
               <div>
-                <p className="text-[11px] text-description">SKU</p>
+                <p className="text-[11px] text-description">{t("productDetails.sku")}</p>
                 <p className="text-xs font-bold text-dark truncate">
                   {matchingVariation?.sku || product.sku}
                 </p>
@@ -1220,8 +1225,8 @@ export default function ProductDetails({
               <Clock size={18} />
             </div>
             <div>
-              <p className="text-[11px] text-description">Delivery Time</p>
-              <p className="text-xs font-bold text-dark">3-5 days</p>
+              <p className="text-[11px] text-description">{t("productDetails.deliveryTime")}</p>
+              <p className="text-xs font-bold text-dark">{t("productDetails.deliveryTimeVal")}</p>
             </div>
           </div>
 
@@ -1231,7 +1236,7 @@ export default function ProductDetails({
                 <Layers size={18} />
               </div>
               <div>
-                <p className="text-[11px] text-description">Variants</p>
+                <p className="text-[11px] text-description">{t("productDetails.variants")}</p>
                 <p className="text-xs font-bold text-dark">
                   {product.variations?.length ||
                     product.variations_data?.length ||
@@ -1248,9 +1253,9 @@ export default function ProductDetails({
                   <Check size={18} strokeWidth={2.5} />
                 </div>
                 <div>
-                  <p className="text-[11px] text-description">Total Sold</p>
+                  <p className="text-[11px] text-description">{t("productDetails.totalSold")}</p>
                   <p className="text-xs font-bold text-dark">
-                    {product.total_sales} units
+                    {formatNumber(product.total_sales)} {t("productDetails.units")}
                   </p>
                 </div>
               </div>
@@ -1263,7 +1268,7 @@ export default function ProductDetails({
             <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border">
               <Info size={17} className="text-primary" />
               <h2 className="text-base font-semibold text-dark">
-                Product Description
+                {t("productDetails.description")}
               </h2>
             </div>
             <div className="min-h-[140px] text-sm md:text-[15px] text-description leading-relaxed">
@@ -1291,13 +1296,13 @@ export default function ProductDetails({
         <div>
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-lg md:text-xl font-semibold text-dark">
-              Related Products
+              {t("productDetails.relatedProducts")}
             </h2>
             <Link
               href="/shop"
               className="text-xs md:text-sm font-medium text-description hover:!text-primary inline-flex items-center gap-0.5 transition-colors group cursor-pointer"
             >
-              <span className="hover:!text-primary">See More</span>
+              <span className="hover:!text-primary">{t("productDetails.seeMore")}</span>
               <ChevronRight
                 size={15}
                 strokeWidth={2}
@@ -1321,28 +1326,28 @@ export default function ProductDetails({
               href="/shop"
               className="inline-flex items-center justify-center px-8 py-2.5 bg-primary hover:bg-primary-hover !text-white text-xs font-bold rounded-none shadow-xs transition-colors"
             >
-              See More
+              {t("productDetails.seeMore")}
             </Link>
           </div>
         </div>
       </div>
 
       {/* ── Fullscreen Lightbox / Zoom Modal ── */}
-      {isLightboxOpen && (
+      {mounted && isLightboxOpen && createPortal(
         <div
-          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col justify-between p-3 sm:p-6 animate-in fade-in duration-200 select-none"
+          className="fixed inset-0 z-[99999] bg-black/90 backdrop-blur-md flex flex-col justify-between p-3 sm:p-6 animate-in fade-in duration-200 select-none"
           onClick={() => setIsLightboxOpen(false)}
         >
           {/* Top Bar */}
           <div
-            className="flex items-center justify-between gap-3 text-white z-20 shrink-0"
+            className="flex items-center justify-between gap-3 text-white z-30 shrink-0 max-w-7xl mx-auto w-full"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-2.5 truncate max-w-[60%] sm:max-w-[70%]">
-              <span className="text-xs sm:text-sm font-semibold text-white/90 truncate">
+              <span className="text-xs sm:text-sm font-semibold text-white truncate">
                 {product.name}
               </span>
-              <span className="text-[11px] sm:text-xs text-white/50 shrink-0">
+              <span className="text-[11px] sm:text-xs text-white/70 shrink-0 font-medium">
                 ({activeImageIndex + 1} / {galleryImages.length})
               </span>
             </div>
@@ -1354,13 +1359,13 @@ export default function ProductDetails({
                   setLightboxZoom((prev) => Math.max(1, +(prev - 0.5).toFixed(1)))
                 }
                 disabled={lightboxZoom <= 1}
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:hover:bg-white/10 flex items-center justify-center text-white transition-colors cursor-pointer"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/15 hover:bg-white/25 disabled:opacity-30 disabled:hover:bg-white/15 flex items-center justify-center text-white transition-colors cursor-pointer"
                 title="Zoom Out"
               >
                 <ZoomOut size={16} />
               </button>
 
-              <span className="text-[11px] sm:text-xs font-mono font-bold text-white/90 min-w-[38px] text-center">
+              <span className="text-[11px] sm:text-xs font-mono font-bold text-white min-w-[38px] text-center">
                 {Math.round(lightboxZoom * 100)}%
               </span>
 
@@ -1370,7 +1375,7 @@ export default function ProductDetails({
                   setLightboxZoom((prev) => Math.min(3, +(prev + 0.5).toFixed(1)))
                 }
                 disabled={lightboxZoom >= 3}
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:hover:bg-white/10 flex items-center justify-center text-white transition-colors cursor-pointer"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/15 hover:bg-white/25 disabled:opacity-30 disabled:hover:bg-white/15 flex items-center justify-center text-white transition-colors cursor-pointer"
                 title="Zoom In"
               >
                 <ZoomIn size={16} />
@@ -1380,7 +1385,7 @@ export default function ProductDetails({
                 <button
                   type="button"
                   onClick={() => setLightboxZoom(1)}
-                  className="px-2 py-1 rounded-full bg-white/15 hover:bg-white/25 text-[10px] sm:text-xs font-semibold text-white transition-colors cursor-pointer"
+                  className="px-2.5 py-1 rounded-full bg-white/20 hover:bg-white/30 text-[10px] sm:text-xs font-semibold text-white transition-colors cursor-pointer"
                 >
                   Reset
                 </button>
@@ -1389,8 +1394,9 @@ export default function ProductDetails({
               <button
                 type="button"
                 onClick={() => setIsLightboxOpen(false)}
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/15 hover:bg-white/30 flex items-center justify-center text-white transition-colors cursor-pointer ml-1"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/25 hover:bg-white/40 flex items-center justify-center text-white transition-colors cursor-pointer ml-1 shadow-md"
                 title="Close (Esc)"
+                aria-label="Close lightbox"
               >
                 <X size={18} />
               </button>
@@ -1399,7 +1405,7 @@ export default function ProductDetails({
 
           {/* Center Stage */}
           <div
-            className="relative flex-1 flex items-center justify-center overflow-hidden my-2 sm:my-4"
+            className="relative flex-1 w-full max-w-7xl mx-auto flex items-center justify-center overflow-hidden my-2 sm:my-4"
             onClick={(e) => {
               if (e.target === e.currentTarget) {
                 setIsLightboxOpen(false);
@@ -1413,46 +1419,49 @@ export default function ProductDetails({
                   e.stopPropagation();
                   handlePrevImage();
                 }}
-                className="absolute left-1 sm:left-4 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/60 hover:bg-black/90 border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer shadow-lg hover:scale-105 active:scale-95"
+                className="absolute left-1 sm:left-4 z-30 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/60 hover:bg-black/90 border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer shadow-lg hover:scale-105 active:scale-95"
                 title="Previous image"
               >
                 <ChevronLeft size={22} />
               </button>
             )}
 
-            <div
-              className={`relative max-w-[90vw] max-h-[70vh] aspect-square transition-transform duration-200 ease-out select-none ${lightboxZoom > 1 ? "cursor-zoom-out" : "cursor-zoom-in"
+            <div className="relative w-full h-[62vh] sm:h-[74vh] flex items-center justify-center">
+              <div
+                className={`relative w-full h-full max-w-4xl transition-transform duration-200 ease-out select-none ${
+                  lightboxZoom > 1 ? "cursor-zoom-out" : "cursor-zoom-in"
                 }`}
-              style={{
-                transform: `scale(${lightboxZoom})`,
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                setLightboxZoom((prev) => (prev > 1 ? 1 : 2));
-              }}
-            >
-              <Image
-                src={
-                  galleryImages[activeImageIndex]?.src ||
-                  galleryImages[0]?.src ||
-                  "/woocommerce-placeholder.webp"
-                }
-                alt={
-                  galleryImages[activeImageIndex]?.alt ||
-                  product.name ||
-                  "Product"
-                }
-                fill
-                sizes="95vw"
-                className="object-contain pointer-events-none"
-                unoptimized={Boolean(
-                  (
+                style={{
+                  transform: `scale(${lightboxZoom})`,
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightboxZoom((prev) => (prev > 1 ? 1 : 2));
+                }}
+              >
+                <Image
+                  src={
                     galleryImages[activeImageIndex]?.src ||
-                    galleryImages[0]?.src
-                  )?.startsWith("/")
-                )}
-                priority
-              />
+                    galleryImages[0]?.src ||
+                    "/woocommerce-placeholder.webp"
+                  }
+                  alt={
+                    galleryImages[activeImageIndex]?.alt ||
+                    product.name ||
+                    "Product"
+                  }
+                  fill
+                  sizes="(max-width: 1024px) 95vw, 85vw"
+                  className="object-contain pointer-events-none drop-shadow-2xl"
+                  unoptimized={Boolean(
+                    (
+                      galleryImages[activeImageIndex]?.src ||
+                      galleryImages[0]?.src
+                    )?.startsWith("/")
+                  )}
+                  priority
+                />
+              </div>
             </div>
 
             {galleryImages.length > 1 && (
@@ -1462,7 +1471,7 @@ export default function ProductDetails({
                   e.stopPropagation();
                   handleNextImage();
                 }}
-                className="absolute right-1 sm:right-4 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/60 hover:bg-black/90 border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer shadow-lg hover:scale-105 active:scale-95"
+                className="absolute right-1 sm:right-4 z-30 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/60 hover:bg-black/90 border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer shadow-lg hover:scale-105 active:scale-95"
                 title="Next image"
               >
                 <ChevronRight size={22} />
@@ -1473,7 +1482,7 @@ export default function ProductDetails({
           {/* Bottom Thumbnails */}
           {galleryImages.length > 1 && (
             <div
-              className="flex items-center justify-center gap-2 overflow-x-auto py-1 z-20 no-scrollbar max-w-full shrink-0"
+              className="flex items-center justify-center gap-2 overflow-x-auto py-1 z-30 no-scrollbar max-w-full shrink-0"
               onClick={(e) => e.stopPropagation()}
             >
               {galleryImages.map((img, idx) => (
@@ -1484,10 +1493,11 @@ export default function ProductDetails({
                     setActiveImageIndex(idx);
                     setLightboxZoom(1);
                   }}
-                  className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-none overflow-hidden border-2 transition-all cursor-pointer shrink-0 ${activeImageIndex === idx
-                    ? "border-primary scale-105 shadow-md"
-                    : "border-white/30 opacity-60 hover:opacity-100"
-                    }`}
+                  className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-none overflow-hidden border-2 transition-all cursor-pointer shrink-0 ${
+                    activeImageIndex === idx
+                      ? "border-primary scale-105 shadow-md"
+                      : "border-white/30 opacity-60 hover:opacity-100"
+                  }`}
                 >
                   <Image
                     src={img.src}
@@ -1501,7 +1511,8 @@ export default function ProductDetails({
               ))}
             </div>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

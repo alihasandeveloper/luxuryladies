@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { Heart, ShoppingBag, Trash2, ArrowRight, Check, Package } from "lucide-react";
 import { toast } from "sonner";
 import { WishlistItem } from "@/types/wishlist";
@@ -43,6 +44,7 @@ export default function WishlistView() {
   const router = useRouter();
   const { wishlist, wishlistCount, removeFromWishlist, clearWishlist } = useWishlist();
   const { addToCart } = useCart();
+  const { t, formatPrice, formatNumber, isBangla } = useLanguage();
   const [addingId, setAddingId] = useState<number | null>(null);
 
   const handleAddToCart = (item: WishlistItem) => {
@@ -65,12 +67,15 @@ export default function WishlistView() {
       stockStatus: item.stockStatus === "outofstock" ? "outofstock" : "instock",
     });
 
-    toast.success(`${item.name} added to cart!`, {
-      action: {
-        label: "View Cart",
-        onClick: () => router.push("/cart"),
-      },
-    });
+    toast.success(
+      isBangla ? `${item.name} কার্টে যোগ হয়েছে!` : `${item.name} added to cart!`,
+      {
+        action: {
+          label: t("common.viewCart"),
+          onClick: () => router.push("/cart"),
+        },
+      }
+    );
 
     setTimeout(() => {
       setAddingId(null);
@@ -85,15 +90,15 @@ export default function WishlistView() {
           <div className="flex items-center gap-2.5">
             <Heart size={24} className="text-dark" strokeWidth={1.75} />
             <h1 className="text-xl sm:text-2xl font-bold text-dark">
-              My Wishlist
+              {t("wishlist.title")}
             </h1>
           </div>
           <span className="text-xs sm:text-sm text-description font-medium">
-            {wishlistCount} {wishlistCount === 1 ? "item" : "items"}
+            {formatNumber(wishlistCount)} {wishlistCount === 1 ? t("common.item") : t("common.items")}
           </span>
         </div>
 
-        {/* ── Empty Wishlist State (styled exactly like Cart) ── */}
+        {/* ── Empty Wishlist State ── */}
         {wishlist.length === 0 ? (
           <div className="py-16 md:py-24 text-center">
             {/* Heart icon in circular background */}
@@ -102,10 +107,10 @@ export default function WishlistView() {
             </div>
 
             <h2 className="text-xl sm:text-2xl font-bold text-dark mb-2.5">
-              Your wishlist is empty
+              {t("wishlist.emptyTitle")}
             </h2>
             <p className="text-xs sm:text-sm text-description max-w-sm mx-auto mb-8 leading-relaxed">
-              Looks like you haven&apos;t added any items to your wishlist yet. Start shopping to fill it up!
+              {t("wishlist.emptySubtitle")}
             </p>
 
             <Button
@@ -113,7 +118,7 @@ export default function WishlistView() {
               href="/shop"
               size="lg"
             >
-              Start Shopping
+              {t("wishlist.startShopping")}
             </Button>
           </div>
         ) : (
@@ -124,13 +129,13 @@ export default function WishlistView() {
                 onClick={clearWishlist}
                 className="text-xs text-description hover:text-red-600 transition-colors cursor-pointer"
               >
-                Clear Wishlist
+                {t("wishlist.clearAll")}
               </button>
               <Link
                 href="/shop"
                 className="px-4 py-2 bg-white hover:bg-bg border border-border text-xs font-semibold text-dark uppercase tracking-wider transition-colors inline-flex items-center gap-1.5"
               >
-                <span>Continue Shopping</span>
+                <span>{t("common.continueShopping")}</span>
                 <ArrowRight size={13} />
               </Link>
             </div>
@@ -142,10 +147,10 @@ export default function WishlistView() {
             <table className="w-full text-left text-sm border-collapse">
               <thead>
                 <tr className="border-b border-border bg-slate-50/60 text-[11px] font-bold uppercase tracking-wider text-description">
-                  <th className="py-3.5 px-6">Product</th>
-                  <th className="py-3.5 px-4">Price</th>
-                  <th className="py-3.5 px-4">Stock Status</th>
-                  <th className="py-3.5 px-6 text-right">Actions</th>
+                  <th className="py-3.5 px-6">{isBangla ? "পণ্য" : "Product"}</th>
+                  <th className="py-3.5 px-4">{isBangla ? "মূল্য" : "Price"}</th>
+                  <th className="py-3.5 px-4">{isBangla ? "স্টক অবস্থা" : "Stock Status"}</th>
+                  <th className="py-3.5 px-6 text-right">{isBangla ? "অ্যাকশন" : "Actions"}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -172,7 +177,7 @@ export default function WishlistView() {
                               {item.name}
                             </Link>
                             <span className="text-[11px] text-description uppercase tracking-wider mt-0.5 block">
-                              {item.type === "variable" ? "Select Size / Color" : "Ready to Wear"}
+                              {item.type === "variable" ? (isBangla ? "সাইজ / অপশন নির্বাচন করুন" : "Select Size / Color") : (isBangla ? "রেডি টু ওয়্যার" : "Ready to Wear")}
                             </span>
                           </div>
                         </div>
@@ -180,10 +185,10 @@ export default function WishlistView() {
 
                       {/* Price */}
                       <td className="py-4 px-4 font-semibold text-primary">
-                        Tk {item.price ? item.price.toLocaleString() : "0"}
+                        {formatPrice(item.price || 0)}
                         {item.regularPrice && item.regularPrice > item.price && (
                           <span className="ml-2 text-xs text-description line-through font-normal">
-                            Tk {item.regularPrice.toLocaleString()}
+                            {formatPrice(item.regularPrice)}
                           </span>
                         )}
                       </td>
@@ -192,11 +197,11 @@ export default function WishlistView() {
                       <td className="py-4 px-4">
                         {isOutOfStock ? (
                           <span className="inline-block px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-red-600 bg-red-50 border border-red-200">
-                            Out of Stock
+                            {t("common.outOfStock")}
                           </span>
                         ) : (
                           <span className="inline-block px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200">
-                            In Stock
+                            {t("common.inStock")}
                           </span>
                         )}
                       </td>
@@ -209,14 +214,14 @@ export default function WishlistView() {
                               disabled
                               className="px-4 py-2 bg-slate-100 text-slate-400 text-xs font-semibold uppercase tracking-wider cursor-not-allowed"
                             >
-                              Out of Stock
+                              {t("common.outOfStock")}
                             </button>
                           ) : item.type === "variable" ? (
                             <Link
                               href={`/product/${item.slug}`}
                               className="px-4 py-2 bg-primary hover:bg-primary-hover !text-white text-xs font-bold uppercase tracking-wider transition-colors inline-flex items-center gap-1.5"
                             >
-                              <span>Select Options</span>
+                              <span>{t("productCard.selectOptions")}</span>
                               <ArrowRight size={13} />
                             </Link>
                           ) : (
@@ -229,12 +234,12 @@ export default function WishlistView() {
                               {isAdding ? (
                                 <>
                                   <Check size={14} />
-                                  <span>Added</span>
+                                  <span>{isBangla ? "যোগ হয়েছে" : "Added"}</span>
                                 </>
                               ) : (
                                 <>
                                   <ShoppingBag size={14} />
-                                  <span>Add to Cart</span>
+                                  <span>{t("productCard.addToCart")}</span>
                                 </>
                               )}
                             </button>
@@ -245,7 +250,7 @@ export default function WishlistView() {
                             onClick={() => removeFromWishlist(item.id)}
                             className="p-2 text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
                             aria-label="Remove item"
-                            title="Remove from wishlist"
+                            title={t("common.remove")}
                           >
                             <Trash2 size={16} />
                           </button>
@@ -286,7 +291,7 @@ export default function WishlistView() {
                           type="button"
                           onClick={() => removeFromWishlist(item.id)}
                           className="text-slate-400 hover:text-red-600 transition-colors cursor-pointer shrink-0 p-1"
-                          aria-label="Remove"
+                          aria-label={t("common.remove")}
                         >
                           <Trash2 size={15} />
                         </button>
@@ -294,11 +299,11 @@ export default function WishlistView() {
 
                       <div className="mt-1 flex items-baseline gap-2">
                         <span className="text-xs font-bold text-primary">
-                          Tk {item.price ? item.price.toLocaleString() : "0"}
+                          {formatPrice(item.price || 0)}
                         </span>
                         {item.regularPrice && item.regularPrice > item.price && (
                           <span className="text-[11px] text-description line-through">
-                            Tk {item.regularPrice.toLocaleString()}
+                            {formatPrice(item.regularPrice)}
                           </span>
                         )}
                       </div>
@@ -307,14 +312,14 @@ export default function WishlistView() {
                     <div className="mt-3">
                       {isOutOfStock ? (
                         <span className="text-[10px] font-semibold text-red-600">
-                          Out of Stock
+                          {t("common.outOfStock")}
                         </span>
                       ) : item.type === "variable" ? (
                         <Link
                           href={`/product/${item.slug}`}
                           className="w-full py-1.5 px-3 bg-primary hover:bg-primary-hover !text-white text-[11px] font-bold uppercase tracking-wider text-center block transition-colors"
                         >
-                          Select Options
+                          {t("productCard.selectOptions")}
                         </Link>
                       ) : (
                         <button
@@ -326,12 +331,12 @@ export default function WishlistView() {
                           {isAdding ? (
                             <>
                               <Check size={13} />
-                              <span>Added</span>
+                              <span>{isBangla ? "যোগ হয়েছে" : "Added"}</span>
                             </>
                           ) : (
                             <>
                               <ShoppingBag size={13} />
-                              <span>Add to Cart</span>
+                              <span>{t("productCard.addToCart")}</span>
                             </>
                           )}
                         </button>

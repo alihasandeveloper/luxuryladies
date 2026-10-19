@@ -7,15 +7,11 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Search, Heart, Truck, ShoppingBag, User, X, LogIn, LogOut, Package, MapPin, ChevronRight, Menu, Sparkles } from "lucide-react";
 import { WooCommerceProduct } from "@/types/woocommerce";
 
-const navLinks = [
-  { label: "Home", href: "/" },
-  { label: "Shop", href: "/shop" },
-  { label: "About Us", href: "/about" },
-];
-
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useWishlist } from "@/context/WishlistContext";
+import { useLanguage } from "@/context/LanguageContext";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 interface HeaderCategory {
   label: string;
@@ -39,6 +35,13 @@ export default function Header() {
   const { cartCount } = useCart();
   const { wishlistCount } = useWishlist();
   const { user, isAuthenticated, logout } = useAuth();
+  const { t, formatNumber, formatPrice, isBangla } = useLanguage();
+
+  const navLinks = [
+    { label: t("common.home"), href: "/" },
+    { label: t("common.shop"), href: "/shop" },
+    { label: t("common.aboutUs"), href: "/about" },
+  ];
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -46,10 +49,35 @@ export default function Header() {
 
   const isLinkActive = (href: string) => {
     if (href === "/") {
-      return pathname === "/";
+      return pathname === "/" || pathname === "";
+    }
+    if (href === "/shop") {
+      return (
+        pathname === "/shop" ||
+        pathname.startsWith("/shop/") ||
+        pathname.startsWith("/category/") ||
+        pathname.startsWith("/product/") ||
+        pathname === "/search" ||
+        pathname.startsWith("/search/")
+      );
     }
     return pathname === href || pathname.startsWith(href + "/");
   };
+
+  const isWishlistActive = pathname === "/wishlist" || pathname.startsWith("/wishlist/");
+  const isTrackOrderActive = pathname === "/track-order" || pathname.startsWith("/track-order/");
+  const isCartActive =
+    pathname === "/cart" ||
+    pathname.startsWith("/cart/") ||
+    pathname === "/checkout" ||
+    pathname.startsWith("/checkout/");
+  const isAccountActive =
+    pathname === "/account" ||
+    pathname.startsWith("/account/") ||
+    pathname === "/login" ||
+    pathname.startsWith("/login/") ||
+    pathname === "/register" ||
+    pathname.startsWith("/register/");
 
   // Close drawer and mobile search on route navigation, ensuring clean scroll state
   useEffect(() => {
@@ -254,71 +282,95 @@ export default function Header() {
               <Search className="search-icon" size={17} strokeWidth={1.75} />
               <input
                 type="text"
-                placeholder="Search for products..."
+                placeholder={t("common.searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                aria-label="Search products"
+                aria-label={t("common.search")}
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
                   className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
-                  aria-label="Clear search"
+                  aria-label={t("common.clear")}
                 >
                   <X size={14} />
                 </button>
               )}
             </form>
 
-            {/* Icon Actions (Right side: Cart, User on mobile; Wishlist, Compare, Cart, User on desktop) */}
+            {/* Icon Actions (Right side: Language Switcher on mobile; Language, Wishlist, Track Order, Cart, User on desktop) */}
             <div className="header-actions">
+              {/* Language Switcher */}
+              <LanguageSwitcher variant="header" className="mr-0 md:mr-1" />
+
               {/* Wishlist (desktop only) */}
               <Link
                 href="/wishlist"
-                className="action-btn desktop-only relative"
-                aria-label={`Wishlist (${wishlistCount} items)`}
-                title="Wishlist"
+                className={`action-btn desktop-only hidden md:flex relative ${
+                  isWishlistActive ? "active !text-primary !bg-primary/5" : ""
+                }`}
+                aria-label={`${t("header.wishlistTooltip")} (${formatNumber(wishlistCount)} ${t("common.items")})`}
+                title={t("header.wishlistTooltip")}
               >
                 <Heart
                   size={19}
-                  strokeWidth={1.75}
+                  strokeWidth={isWishlistActive ? 2.2 : 1.75}
+                  className={isWishlistActive ? "text-primary fill-primary/10" : ""}
                 />
                 {wishlistCount > 0 && (
-                  <span className="cart-badge" aria-hidden="true">{wishlistCount}</span>
+                  <span className="cart-badge" aria-hidden="true">{formatNumber(wishlistCount)}</span>
                 )}
               </Link>
 
               {/* Track Order (desktop only) */}
               <Link
                 href="/track-order"
-                className="action-btn desktop-only"
-                aria-label="Track Order"
-                title="Track Order"
+                className={`action-btn desktop-only hidden md:flex ${
+                  isTrackOrderActive ? "active !text-primary !bg-primary/5" : ""
+                }`}
+                aria-label={t("header.trackOrderTooltip")}
+                title={t("header.trackOrderTooltip")}
               >
-                <Truck size={19} strokeWidth={1.75} />
+                <Truck
+                  size={19}
+                  strokeWidth={isTrackOrderActive ? 2.2 : 1.75}
+                  className={isTrackOrderActive ? "text-primary" : ""}
+                />
               </Link>
 
-              {/* Cart */}
+              {/* Cart (desktop only - bottom bar handles mobile) */}
               <Link
                 href="/cart"
-                className="action-btn cart-btn"
-                aria-label={`Cart (${cartCount} items)`}
+                className={`action-btn cart-btn desktop-only hidden md:flex ${
+                  isCartActive ? "active !text-primary !bg-primary/5" : ""
+                }`}
+                aria-label={`${t("header.cartTooltip")} (${formatNumber(cartCount)} ${t("common.items")})`}
               >
-                <ShoppingBag size={19} strokeWidth={1.75} />
+                <ShoppingBag
+                  size={19}
+                  strokeWidth={isCartActive ? 2.2 : 1.75}
+                  className={isCartActive ? "text-primary" : ""}
+                />
                 {cartCount > 0 && (
-                  <span className="cart-badge" aria-hidden="true">{cartCount}</span>
+                  <span className="cart-badge" aria-hidden="true">{formatNumber(cartCount)}</span>
                 )}
               </Link>
 
-              {/* Account Dropdown */}
-              <div className="relative group">
+              {/* Account Dropdown (desktop only - bottom bar handles mobile) */}
+              <div className="relative group desktop-only hidden md:block">
                 <Link
                   href={isAuthenticated ? "/account" : "/login"}
-                  className="action-btn"
-                  aria-label={isAuthenticated ? "My Account" : "Sign In"}
+                  className={`action-btn ${
+                    isAccountActive ? "active !text-primary !bg-primary/5" : ""
+                  }`}
+                  aria-label={isAuthenticated ? t("header.myAccount") : t("header.signIn")}
                 >
-                  <User size={19} strokeWidth={1.75} />
+                  <User
+                    size={19}
+                    strokeWidth={isAccountActive ? 2.2 : 1.75}
+                    className={isAccountActive ? "text-primary" : ""}
+                  />
                 </Link>
 
                 {/* Submenu Dropdown on Hover */}
@@ -345,28 +397,28 @@ export default function Header() {
                             className="flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-dark hover:text-primary hover:bg-bg/40 transition-colors"
                           >
                             <User size={14} className="text-slate-400" />
-                            <span>My Account</span>
+                            <span>{t("header.myAccount")}</span>
                           </Link>
                           <Link
                             href="/account?tab=orders"
                             className="flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-dark hover:text-primary hover:bg-bg/40 transition-colors"
                           >
                             <Package size={14} className="text-slate-400" />
-                            <span>My Orders</span>
+                            <span>{t("header.myOrders")}</span>
                           </Link>
                           <Link
                             href="/account?tab=addresses"
                             className="flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-dark hover:text-primary hover:bg-bg/40 transition-colors"
                           >
                             <MapPin size={14} className="text-slate-400" />
-                            <span>Saved Addresses</span>
+                            <span>{t("header.savedAddresses")}</span>
                           </Link>
                           <Link
                             href="/track-order"
                             className="flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-dark hover:text-primary hover:bg-bg/40 transition-colors"
                           >
                             <Truck size={14} className="text-slate-400" />
-                            <span>Track Order</span>
+                            <span>{t("header.trackOrder")}</span>
                           </Link>
                         </div>
 
@@ -378,7 +430,7 @@ export default function Header() {
                             className="w-full flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors cursor-pointer text-left rounded-none"
                           >
                             <LogOut size={13} />
-                            <span>Sign Out</span>
+                            <span>{t("header.signOut")}</span>
                           </button>
                         </div>
                       </div>
@@ -387,10 +439,10 @@ export default function Header() {
                         {/* Guest Welcome */}
                         <div className="p-3.5 border-b border-border bg-slate-50/70 text-center">
                           <p className="text-xs font-bold text-dark uppercase tracking-wider">
-                            Welcome
+                            {t("header.welcomeGuest")}
                           </p>
                           <p className="text-[11px] text-description mt-0.5">
-                            Manage your orders and profile
+                            {t("header.manageOrders")}
                           </p>
                         </div>
 
@@ -400,13 +452,13 @@ export default function Header() {
                             href="/login"
                             className="w-full py-2 px-3 bg-primary hover:bg-primary-hover !text-white text-xs font-bold uppercase tracking-wider text-center transition-colors rounded-none"
                           >
-                            Sign In
+                            {t("header.signIn")}
                           </Link>
                           <Link
                             href="/register"
                             className="w-full py-2 px-3 bg-white hover:bg-bg text-dark border border-border hover:border-primary text-xs font-bold uppercase tracking-wider text-center transition-colors rounded-none"
                           >
-                            Create Account
+                            {t("header.createAccount")}
                           </Link>
                         </div>
 
@@ -417,7 +469,7 @@ export default function Header() {
                             className="flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-dark hover:text-primary hover:bg-bg/40 transition-colors"
                           >
                             <Truck size={14} className="text-slate-400" />
-                            <span>Track Order</span>
+                            <span>{t("header.trackOrder")}</span>
                           </Link>
                         </div>
                       </div>
@@ -485,7 +537,7 @@ export default function Header() {
 
           {/* Subtitle / Question */}
           <p className="text-xs font-medium text-description tracking-wide -mt-1">
-            What are you looking for?
+            {t("common.searchQuestion")}
           </p>
 
           {/* Search Input Form (Pink bordered rounded-full pill) */}
@@ -495,7 +547,7 @@ export default function Header() {
               <input
                 ref={searchInputRef}
                 type="text"
-                placeholder="Search for products..."
+                placeholder={t("common.searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-transparent text-sm text-dark placeholder:text-description outline-none"
@@ -505,7 +557,7 @@ export default function Header() {
                   type="button"
                   onClick={() => setSearchQuery("")}
                   className="p-1 text-gray-400 hover:text-gray-700 cursor-pointer shrink-0"
-                  aria-label="Clear text"
+                  aria-label={t("common.clear")}
                 >
                   <X size={14} />
                 </button>
@@ -518,7 +570,7 @@ export default function Header() {
         {matchingSuggestions.length > 0 && (
           <div className="px-4 pb-4 pt-1 border-t border-border flex flex-col gap-2 max-h-[50vh] overflow-y-auto">
             <span className="text-[11px] font-semibold text-description uppercase tracking-wider">
-              Matching Products ({matchingSuggestions.length})
+              {t("common.matchingProducts")} ({formatNumber(matchingSuggestions.length)})
             </span>
             <div className="divide-y divide-border">
               {matchingSuggestions.map((item) => (
@@ -542,10 +594,10 @@ export default function Header() {
                       {item.name}
                     </p>
                     <p className="text-[11px] font-semibold text-primary">
-                      Tk {parseFloat(item.price).toLocaleString()}
+                      {formatPrice(item.price)}
                       {item.sku && (
                         <span className="ml-1.5 text-[10px] text-description font-normal">
-                          SKU: {item.sku}
+                          {t("common.sku")}: {item.sku}
                         </span>
                       )}
                     </p>
@@ -589,6 +641,9 @@ export default function Header() {
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-5 bg-white">
+          {/* Language Switcher inside Mobile Drawer */}
+          <LanguageSwitcher variant="drawer" className="pb-1" />
+
           {/* Main Navigation Links */}
           <nav className="flex flex-col space-y-1">
             {navLinks.map((link) => {
@@ -616,7 +671,7 @@ export default function Header() {
           {/* Shop Categories Section */}
           <div>
             <p className="text-[11px] font-semibold tracking-wider uppercase text-description px-3 mb-2">
-              Categories
+              {t("common.categories")}
             </p>
             <nav className="flex flex-col space-y-0.5">
               {liveCategories.map((cat) => {
@@ -646,53 +701,59 @@ export default function Header() {
           {/* Quick Access Icons */}
           <div>
             <p className="text-[11px] font-semibold tracking-wider uppercase text-description px-3 mb-2">
-              Account & Saved
+              {t("header.accountAndSaved")}
             </p>
             <div className="grid grid-cols-3 gap-2 px-1">
               <Link
                 href="/wishlist"
                 onClick={() => setDrawerOpen(false)}
-                className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-md border text-xs font-medium gap-1.5 transition-colors relative ${pathname === "/wishlist"
-                    ? "border-primary text-primary bg-bg"
+                className={`flex flex-col items-center justify-center text-center py-2.5 px-2 rounded-md border text-xs font-medium gap-1.5 transition-colors relative ${
+                  pathname === "/wishlist" || pathname.startsWith("/wishlist/")
+                    ? "border-primary text-primary bg-bg font-semibold"
                     : "border-border hover:border-primary hover:text-primary text-slate-600"
-                  }`}
+                }`}
               >
                 <div className="relative">
                   <Heart
                     size={16}
-                    strokeWidth={1.75}
+                    strokeWidth={pathname === "/wishlist" || pathname.startsWith("/wishlist/") ? 2.2 : 1.75}
                   />
                   {wishlistCount > 0 && (
                     <span className="absolute -top-1.5 -right-2.5 min-w-[14px] h-3.5 px-0.5 rounded-full bg-primary text-white text-[9px] font-bold flex items-center justify-center">
-                      {wishlistCount}
+                      {formatNumber(wishlistCount)}
                     </span>
                   )}
                 </div>
-                <span>Wishlist</span>
+                <span className="text-center block w-full leading-tight">{t("header.wishlistTooltip")}</span>
               </Link>
               <Link
                 href="/track-order"
                 onClick={() => setDrawerOpen(false)}
-                className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-md border text-xs font-medium gap-1.5 transition-colors ${
-                  pathname === "/track-order"
-                    ? "border-primary text-primary bg-bg"
+                className={`flex flex-col items-center justify-center text-center py-2.5 px-2 rounded-md border text-xs font-medium gap-1.5 transition-colors ${
+                  pathname === "/track-order" || pathname.startsWith("/track-order/")
+                    ? "border-primary text-primary bg-bg font-semibold"
                     : "border-border hover:border-primary hover:text-primary text-slate-600"
                 }`}
               >
-                <Truck size={16} strokeWidth={1.75} />
-                <span>Track Order</span>
+                <Truck size={16} strokeWidth={pathname === "/track-order" || pathname.startsWith("/track-order/") ? 2.2 : 1.75} />
+                <span className="text-center block w-full leading-tight">{t("header.trackOrderTooltip")}</span>
               </Link>
               <Link
                 href={isAuthenticated ? "/account" : "/login"}
                 onClick={() => setDrawerOpen(false)}
-                className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-md border text-xs font-medium gap-1.5 transition-colors ${
-                  pathname === "/account" || pathname === "/login"
-                    ? "border-primary text-primary bg-bg"
+                className={`flex flex-col items-center justify-center text-center py-2.5 px-2 rounded-md border text-xs font-medium gap-1.5 transition-colors ${
+                  pathname === "/account" ||
+                  pathname.startsWith("/account/") ||
+                  pathname === "/login" ||
+                  pathname.startsWith("/login/") ||
+                  pathname === "/register" ||
+                  pathname.startsWith("/register/")
+                    ? "border-primary text-primary bg-bg font-semibold"
                     : "border-border hover:border-primary hover:text-primary text-slate-600"
                 }`}
               >
-                <User size={16} strokeWidth={1.75} />
-                <span>{isAuthenticated ? "Account" : "Sign In"}</span>
+                <User size={16} strokeWidth={pathname === "/account" || pathname.startsWith("/account/") || pathname === "/login" ? 2.2 : 1.75} />
+                <span className="text-center block w-full leading-tight">{isAuthenticated ? t("header.myAccount") : t("header.signIn")}</span>
               </Link>
             </div>
           </div>
@@ -705,10 +766,10 @@ export default function Header() {
               <Link
                 href="/account"
                 onClick={() => setDrawerOpen(false)}
-                className="w-full flex items-center justify-center gap-2 py-2.5 !bg-primary hover:!bg-primary-hover !text-white rounded-md text-xs font-semibold shadow-xs transition-colors"
+                className="w-full flex items-center justify-center gap-2 py-2.5 !bg-primary hover:!bg-primary-hover !text-white rounded-none text-xs font-semibold shadow-xs transition-colors"
               >
                 <User size={15} className="!text-white shrink-0" />
-                <span className="!text-white text-inherit">My Account ({user?.first_name || user?.username})</span>
+                <span className="!text-white text-inherit">{t("header.myAccount")} ({user?.first_name || user?.username})</span>
               </Link>
               <button
                 type="button"
@@ -718,7 +779,7 @@ export default function Header() {
                 }}
                 className="w-full py-2 text-center text-xs font-medium text-rose-600 hover:underline cursor-pointer"
               >
-                Sign Out
+                {t("header.signOut")}
               </button>
             </>
           ) : (
@@ -726,17 +787,17 @@ export default function Header() {
               <Link
                 href="/login"
                 onClick={() => setDrawerOpen(false)}
-                className="w-full flex items-center justify-center gap-2 py-2.5 !bg-primary hover:!bg-primary-hover !text-white rounded-md text-xs font-semibold shadow-xs transition-colors"
+                className="w-full flex items-center justify-center gap-2 py-2.5 !bg-primary hover:!bg-primary-hover !text-white rounded-none text-xs font-semibold shadow-xs transition-colors"
               >
                 <LogIn size={15} className="!text-white shrink-0" />
-                <span className="!text-white text-inherit">Sign In</span>
+                <span className="!text-white text-inherit">{t("header.signIn")}</span>
               </Link>
               <Link
                 href="/register"
                 onClick={() => setDrawerOpen(false)}
                 className="w-full py-2 text-center text-xs font-medium text-description hover:text-primary transition-colors"
               >
-                Create an Account
+                {t("header.createAccount")}
               </Link>
             </>
           )}

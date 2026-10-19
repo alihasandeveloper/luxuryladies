@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { Eye, EyeOff, Lock, Mail, ArrowRight, CheckCircle2, AlertCircle } from "lucide-react";
 
 export default function LoginView() {
@@ -12,6 +13,7 @@ export default function LoginView() {
   const redirectUrl = searchParams.get("redirect") || "/account";
 
   const { user, isAuthenticated, login, logout, isLoading } = useAuth();
+  const { t } = useLanguage();
 
   // Form state
   const [identifier, setIdentifier] = useState("");
@@ -54,22 +56,22 @@ export default function LoginView() {
           <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
             <CheckCircle2 size={32} />
           </div>
-          <h1 className="text-xl font-medium text-dark mb-2">Already Signed In</h1>
+          <h1 className="text-xl font-medium text-dark mb-2">{t("auth.alreadySignedIn")}</h1>
           <p className="text-sm text-description mb-6">
-            You are currently signed in as <strong className="text-dark">{user.email}</strong>.
+            {t("auth.signedInAs")} <strong className="text-dark">{user.email}</strong>.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
               href="/account"
               className="w-full sm:w-auto px-6 py-2.5 bg-primary hover:bg-primary-hover !text-white text-xs font-bold uppercase tracking-wider transition-colors"
             >
-              Go to My Account
+              {t("auth.goToAccount")}
             </Link>
             <button
               onClick={() => logout()}
               className="w-full sm:w-auto px-6 py-2.5 bg-white hover:bg-bg text-dark border border-border hover:border-primary text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
             >
-              Sign Out
+              {t("auth.logout")}
             </button>
           </div>
         </div>
@@ -81,7 +83,7 @@ export default function LoginView() {
     <div className="w-full py-12 md:py-20 px-4">
       <div className="w-full max-w-[500px] mx-auto bg-white border border-border shadow-sm p-6 sm:p-8" style={{ maxWidth: "500px" }}>
         <h1 className="text-xl md:text-2xl font-semibold text-center text-dark mb-6">
-          Sign In
+          {t("auth.signInTitle")}
         </h1>
 
         {formError && (
@@ -103,14 +105,14 @@ export default function LoginView() {
           {/* Username / Email */}
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-dark mb-1.5">
-              Username or Email Address <span className="text-primary">*</span>
+              {t("auth.usernameOrEmail")} <span className="text-primary">*</span>
             </label>
             <div className="relative">
               <input
                 type="text"
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
-                placeholder="Enter your username or email"
+                placeholder={t("auth.usernameOrEmailPlaceholder")}
                 required
                 autoComplete="username"
                 className="w-full h-11 px-3.5 pl-10 text-sm bg-white border border-border focus:border-primary focus:outline-hidden transition-colors rounded-none placeholder:text-slate-400"
@@ -124,14 +126,14 @@ export default function LoginView() {
           {/* Password */}
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-dark mb-1.5">
-              Password <span className="text-primary">*</span>
+              {t("auth.password")} <span className="text-primary">*</span>
             </label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder={t("auth.passwordPlaceholder")}
                 required
                 autoComplete="current-password"
                 className="w-full h-11 px-3.5 pl-10 pr-10 text-sm bg-white border border-border focus:border-primary focus:outline-hidden transition-colors rounded-none placeholder:text-slate-400"
@@ -160,7 +162,7 @@ export default function LoginView() {
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
               <>
-                <span>Sign In</span>
+                <span>{t("auth.signInBtn")}</span>
                 <ArrowRight size={16} />
               </>
             )}
@@ -169,12 +171,12 @@ export default function LoginView() {
           {/* Switch to Register link */}
           <div className="text-center pt-3 border-t border-border mt-5">
             <p className="text-xs text-description">
-              Don&apos;t have an account yet?{" "}
+              {t("auth.dontHaveAccount")}{" "}
               <Link
                 href={redirectUrl ? `/register?redirect=${encodeURIComponent(redirectUrl)}` : "/register"}
                 className="text-primary font-semibold hover:underline"
               >
-                Create an account
+                {t("auth.createAccountLink")}
               </Link>
             </p>
           </div>

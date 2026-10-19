@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Heart, ShoppingCart, Check } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { toast } from "sonner";
 import { WooCommerceProduct } from "@/types/woocommerce";
 
@@ -19,6 +20,7 @@ export default function ProductCard({
   product,
   showWishlist = true,
 }: ProductCardProps) {
+  const { t, formatPrice, formatNumber, isBangla } = useLanguage();
   const regular = parseFloat(product.regular_price || product.price);
   const current = parseFloat(product.sale_price || product.price);
   const discountPercent =
@@ -81,12 +83,15 @@ export default function ProductCard({
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1500);
 
-    toast.success(`${product.name} added to cart!`, {
-      action: {
-        label: "View Cart",
-        onClick: () => router.push("/cart"),
-      },
-    });
+    toast.success(
+      isBangla ? `${product.name} কার্টে যোগ হয়েছে!` : `${product.name} added to cart!`,
+      {
+        action: {
+          label: t("common.viewCart"),
+          onClick: () => router.push("/cart"),
+        },
+      }
+    );
   };
 
   useEffect(() => {
@@ -112,7 +117,7 @@ export default function ProductCard({
         {/* Out of Stock Badge */}
         {isOutOfStock ? (
           <span className="absolute top-2 left-2 z-10 bg-dark/90 backdrop-blur-xs text-white text-[10px] font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-md shadow-xs">
-            Out of Stock
+            {t("productCard.outOfStock")}
           </span>
         ) : badgeMeta ? (
           /* Limited Offer Badge (Green badge on top-left) */
@@ -131,7 +136,7 @@ export default function ProductCard({
                 ? "bg-white text-primary"
                 : "bg-white/90 hover:bg-white text-gray-700 hover:text-primary"
             }`}
-            aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+            aria-label={isWishlisted ? t("productCard.removeFromWishlist") : t("productCard.addToWishlist")}
           >
             <Heart
               size={16}
@@ -158,18 +163,18 @@ export default function ProductCard({
           <div className="flex flex-col">
             {/* Sale / Current Price */}
             <span className="text-sm md:text-base font-semibold text-primary leading-tight">
-              Tk {parseFloat(product.price).toLocaleString()}
+              {formatPrice(product.price)}
             </span>
 
             {/* Regular Price & Discount Percent */}
             {product.on_sale && product.regular_price && (
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="text-[11px] md:text-xs text-description line-through font-normal">
-                  Tk {parseFloat(product.regular_price).toLocaleString()}
+                  {formatPrice(product.regular_price)}
                 </span>
                 {discountPercent > 0 && (
                   <span className="text-[11px] md:text-xs font-semibold text-accent">
-                    -{discountPercent}%
+                    -{formatNumber(discountPercent)}%
                   </span>
                 )}
               </div>
@@ -189,19 +194,19 @@ export default function ProductCard({
               }`}
             aria-label={
               isOutOfStock
-                ? `${product.name} is out of stock`
+                ? `${product.name} - ${t("productCard.outOfStock")}`
                 : isVariable
-                  ? `Select options for ${product.name}`
-                  : `Add ${product.name} to cart`
+                  ? `${t("productCard.selectOptions")} - ${product.name}`
+                  : `${t("productCard.addToCart")} - ${product.name}`
             }
             title={
               isOutOfStock
-                ? "Out of Stock"
+                ? t("productCard.outOfStock")
                 : isVariable
-                  ? "Select Options"
+                  ? t("productCard.selectOptions")
                   : justAdded
-                    ? "Added to Cart!"
-                    : "Add to Cart"
+                    ? t("productCard.addedToCart")
+                    : t("productCard.addToCart")
             }
           >
             {justAdded ? (
